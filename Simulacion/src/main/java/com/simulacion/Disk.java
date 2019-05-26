@@ -9,6 +9,6 @@ public class Disk {
     }
 
     public void writeBits(BitSet Address, BitSet[] data){
-        
+
     }
 }

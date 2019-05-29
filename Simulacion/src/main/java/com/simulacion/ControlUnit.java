@@ -17,7 +17,7 @@ public class ControlUnit {
 
     }
 
-    public ALUOperations instruction(BitSet instruction){
+    public ALUOperations bitSetToALUOperations(BitSet instruction){
         ALUOperations operation;
         switch(instruction.get(0,6).toByteArray()[0]){
             case 0:

@@ -37,6 +37,6 @@ public class CPUInterconnection {
     }
 
     public void loadInstructionToIR(BitSet address){
-
+        this.cache.getBits(address,OperandSize.Word);
     }
 }

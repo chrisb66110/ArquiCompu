@@ -1,7 +1,7 @@
 package com.simulacion;
 
 public class EventsHandler {
-    private Events eventList;
+    /*private Events eventList;
 
     public void addEvent(Events event){
 
@@ -9,5 +9,5 @@ public class EventsHandler {
 
     public Events nextEvent(){
         return null;
-    }
+    }*/
 }

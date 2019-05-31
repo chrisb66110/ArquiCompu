@@ -17,11 +17,16 @@ public class ControlUnit {
 
     public void fetchNextInstruction(){
         this.internalBus.loadInstructionToIR(this.programCounter);
-
-        bus.register(CacheTraeMemoria.class, evento -> {
+        /**
+         * Creo que aqui el evento deberia ser como CacheDevuelveInstruccion
+         */
+        this.bus.register(CacheTraeMemoria.class, evento -> {
             instructionRegister = (BitSet) evento.info[0];
             this.decodeInstruction();
         });
+        /**
+         * Preguntar donde irial el codigo que trigerea el evento
+         */
     }
 
     public void decodeInstruction(){
@@ -373,7 +378,9 @@ public class ControlUnit {
     }
 
     public void executeInstruciton(){
-
+        /**
+         * Falta un metodo en CPUInterconnection para mandar a ejecutar la vara
+         */
     }
 
     public BitSet instruction(){

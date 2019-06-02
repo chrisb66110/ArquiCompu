@@ -13,6 +13,7 @@ public class ComputerBuilder {
         Cache L1DataCache = createCacheHierarchy(3, new long[]{}, new int[]{}, new int[]{},bus);
         Cache L1InstCache = createCacheHierarchy(3, new long[]{}, new int[]{}, new int[]{},bus);
         CPU cpu = new CPU(L1DataCache, L1InstCache);
+        EventHandler.getInstance().setCpu(cpu);
 
         MemoryManager memoryManager = new MemoryManager(memory);
         os.setMemory(memoryManager);

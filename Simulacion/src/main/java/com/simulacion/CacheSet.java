@@ -1,7 +1,5 @@
 package com.simulacion;
 
-import java.util.BitSet;
-
 public class CacheSet {
     private CacheBlock[] blocks;
 
@@ -9,7 +7,7 @@ public class CacheSet {
 
     }
 
-    public BitSet find(BitSet address){
+    public BitsSet find(BitsSet address){
         return null;
     }
 }

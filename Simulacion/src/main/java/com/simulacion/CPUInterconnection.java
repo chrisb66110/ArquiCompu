@@ -1,17 +1,13 @@
 package com.simulacion;
 
-import com.simulacion.eventos.CacheBringsMemory;
-
-import java.util.BitSet;
-
 public class CPUInterconnection {
-    private BitSet [] registers;
+    private BitsSet [] registers;
     private ALU alu;
     private ControlUnit controlUnit;
     private Cache dataCache;
     private Cache instCache;
 
-    CPUInterconnection(BitSet[] registers, ALU alu, ControlUnit controlUnit, Cache dataCache, Cache instCache){
+    CPUInterconnection(BitsSet[] registers, ALU alu, ControlUnit controlUnit, Cache dataCache, Cache instCache){
         this.registers = registers;
         this.alu = alu;
         this.controlUnit = controlUnit;
@@ -22,91 +18,55 @@ public class CPUInterconnection {
     private RxBus bus = RxBus.getInstance();
 
     public CPUInterconnection(){
-        this.registers = new BitSet[32];
-        for (BitSet regiter: registers) {
-            regiter = new BitSet(32);
+        this.registers = new BitsSet[32];
+        for (BitsSet regiter: registers) {
+            regiter = new BitsSet(32);
         }
     }
 
     public void loadRegisterToALU(int register, ALUOperands aluOperand){
         if (aluOperand == ALUOperands.OperandA){
-            this.alu.OperandA = this.registers[register];
+            this.alu.setOperandA(this.registers[register]);
         }else{
-            this.alu.OperandB = this.registers[register];
+            this.alu.setOperandB(this.registers[register]);
         }
     }
 
-    public void loadImmediateToALU(BitSet immediate, ALUOperands aluOperand){
-        /**
-         * Ver si hay que revisar que el BitSet es de 32
-         */
+    public void loadImmediateToALU(BitsSet immediate, ALUOperands aluOperand){
+        //TODO: Ver si hay que revisar que el BitSet es de 32
         if (aluOperand == ALUOperands.OperandA){
-            this.alu.OperandA = immediate;
+            this.alu.setOperandA(immediate);
         }else{
-            this.alu.OperandB = immediate;
+            this.alu.setOperandB(immediate);
         }
     }
 
     public void saveALUResultToRegister(int register){
-        /**
-         * Ver si hay que revisar que el BitSet no hace overflow
-         */
-        this.registers[register] = this.alu.result;
+        //TODO: Ver si hay que revisar que el BitSet no hace overflow
+        this.registers[register] = this.alu.getResult();
     }
 
-    public BitSet getALUResult(){
-        /**
-         * Ver si hay que revisar que el BitSet no hace overflow
-         */
-        return this.alu.result;
+    public BitsSet getALUResult(){
+        //TODO: Ver si hay que revisar que el BitSet no hace overflow
+        return this.alu.getResult();
     }
 
-    public void loadImmediateToRegister(BitSet Immediate, int register){
-        /**
-         * Hablar de para que es este, no se en que caso se puede usar
-         */
+    public void loadImmediateToRegister(BitsSet Immediate, int register){
+        //TODO: Para que es este metodo?
     }
 
-    public void loadMemoryToRegister(int register, int offset, OperandSize ammount, boolean signed){
-        /**
-         * Hablar con los compañeros porque creo que es mejor que el offset sea un BitSet
-         * Hablar de para que es ese parametro de signed? porque no hay load con esa diferencia
-         */
-//        this.cache.getBits(offset,ammount);
-        /**
-         * Revisar porque aqui creo que va otro que es que ya estan los datos en cache
-         * porque puede que tenga que ir a memoria
-         * en tal caso el post de abajo va dentro de ese evento
-         */
-//        this.bus.register(CacheDevuelveDatos.class, evento -> {
-//            this.registers[register] = (BitSet) evento.info[0];
-//            bus.post(new LoadMemoryToRegister());
-//        });
+    public void loadMemoryToRegister(int register, BitsSet offset, OperandSize ammount, boolean signed){
+        //TODO: Revisar que ese metodo genere el evento de que ya cache retorno los datos
+        this.instCache.getBits(offset,ammount);
     }
 
-    public void storeRegisterToMemory(int register, int offset, OperandSize ammount){
-        /**
-         * Hablar de en que casos el tercer parametro seria un Bitset[], porque se puede cambiar a BitSet
-         */
-//        this.cache.writeBits(offset, ammount, this.registers[register]);
-//        this.bus.register(CacheTerminoEscribir.class, evento -> {
-//            bus.post(new StoreRegisterToMemory());
-//        });
+    public void storeRegisterToMemory(int register, BitsSet offset, OperandSize ammount){
+        //TODO: Revisar que ese metodo genere el evento de que ya cache escribio los datos
+        this.instCache.writeBits(offset, ammount, this.registers[register]);
     }
 
-    public void loadInstructionToIR(BitSet address){
+    public void loadInstructionToIR(BitsSet address){
+        //TODO: Revisar que ese metodo genere el evento de que ya cache retorno los datos
         this.instCache.getBits(address,OperandSize.Word);
-        bus.post(new CacheBringsMemory());
-        /**
-         * Revisar porque aqui creo que va otro que es que ya estan los datos en cache
-         * porque puede que tenga que ir a memoria
-         * en tal caso el post de abajo va dentro de ese evento
-         * Algo como lo que esta abajo
-         */
-//        this.bus.register(CacheDevuelveDatos.class, evento -> {
-//            this.registers[register] = (BitSet) evento.info[0];
-//            bus.post(new CacheDevuelveInstruccion());
-//        });
-
     }
 }

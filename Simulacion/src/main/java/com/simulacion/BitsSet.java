@@ -222,11 +222,21 @@ public class BitsSet{
     }
 
     public void scl(BitsSet other){
+        int val = this.toInt();
+        int shift = other.toInt();
 
+        int resp = (val << shift) | (val >>> (Integer.SIZE - shift));
+
+        this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void scr(BitsSet other){
+        int val = this.toInt();
+        int shift = other.toInt();
 
+        int resp = (val >>> shift) | (val << (Integer.SIZE - shift));
+
+        this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     /*public static String byteArrayToString(byte [] array){
@@ -326,15 +336,21 @@ public class BitsSet{
         System.out.println("Slr : " + bitSetX.toString());
         System.out.println();
 
-        /*
-        int x = -1;
-        System.out.println(x);
+        bitSetX = BitsSet.valueOf(-143257);
+        bitSetY = BitsSet.valueOf(6);
+        System.out.println("Val1: " + bitSetX.toString());
+        System.out.println("Val2: " + bitSetY.toString());
+        bitSetX.scl(bitSetY);
+        System.out.println("Scl : " + bitSetX.toString());
+        System.out.println();
 
-        System.out.println(Integer.toBinaryString(x));
-        x = x >> 1;
-
-        System.out.println(x);
-
-        System.out.println(Integer.toBinaryString(x));*/
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(6);
+        System.out.println("Val1: " + bitSetX.toString());
+        System.out.println("Val2: " + bitSetY.toString());
+        bitSetX.scr(bitSetY);
+        System.out.println("Scr : " + bitSetX.toString());
+        System.out.println();
+        
     }
 }

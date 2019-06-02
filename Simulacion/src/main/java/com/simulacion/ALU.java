@@ -3,11 +3,23 @@ package com.simulacion;
 import java.util.BitSet;
 
 public class ALU {
-    public BitSet OperandA;
-    public BitSet OperandB;
-    public BitSet result;
+    private BitsSet OperandA;
+    private BitsSet OperandB;
+    private BitsSet result;
 
-    public BitSet executeOperation(ALUOperations operation){
+    public BitsSet getResult() {
+        return this.result;
+    }
+
+    public void setOperandA(BitsSet operandA) {
+        this.OperandA = operandA;
+    }
+
+    public void setOperandB(BitsSet operandB) {
+        this.OperandB = operandB;
+    }
+
+    public BitsSet executeOperation(ALUOperations operation){
         switch(operation){
             case Add:
                 this.operationAdd();
@@ -104,78 +116,81 @@ public class ALU {
         return null;
     }
 
-    public void operationAdd(){
-
+    private void operationAdd(){
+        this.result = this.OperandA;
+        this.result.add(this.OperandB);
     }
 
-    public void operationSub(){
-
+    private void operationSub(){
+        this.result = this.OperandA;
+        this.result.sub(this.OperandB);
     }
 
-    public void operationMul(){
-
+    private void operationMul(){
+        this.result = this.OperandA;
+        this.result.mul(this.OperandB);
     }
 
-    public void operationDiv(){
-
+    private void operationDiv(){
+        this.result = this.OperandA;
+        this.result.div(this.OperandB);
     }
 
-    public void operationMod(){
-
+    private void operationMod(){
+        this.result = this.OperandA;
+        this.result.mod(this.OperandB);
     }
 
-    public void operationAnd(){
+    private void operationAnd(){
         this.result = this.OperandA;
         this.result.and(this.OperandB);
     }
 
-    public void operationOr(){
+    private void operationOr(){
         this.result = this.OperandA;
         this.result.or(this.OperandB);
     }
 
-    public void operationXor(){
+    private void operationXor(){
         this.result = this.OperandA;
         this.result.xor(this.OperandB);
     }
 
-    public void operationNot(){
+    private void operationNot(){
         this.result = this.OperandA;
         this.result.flip(0, this.OperandA.length());
     }
 
-    public void operationSal(){
+    private void operationSal(){
         this.result = this.OperandA;
-        // Pos 0 porque el shift no deberia ser un digito mayor a 32
-        byte shift = this.OperandB.toByteArray()[0];
-        byte finalShift = (byte)(this.result.length()-shift);
-        int i;
-        for (i=0; i<finalShift; i++)
-            this.result.set(i, this.result.get(i+shift));
-        for (i = i; i<this.result.length(); i++)
-            this.result.set(i, true);
+        this.result.sal(this.OperandB);
     }
 
-    public void operationSar(){
-
+    private void operationSar(){
+        this.result = this.OperandA;
+        this.result.sar(this.OperandB);
     }
 
-    public void operationSll(){
-
+    private void operationSll(){
+        this.result = this.OperandA;
+        this.result.sll(this.OperandB);
     }
 
-    public void operationSlr(){
-
+    private void operationSlr(){
+        this.result = this.OperandA;
+        this.result.slr(this.OperandB);
     }
 
-    public void operationScl(){
-
+    private void operationScl(){
+        this.result = this.OperandA;
+        this.result.scl(this.OperandB);
     }
 
-    public void operationScr(){
-
+    private void operationScr(){
+        this.result = this.OperandA;
+        this.result.scr(this.OperandB);
     }
-
+    // TODO: eliminar estos comentarios
     /*public static void main(String[] args) {
         BitSet bitSet = new BitSet(31);
         bitSet.set(0, 31,true);

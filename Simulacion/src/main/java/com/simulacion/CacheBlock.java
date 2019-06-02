@@ -1,9 +1,7 @@
 package com.simulacion;
 
-import java.util.BitSet;
-
 public class CacheBlock {
-    public BitSet data;
-    public BitSet tag;
+    public BitsSet data;
+    public BitsSet tag;
     public boolean valid;
 }

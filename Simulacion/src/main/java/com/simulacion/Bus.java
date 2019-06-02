@@ -5,7 +5,7 @@ import java.util.BitSet;
 public class Bus {
     private BitSet lines;
     private Object [] connectedDevices;
-    private EventsHandler eventHandler;
+    private EventHandler eventHandler;
 
     public void sendControl(BitSet controlCode, int device){
 

@@ -6,7 +6,16 @@ public class CPUInterconnection {
     private BitSet [] registers;
     private ALU alu;
     private ControlUnit controlUnit;
-    private Cache cache;
+    private Cache dataCache;
+    private Cache instCache;
+
+    CPUInterconnection(BitSet[] registers, ALU alu, ControlUnit controlUnit, Cache dataCache, Cache instCache){
+        this.registers = registers;
+        this.alu = alu;
+        this.controlUnit = controlUnit;
+        this.dataCache = dataCache;
+        this.instCache = instCache;
+    }
 
     public void loadRegisterToALU(int register, ALUOperands aluOperand){
 
@@ -37,6 +46,6 @@ public class CPUInterconnection {
     }
 
     public void loadInstructionToIR(BitSet address){
-        this.cache.getBits(address,OperandSize.Word);
+        this.instCache.getBits(address,OperandSize.Word);
     }
 }

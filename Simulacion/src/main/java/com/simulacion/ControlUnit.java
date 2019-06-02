@@ -1,24 +1,31 @@
 package com.simulacion;
 
-import com.simulacion.eventos.CacheTraeMemoria;
+import com.simulacion.eventos.CacheBringsMemory;
+import com.simulacion.eventos.StartCUCycle;
 
 import java.util.BitSet;
-
-import static com.simulacion.ALUOperands.OperandA;
 
 public class ControlUnit {
     private BitSet programCounter;
     private BitSet instructionRegister;
     private CPUInterconnection internalBus;
-    private OperatingSystem os;
-    private EventsHandler eventHandler;
-
+    private EventHandler eventHandler = EventHandler.getInstance();
     private RxBus bus = RxBus.getInstance();
+
+    public ControlUnit() {
+        this.programCounter = new BitSet(32);
+        this.instructionRegister = new BitSet(32);
+
+        bus.register(StartCUCycle.class, event -> {
+            this.fetchNextInstruction();
+        });
+    }
+
 
     public void fetchNextInstruction(){
         this.internalBus.loadInstructionToIR(this.programCounter);
 
-        bus.register(CacheTraeMemoria.class, evento -> {
+        bus.register(CacheBringsMemory.class, evento -> {
             instructionRegister = (BitSet) evento.info[0];
             this.decodeInstruction();
         });
@@ -27,10 +34,6 @@ public class ControlUnit {
     public void decodeInstruction(){
         ALUOperations operation = this.bitSetToALUOperations(this.instructionRegister.get(0,6));
         this.executeInstruciton();
-    }
-
-    public void controlUnitCycle(){
-        this.fetchNextInstruction();
     }
 
     /**
@@ -374,6 +377,14 @@ public class ControlUnit {
 
     public void executeInstruciton(){
 
+    }
+
+    public void setInternalBus(CPUInterconnection internalBus) {
+        this.internalBus = internalBus;
+    }
+
+    public void setProgramCounter(BitSet programCounter) {
+        this.programCounter = programCounter;
     }
 
     public BitSet instruction(){

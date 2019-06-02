@@ -1,5 +1,6 @@
 package com.simulacion;
 
+import com.simulacion.eventos.Event;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
@@ -23,7 +24,8 @@ public class RxBus {
                 .subscribe(onNext);
     }
 
-    public void post(Object event) {
+    public void post(Event event) {
+        System.out.println(event.type);
         mBusSubject.onNext(event);
     }
 }

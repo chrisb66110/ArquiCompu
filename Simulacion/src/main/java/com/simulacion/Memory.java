@@ -1,22 +1,20 @@
 package com.simulacion;
 
-import java.util.BitSet;
-
 public class Memory {
-    private BitSet[] memory;
+    private BitsSet[] memory;
     private EventHandler eventHandler = EventHandler.getInstance();
     private Bus bus;
 
     public Memory(int size, Bus bus) {
-        this.memory = new BitSet[size];
+        this.memory = new BitsSet[size];
         this.bus = bus;
     }
 
-    public BitSet[] getBits(int dir, OperandSize ammount){
+    public BitsSet[] getBits(int dir, OperandSize ammount){
         return null;
     }
 
-    public void writeBits(int dir, OperandSize ammount, BitSet[] data){
+    public void writeBits(int dir, OperandSize ammount, BitsSet[] data){
 
     }
 }

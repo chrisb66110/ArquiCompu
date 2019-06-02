@@ -1,7 +1,5 @@
 package com.simulacion;
 
-import java.util.BitSet;
-
 public class Cache {
     private long size;
     private int associativity;

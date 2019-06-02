@@ -1,6 +1,6 @@
 package com.simulacion;
 
-import com.simulacion.eventos.CacheTraeMemoria;
+import com.simulacion.eventos.CacheBringsMemory;
 
 import java.util.BitSet;
 
@@ -8,7 +8,16 @@ public class CPUInterconnection {
     private BitSet [] registers;
     private ALU alu;
     private ControlUnit controlUnit;
-    private Cache cache;
+    private Cache dataCache;
+    private Cache instCache;
+
+    CPUInterconnection(BitSet[] registers, ALU alu, ControlUnit controlUnit, Cache dataCache, Cache instCache){
+        this.registers = registers;
+        this.alu = alu;
+        this.controlUnit = controlUnit;
+        this.dataCache = dataCache;
+        this.instCache = instCache;
+    }
 
     private RxBus bus = RxBus.getInstance();
 
@@ -86,8 +95,8 @@ public class CPUInterconnection {
     }
 
     public void loadInstructionToIR(BitSet address){
-        this.cache.getBits(address,OperandSize.Word);
-        bus.post(new CacheTraeMemoria());
+        this.instCache.getBits(address,OperandSize.Word);
+        bus.post(new CacheBringsMemory());
         /**
          * Revisar porque aqui creo que va otro que es que ya estan los datos en cache
          * porque puede que tenga que ir a memoria

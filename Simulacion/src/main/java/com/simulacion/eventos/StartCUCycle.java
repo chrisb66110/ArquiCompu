@@ -5,7 +5,7 @@ package com.simulacion.eventos;
  * no info
  */
 public class StartCUCycle extends Event {
-    public StartCUCycle(long eventTime, int cycles, Object[] info) {
-        super(eventTime, cycles, "Start Control unit Cycle", info);
+    public StartCUCycle(int cycles, Object[] info) {
+        super(cycles, "Start Control unit Cycle", info);
     }
 }

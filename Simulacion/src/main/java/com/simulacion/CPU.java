@@ -35,7 +35,7 @@ public class CPU {
         // Subscribe to when the program halts
         eventsBus.register(Halt.class, event -> this.run = false);
         this.controlUnit.setProgramCounter(initialInstAddress);
-        eventHandler.addEvent(new StartCUCycle(0, 1, null));
+        eventHandler.addEvent(new StartCUCycle(1, null));
 
         this.run = true;
         while(this.run){
@@ -44,4 +44,7 @@ public class CPU {
         }
     }
 
+    public long getClock() {
+        return clock;
+    }
 }

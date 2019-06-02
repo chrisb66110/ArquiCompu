@@ -14,7 +14,7 @@ public class Main {
                 num = num + i % 10;
             }
             System.out.println("numero: " + num);
-            bus.post(new Halt(0, 0, null));
+            bus.post(new Halt(0, null));
         });
 
         bus.register(Halt.class, event -> {
@@ -22,7 +22,7 @@ public class Main {
         });
 
         for(int i = 0; i< 10; i++) {
-            bus.post(new Event(0,0, "Hola",null));
+            bus.post(new Event(0, "Hola",null));
             System.out.println("Finitio");
         }
 

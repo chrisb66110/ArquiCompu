@@ -6,14 +6,17 @@ public class BitsSet{
     private BitSet bitSet;
 
     /**
+     * Constructor vacio
+     */
+    public BitsSet(){
+        this.bitSet = new BitSet();
+    }
+
+    /**
      * Constructor a partir de BitSet
      */
     public BitsSet(BitSet bitSet){
         this.bitSet = bitSet;
-    }
-
-    public BitsSet(){
-        this.bitSet = new BitSet();
     }
 
     /**
@@ -260,6 +263,8 @@ public class BitsSet{
 
 
 
+    /*
+    //Pruebas de operaciones
     public static void main(String[] args) {
         BitsSet bitSetX;
         BitsSet bitSetY;
@@ -351,6 +356,6 @@ public class BitsSet{
         bitSetX.scr(bitSetY);
         System.out.println("Scr : " + bitSetX.toString());
         System.out.println();
-        
-    }
+
+    }*/
 }

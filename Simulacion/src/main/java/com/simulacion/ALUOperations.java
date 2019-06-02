@@ -51,7 +51,6 @@ public enum ALUOperations {
     Jles,
     Jleu,
     Call,
-    //Call, -Revisar a ver si hay que cambiarla
     Ret,
     Syscall,
     Err

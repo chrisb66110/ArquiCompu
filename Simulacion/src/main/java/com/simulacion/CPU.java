@@ -3,10 +3,9 @@ package com.simulacion;
 import com.simulacion.eventos.Halt;
 import com.simulacion.eventos.StartCUCycle;
 
-import java.util.BitSet;
 
 public class CPU {
-    private BitSet[] registers;
+    private BitsSet[] registers;
     private ALU alu;
     private Cache dataCache;
     private Cache instCache;
@@ -19,7 +18,7 @@ public class CPU {
 
     CPU(Cache L1DataCache, Cache L1InstCache){
         this.run = true;
-        this.registers = new BitSet[32];
+        this.registers = new BitsSet[32];
         this.alu = new ALU();
         this.dataCache = L1DataCache;
         this.instCache = L1InstCache;
@@ -31,7 +30,7 @@ public class CPU {
         this.eventsBus = RxBus.getInstance();
     }
 
-    public void run(BitSet initialInstAddress){
+    public void run(BitsSet initialInstAddress){
         // Subscribe to when the program halts
         eventsBus.register(Halt.class, event -> this.run = false);
         this.controlUnit.setProgramCounter(initialInstAddress);

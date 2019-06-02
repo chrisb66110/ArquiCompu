@@ -1,7 +1,6 @@
 package com.simulacion;
 
 import java.io.FileNotFoundException;
-import java.util.BitSet;
 
 public class ProgramLoader {
     MemoryManager memoryManager;
@@ -16,7 +15,7 @@ public class ProgramLoader {
      * @throws FileNotFoundException if there's no file for the path given
      * @return a BitSet that represents the initialAddress for execution
      */
-    public BitSet loadProgram(String path) throws FileNotFoundException {
+    public BitsSet loadProgram(String path) throws FileNotFoundException {
         return null;
     }
 }

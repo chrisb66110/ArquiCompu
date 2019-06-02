@@ -23,15 +23,13 @@ public class BitsSet{
         this.bitSet = new BitSet(nbits);
     }
 
-    public static BitsSet valueOf(long number) {
-        //Se hace de 64 para manejar los shift
-        BitsSet nuevo = new BitsSet(64);
+    public static BitsSet valueOf(int number) {
+        //Se hace de 32 para manejar los shift
+        BitsSet nuevo = new BitsSet(32);
         //Se llenan los 32 bits
         for (int i = 0; i <32; ++i) {
             nuevo.set(i,(number & (1 << i)) != 0);
         }
-        //Se llenan los otros con el ultimo bit
-        nuevo.set(32,64,nuevo.get(31));
         return nuevo;
     }
 
@@ -127,12 +125,12 @@ public class BitsSet{
         return x;
     }
 
-    public long toLong(){
-        long valint = 0;
-        for(int i = 0; i < 64; i++){
+    public int toInt(){
+        int valint = 0;
+        for(int i = 0; i < 32; i++){
             boolean bit = this.bitSet.get(i);
             if(bit){
-                valint += ((long)1 << i) /*(long)Math.pow(2,i)*/;
+                valint += ((int)1 << i) /*(long)Math.pow(2,i)*/;
                 //System.out.println("Agrego 2^"+i+": " + ((long)1 << i));
             }
         }
@@ -141,64 +139,64 @@ public class BitsSet{
     }
 
     public void add(BitsSet other){
-        long bitset1 = this.toLong();
-        long bitset2 = other.toLong();
+        int bitset1 = this.toInt();
+        int bitset2 = other.toInt();
 
-        long resp = bitset1 + bitset2;
+        int resp = bitset1 + bitset2;
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void sub(BitsSet other){
-        long bitset1 = this.toLong();
-        long bitset2 = other.toLong();
+        int bitset1 = this.toInt();
+        int bitset2 = other.toInt();
 
-        long resp = bitset1 - bitset2;
+        int resp = bitset1 - bitset2;
 
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void mul(BitsSet other){
-        long bitset1 = this.toLong();
-        long bitset2 = other.toLong();
+        int bitset1 = this.toInt();
+        int bitset2 = other.toInt();
 
-        long resp = bitset1 * bitset2;
+        int resp = bitset1 * bitset2;
 
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void div(BitsSet other){
-        long bitset1 = this.toLong();
-        long bitset2 = other.toLong();
+        int bitset1 = this.toInt();
+        int bitset2 = other.toInt();
 
-        long resp = bitset1 / bitset2;
+        int resp = bitset1 / bitset2;
 
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void mod(BitsSet other){
-        long bitset1 = this.toLong();
-        long bitset2 = other.toLong();
+        int bitset1 = this.toInt();
+        int bitset2 = other.toInt();
 
-        long resp = bitset1 % bitset2;
+        int resp = bitset1 % bitset2;
 
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void sal(BitsSet other){
-        long val = this.toLong();
-        long shift = other.toLong();
+        int val = this.toInt();
+        int shift = other.toInt();
 
-        long resp = val << shift;
+        int resp = val << shift;
 
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void sar(BitsSet other){
-        long val = this.toLong();
-        long shift = other.toLong();
+        int val = this.toInt();
+        int shift = other.toInt();
         //System.out.println(this.bitSet.toString());
         //System.out.println(Long.toBinaryString(val));
-        long resp = val >> shift;
+        int resp = val >> shift;
 
         //System.out.println(Long.toBinaryString(resp));
 
@@ -206,19 +204,19 @@ public class BitsSet{
     }
 
     public void sll(BitsSet other){
-        long val = this.toLong();
-        long shift = other.toLong();
+        int val = this.toInt();
+        int shift = other.toInt();
 
-        long resp = val << shift;
+        int resp = val << shift;
 
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
 
     public void slr(BitsSet other){
-        long val = this.toLong();
-        long shift = other.toLong();
+        int val = this.toInt();
+        int shift = other.toInt();
 
-        long resp = val >>> 32 + shift;
+        int resp = val >>> shift;
 
         this.bitSet = BitsSet.valueOf(resp).bitSet;
     }
@@ -256,76 +254,76 @@ public class BitsSet{
         BitsSet bitSetX;
         BitsSet bitSetY;
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(215);
+        System.out.println("Val1: " + bitSetX.toInt());
+        System.out.println("Val2: " + bitSetY.toInt());
         bitSetX.add(bitSetY);
-        System.out.println("Suma: " + bitSetX.toLong());
+        System.out.println("Suma: " + bitSetX.toInt());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(215);
+        System.out.println("Val1: " + bitSetX.toInt());
+        System.out.println("Val2: " + bitSetY.toInt());
         bitSetX.sub(bitSetY);
-        System.out.println("Rest: " + bitSetX.toLong());
+        System.out.println("Rest: " + bitSetX.toInt());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(215);
+        System.out.println("Val1: " + bitSetX.toInt());
+        System.out.println("Val2: " + bitSetY.toInt());
         bitSetX.mul(bitSetY);
-        System.out.println("Mult: " + bitSetX.toLong());
+        System.out.println("Mult: " + bitSetX.toInt());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(215);
+        System.out.println("Val1: " + bitSetX.toInt());
+        System.out.println("Val2: " + bitSetY.toInt());
         bitSetX.div(bitSetY);
-        System.out.println("Divi: " + bitSetX.toLong());
+        System.out.println("Divi: " + bitSetX.toInt());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(215);
+        System.out.println("Val1: " + bitSetX.toInt());
+        System.out.println("Val2: " + bitSetY.toInt());
         bitSetX.mod(bitSetY);
-        System.out.println("Mod : " + bitSetX.toLong());
+        System.out.println("Mod : " + bitSetX.toInt());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(6);
+        System.out.println("Val1: " + bitSetX.toString());
+        System.out.println("Val2: " + bitSetY.toString());
         bitSetX.sal(bitSetY);
-        System.out.println("Sal : " + bitSetX.toLong());
+        System.out.println("Sal : " + bitSetX.toString());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(6);
+        System.out.println("Val1: " + bitSetX.toString());
+        System.out.println("Val2: " + bitSetY.toString());
         bitSetX.sar(bitSetY);
-        System.out.println("Sar : " + bitSetX.toLong());
+        System.out.println("Sar : " + bitSetX.toString());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(6);
+        System.out.println("Val1: " + bitSetX.toString());
+        System.out.println("Val2: " + bitSetY.toString());
         bitSetX.sll(bitSetY);
-        System.out.println("Sll : " + bitSetX.toLong());
+        System.out.println("Sll : " + bitSetX.toString());
         System.out.println();
 
-        bitSetX = BitsSet.valueOf(-1);
-        bitSetY = BitsSet.valueOf(1);
-        System.out.println("Val1: " + bitSetX.toLong());
-        System.out.println("Val2: " + bitSetY.toLong());
+        bitSetX = BitsSet.valueOf(143257);
+        bitSetY = BitsSet.valueOf(6);
+        System.out.println("Val1: " + bitSetX.toString());
+        System.out.println("Val2: " + bitSetY.toString());
         bitSetX.slr(bitSetY);
-        System.out.println("Slr : " + bitSetX.toLong());
+        System.out.println("Slr : " + bitSetX.toString());
         System.out.println();
 
         /*

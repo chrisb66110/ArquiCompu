@@ -21,11 +21,11 @@ public class Cache {
         this.memoryBus = memoryBus;
     }
 
-    public BitSet[] getBits(BitSet address, OperandSize ammount){
+    public BitsSet[] getBits(BitsSet address, OperandSize ammount){
         return null;
     }
 
-    public void writeBits(BitSet address, OperandSize ammount, BitSet [] data){
+    public void writeBits(BitsSet address, OperandSize ammount, BitsSet data){
 
     }
 }

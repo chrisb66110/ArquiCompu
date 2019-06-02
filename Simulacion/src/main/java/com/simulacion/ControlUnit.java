@@ -3,18 +3,16 @@ package com.simulacion;
 import com.simulacion.eventos.CacheBringsMemory;
 import com.simulacion.eventos.StartCUCycle;
 
-import java.util.BitSet;
-
 public class ControlUnit {
-    private BitSet programCounter;
-    private BitSet instructionRegister;
+    private BitsSet programCounter;
+    private BitsSet instructionRegister;
     private CPUInterconnection internalBus;
     private EventHandler eventHandler = EventHandler.getInstance();
     private RxBus bus = RxBus.getInstance();
 
     public ControlUnit() {
-        this.programCounter = new BitSet(32);
-        this.instructionRegister = new BitSet(32);
+        this.programCounter = new BitsSet(32);
+        this.instructionRegister = new BitsSet(32);
 
         bus.register(StartCUCycle.class, event -> {
             this.fetchNextInstruction();
@@ -23,17 +21,12 @@ public class ControlUnit {
 
 
     public void fetchNextInstruction(){
+        //TODO: Revisar que ese metodo genere un evento CacheBringsMemory
         this.internalBus.loadInstructionToIR(this.programCounter);
-        /**
-         * Creo que aqui el evento deberia ser como CacheDevuelveInstruccion
-         */
         bus.register(CacheBringsMemory.class, evento -> {
-            instructionRegister = (BitSet) evento.info[0];
+            instructionRegister = (BitsSet) evento.info[0];
             this.decodeInstruction();
         });
-        /**
-         * Preguntar donde irial el codigo que trigerea el evento
-         */
     }
 
     public void decodeInstruction(){
@@ -46,12 +39,12 @@ public class ControlUnit {
      * @param instruction BitSet de un byte donde está la instrucción.
      * @return ALUOperations operación que decodificada.
      */
-    private ALUOperations bitSetToALUOperations(BitSet instruction){
+    private ALUOperations bitSetToALUOperations(BitsSet instruction){
         //Operacion a ejecutar
         ALUOperations operation;
         //La comparacion se hace con el numero decimal de la combinacion de bits de cada instruccion
         //En este caso serian los ultimos bits del BitSet
-        switch(instruction.get(0,6).toByteArray()[0]){
+        switch(instruction.get(0,6).toInt()){
             case 0:
                 operation = ALUOperations.Add;
                 this.operationRegisterRegisterRegister(operation, instruction);
@@ -262,156 +255,115 @@ public class ControlUnit {
                 break;
             default:
                 operation = ALUOperations.Err;
-                /**
-                 * FALTA ver como se va a manejar esta excepcion
-                 */
+                //TODO: GENERAR EXCEPCION
         }
         return operation;
     }
 
-    private void operationRegisterRegisterRegister(ALUOperations operation, BitSet instruction){
-        byte registerResult = instruction.get(6,11).toByteArray()[0];
-        byte registerA = instruction.get(11,16).toByteArray()[0];
-        byte registerB = instruction.get(16,21).toByteArray()[0];
+    private void operationRegisterRegisterRegister(ALUOperations operation, BitsSet instruction){
+        int registerResult = instruction.get(6,11).toInt();
+        int registerA = instruction.get(11,16).toInt();
+        int registerB = instruction.get(16,21).toInt();
 
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
-        /**
-         * FALTA mandar a ejecutar la instruccion
-        */
+        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
          this.internalBus.saveALUResultToRegister(registerResult);
     }
 
-    private void operationRegisterRegisterInmediate(ALUOperations operation, BitSet instruction){
-        byte registerResult = instruction.get(6,11).toByteArray()[0];
-        byte registerA = instruction.get(11,16).toByteArray()[0];
-        BitSet inmmediate = instruction.get(16,32);
+    private void operationRegisterRegisterInmediate(ALUOperations operation, BitsSet instruction){
+        int registerResult = instruction.get(6,11).toInt();
+        int registerA = instruction.get(11,16).toInt();
+        BitsSet inmmediate = instruction.get(16,32);
 
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandB);
-        /**
-         * FALTA mandar a ejecutar la instruccion
-         */
+        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
         this.internalBus.saveALUResultToRegister(registerResult);
     }
 
-    private void operationRegisterRegister(ALUOperations operation, BitSet instruction){
-        byte registerResult = instruction.get(6,11).toByteArray()[0];
-        byte registerA = instruction.get(11,16).toByteArray()[0];
+    private void operationRegisterRegister(ALUOperations operation, BitsSet instruction){
+        int registerResult = instruction.get(6,11).toInt();
+        int registerA = instruction.get(11,16).toInt();
 
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
-        /**
-         * FALTA mandar a ejecutar la instruccion
-         */
+        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
         this.internalBus.saveALUResultToRegister(registerResult);
     }
 
-    private void operationRegisterInmediate(ALUOperations operation, BitSet instruction){
-        byte registerResult = instruction.get(6,11).toByteArray()[0];
-        BitSet inmmediate = instruction.get(11,27);
+    private void operationRegisterInmediate(ALUOperations operation, BitsSet instruction){
+        int registerResult = instruction.get(6,11).toInt();
+        BitsSet inmmediate = instruction.get(11,27);
 
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandA);
-        /**
-         * FALTA mandar a ejecutar la instruccion
-         */
+        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
         this.internalBus.saveALUResultToRegister(registerResult);
     }
 
-    private void operationRegisterMemory(ALUOperations operation, BitSet instruction, OperandSize operandSize, boolean signed){
-        byte registerResult = instruction.get(6,11).toByteArray()[0];
-        byte offset = instruction.get(11,27).toByteArray()[0];
-
-        /**
-         * Falta mandar a cargar ese offset
-         * FALTA mandar a ejecutar la instruccion
-         */
+    private void operationRegisterMemory(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
+        int registerResult = instruction.get(6,11).toInt();
+        BitsSet offset = instruction.get(11,27);
+        //TODO: Falta mandar a cargar ese offset
+        //TODO: FALTA mandar a ejecutar la instruccion
         this.internalBus.loadMemoryToRegister(registerResult, offset, operandSize, signed);
     }
 
-    private void operationMemoryRegister(ALUOperations operation, BitSet instruction, OperandSize operandSize){
-        byte offset = instruction.get(6,22).toByteArray()[0];
-        byte register = instruction.get(22,27).toByteArray()[0];
-        /**
-         * Falta mandar a cargar ese offset
-         * FALTA mandar a ejecutar la instruccion
-         */
+    private void operationMemoryRegister(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
+        BitsSet offset = instruction.get(6,22);
+        int register = instruction.get(22,27).toInt();
+        //TODO: Falta mandar a cargar ese offset
+        //TODO: FALTA mandar a ejecutar la instruccion
         this.internalBus.storeRegisterToMemory(register,offset, operandSize);
     }
 
 
 
-    private void operationMemoryRegisterRegister(ALUOperations operation, BitSet instruction){
-        BitSet offset = instruction.get(6,22);
-        byte registerA = instruction.get(22,27).toByteArray()[0];
-        byte registerB = instruction.get(27,32).toByteArray()[0];
+    private void operationMemoryRegisterRegister(ALUOperations operation, BitsSet instruction){
+        BitsSet offset = instruction.get(6,22);
+        int registerA = instruction.get(22,27).toInt();
+        int registerB = instruction.get(27,32).toInt();
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
-        /**
-         * FALTA mandar a ejecutar la instruccion
-         */
-        BitSet result = this.internalBus.getALUResult();
-        if (result.toByteArray()[0] == 1){
+        //TODO: FALTA mandar a ejecutar la instruccion
+        BitsSet result = this.internalBus.getALUResult();
+        if (result.toInt() == 1){
             this.programCounter = offset;
         }
     }
 
-    private void operationCall(ALUOperations operation, BitSet instruction){
-        BitSet offset = instruction.get(6,22);
-        /**
-         * FALTA guardar la direccion de retorno en la pila
-         * this.saveStack();
-         */
+    private void operationCall(ALUOperations operation, BitsSet instruction){
+        BitsSet offset = instruction.get(6,22);
+        //TODO: FALTA guardar la direccion de retorno en la pila
+        // this.saveStack();
         this.programCounter = offset;
     }
 
-    private void operationRet(ALUOperations operation, BitSet instruction){
-        BitSet offset = instruction.get(6,22);
-        /**
-         * FALTA sacar la direccion de retorno en la pila
-         * this.programCounter offset = this.popStack();
-         */
+    private void operationRet(ALUOperations operation, BitsSet instruction){
+        BitsSet offset = instruction.get(6,22);
+        //TODO:FALTA sacar la direccion de retorno en la pila
+        // this.programCounter offset = this.popStack();
         this.programCounter = offset;
     }
 
-    private void operationSysCall(ALUOperations operation, BitSet instruction){
-        /**
-         * FALTA revisar como es eso de R3+ se toman como parametros
-         * Hablar de como se va a ejecutar esto
-         */
+    private void operationSysCall(ALUOperations operation, BitsSet instruction){
+        //TODO: FALTA revisar como es eso de R3+ se toman como parametros
+        //TODO: Hablar de como se va a ejecutar esto
     }
 
     public void executeInstruciton(){
-        /**
-         * Falta un metodo en CPUInterconnection para mandar a ejecutar la vara
-         */
+        //TODO: Falta un metodo en CPUInterconnection para mandar a ejecutar la vara
     }
 
     public void setInternalBus(CPUInterconnection internalBus) {
         this.internalBus = internalBus;
     }
 
-    public void setProgramCounter(BitSet programCounter) {
+    public void setProgramCounter(BitsSet programCounter) {
         this.programCounter = programCounter;
     }
 
-    public BitSet instruction(){
+    public BitsSet instruction(){
         return null;
     }
-
-    /*public static void main(String[] args) {
-        BitSet bitSet = new BitSet(8);
-        bitSet.set(0,true);
-        bitSet.set(1,false);
-        bitSet.set(2,true);
-        bitSet.set(3,false);
-        bitSet.set(4,true);
-        bitSet.set(5,false);
-        bitSet.set(6,true);
-        bitSet.set(7,true);
-
-        ControlUnit controlUnit = new ControlUnit();
-
-        System.out.println(controlUnit.decodeInstruction(bitSet));
-    }*/
 
 }

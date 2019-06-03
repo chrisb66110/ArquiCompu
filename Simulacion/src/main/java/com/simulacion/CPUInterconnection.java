@@ -41,6 +41,10 @@ public class CPUInterconnection {
         }
     }
 
+    public void executeOperation(ALUOperations operation){
+        this.alu.executeOperation(operation);
+    }
+
     public void saveALUResultToRegister(int register){
         //TODO: Ver si hay que revisar que el BitSet no hace overflow
         this.registers[register] = this.alu.getResult();
@@ -52,7 +56,7 @@ public class CPUInterconnection {
     }
 
     public void loadImmediateToRegister(BitsSet Immediate, int register){
-        //TODO: Para que es este metodo?
+        //TODO: Para que era este metodo?
     }
 
     public void loadMemoryToRegister(int register, BitsSet offset, OperandSize ammount, boolean signed){

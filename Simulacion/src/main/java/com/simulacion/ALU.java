@@ -1,7 +1,5 @@
 package com.simulacion;
 
-import java.util.BitSet;
-
 public class ALU {
     private BitsSet OperandA;
     private BitsSet OperandB;
@@ -20,6 +18,7 @@ public class ALU {
     }
 
     public BitsSet executeOperation(ALUOperations operation){
+        //TODO: Revisar si hay que quitar el retorno del BitsSet
         switch(operation){
             case Add:
                 this.operationAdd();
@@ -111,7 +110,8 @@ public class ALU {
                 this.operationScr();
                 break;
             case Err:
-
+                //TODO: Generar excepcion
+                break;
         }
         return null;
     }

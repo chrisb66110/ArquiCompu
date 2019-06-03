@@ -25,12 +25,12 @@ public class BitsSet{
         return nuevo;
     }
 
-    public void flip(int bitIndex) {
-        this.bitSet.flip(bitIndex);
+    public boolean get(int bitIndex) {
+        return this.bitSet.get(bitIndex);
     }
 
-    public void flip(int fromIndex, int toIndex) {
-        this.bitSet.flip(fromIndex, toIndex);
+    public BitsSet get(int fromIndex, int toIndex) {
+        return new BitsSet(this.bitSet.get(fromIndex, toIndex));
     }
 
     public void set(int bitIndex) {
@@ -61,36 +61,12 @@ public class BitsSet{
         this.bitSet.clear();
     }
 
-    public boolean get(int bitIndex) {
-        return this.bitSet.get(bitIndex);
-    }
-
-    public BitsSet get(int fromIndex, int toIndex) {
-        return new BitsSet(this.bitSet.get(fromIndex, toIndex));
-    }
-
     public int length() {
         return this.bitSet.length();
     }
 
     public boolean isEmpty(){
         return this.bitSet.isEmpty();
-    }
-
-    public void and(BitsSet set) {
-        this.bitSet.and(set.bitSet);
-    }
-
-    public void or(BitsSet set) {
-        this.bitSet.or(set.bitSet);
-    }
-
-    public void xor(BitsSet set) {
-        this.bitSet.xor(set.bitSet);
-    }
-
-    public void andNot(BitsSet set) {
-        this.bitSet.andNot(set.bitSet);
     }
 
     public int size(){
@@ -126,6 +102,30 @@ public class BitsSet{
             }
         }
         return valint;
+    }
+
+    public void flip(int bitIndex) {
+        this.bitSet.flip(bitIndex);
+    }
+
+    public void flip(int fromIndex, int toIndex) {
+        this.bitSet.flip(fromIndex, toIndex);
+    }
+
+    public void and(BitsSet set) {
+        this.bitSet.and(set.bitSet);
+    }
+
+    public void or(BitsSet set) {
+        this.bitSet.or(set.bitSet);
+    }
+
+    public void xor(BitsSet set) {
+        this.bitSet.xor(set.bitSet);
+    }
+
+    public void andNot(BitsSet set) {
+        this.bitSet.andNot(set.bitSet);
     }
 
     public void add(BitsSet other){

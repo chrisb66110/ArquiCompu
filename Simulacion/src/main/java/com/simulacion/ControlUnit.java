@@ -1,8 +1,6 @@
 package com.simulacion;
 
-import com.simulacion.eventos.CacheBringsMemory;
-import com.simulacion.eventos.CacheDataReturn;
-import com.simulacion.eventos.StartCUCycle;
+import com.simulacion.eventos.*;
 
 public class ControlUnit {
     private BitsSet programCounter;
@@ -14,7 +12,7 @@ public class ControlUnit {
     public ControlUnit() {
         this.programCounter = new BitsSet(32);
         this.instructionRegister = new BitsSet(32);
-
+        //TODO: Creo que aqui va el ciclo, contiene el siguiente evento
         bus.register(StartCUCycle.class, event -> {
             this.fetchNextInstruction();
         });
@@ -214,6 +212,9 @@ public class ControlUnit {
                 break;
             case 43:
                 operation = ALUOperations.Jne;
+                //Todo: en todas las operaciones de Jumps hay que hacerlas por cada
+                // una, y lo que se va a hacer es quue el BitsSet tenga funciones
+                // para igual, mayor, menor
                 this.operationMemoryRegisterRegister(operation, instruction);
                 break;
             case 44:
@@ -263,6 +264,11 @@ public class ControlUnit {
         return operation;
     }
 
+    /**
+     * Metodo para ejecutar operaciones de add, sub, mul, div, mod, and, or, xor, sal, sar, sll, slr, scl, scr
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationRegisterRegisterRegister(ALUOperations operation, BitsSet instruction){
         int registerResult = instruction.get(6,11).toInt();
         int registerA = instruction.get(11,16).toInt();
@@ -271,9 +277,17 @@ public class ControlUnit {
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
         this.executeInstruciton(operation);
-        this.internalBus.saveALUResultToRegister(registerResult);
+        //Evento de que la operacion ya se ejecuto
+        bus.register(ALUExecutedInstruction.class, evento -> {
+            this.internalBus.saveALUResultToRegister(registerResult);
+        });
     }
 
+    /**
+     * Metodo para ejecutar operaciones de addi, subi, muli, divi, modi, andi, ori, xori, sali, sari, slli, slri, scli, scri
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationRegisterRegisterInmediate(ALUOperations operation, BitsSet instruction){
         int registerResult = instruction.get(6,11).toInt();
         int registerA = instruction.get(11,16).toInt();
@@ -282,47 +296,87 @@ public class ControlUnit {
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandB);
         this.executeInstruciton(operation);
-        this.internalBus.saveALUResultToRegister(registerResult);
+        //Evento de que la operacion ya se ejecuto
+        bus.register(ALUExecutedInstruction.class, evento -> {
+            this.internalBus.saveALUResultToRegister(registerResult);
+        });
     }
 
+    /**
+     * Metodo para ejecutar operacion not
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationRegisterRegister(ALUOperations operation, BitsSet instruction){
         int registerResult = instruction.get(6,11).toInt();
         int registerA = instruction.get(11,16).toInt();
 
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.executeInstruciton(operation);
-        this.internalBus.saveALUResultToRegister(registerResult);
+        //Evento de que la operacion ya se ejecuto
+        bus.register(ALUExecutedInstruction.class, evento -> {
+            this.internalBus.saveALUResultToRegister(registerResult);
+        });
     }
 
+    /**
+     * Metodo para ejecutar operacion noti
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationRegisterInmediate(ALUOperations operation, BitsSet instruction){
         int registerResult = instruction.get(6,11).toInt();
         BitsSet inmmediate = instruction.get(11,27);
 
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandA);
         this.executeInstruciton(operation);
-        this.internalBus.saveALUResultToRegister(registerResult);
+        //Evento de que la operacion ya se ejecuto
+        bus.register(ALUExecutedInstruction.class, evento -> {
+            this.internalBus.saveALUResultToRegister(registerResult);
+        });
     }
 
+    /**
+     * Metodo para ejecutar operaciones lsb, lub. lsh, luh, lsw, luw
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationRegisterMemory(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
         int registerResult = instruction.get(6,11).toInt();
         BitsSet offset = instruction.get(11,27);
         //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
+        //TODO: ver si al offset hay que sumarle la pos inicial
         this.internalBus.loadMemoryToRegister(registerResult, offset, operandSize, signed);
-        //TODO: ver el evento que genera
-        //bus.register(CacheDataReturn.class, evento -> {
-        //    instructionRegister = (BitsSet) evento.info[0];
-        //    this.decodeInstruction();
-        //});
+        //Evento de que la cache ya retorno datos
+        bus.register(CacheDataReturn.class, evento -> {
+            instructionRegister = (BitsSet) evento.info[0];
+            //TODO: Ver si hay que hacer algo mas
+        });
     }
 
+    /**
+     * Metodo para ejecutar operaciones sb, sh, sw
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationMemoryRegister(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
         BitsSet offset = instruction.get(6,22);
         int register = instruction.get(22,27).toInt();
         //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
+        //TODO: ver si al offset hay que sumarle la pos inicial
         this.internalBus.storeRegisterToMemory(register,offset, operandSize);
-        //TODO: ver el evento que genera
+        //Evento de que la cache ya escribio datos
+        bus.register(CacheWroteData.class, evento -> {
+            //TODO: Ver que hay que hacer, OJO porque hay que ver como espera el ciclo de arriba si se hace
+        });
     }
 
+    /**
+     * Metodo para ejecutar operaciones je, jne, jg, jges, jgeu, jls, jlu, jles, jleu
+     * Este metodo se tiene que cambiar a cada uno para ver si se cambia el PC
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationMemoryRegisterRegister(ALUOperations operation, BitsSet instruction){
         BitsSet offset = instruction.get(6,22);
         int registerA = instruction.get(22,27).toInt();
@@ -330,31 +384,57 @@ public class ControlUnit {
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
         //TODO: FALTA mandar a ejecutar la instruccion y hacer que la ALU haga esas instrucciones
-        BitsSet result = this.internalBus.getALUResult();
-        if (result.toInt() == 1){
-            this.programCounter = offset;
-        }
+        //Evento de que la cache ya escribio datos
+        bus.register(ALUExecutedInstruction.class, evento -> {
+            //TODO: Ver si hay que hacer algo mas
+            BitsSet result = this.internalBus.getALUResult();
+            if (result.toInt() == 1){
+                //TODO: ver si al offset hay que sumarle la pos inicial
+                this.programCounter = offset;
+            }
+        });
     }
 
+    /**
+     * Metodo para ejecutar operaciones call
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationCall(ALUOperations operation, BitsSet instruction){
         BitsSet offset = instruction.get(6,22);
         //TODO: FALTA guardar la direccion de retorno en la pila
         // this.saveStack();
+        //TODO: ver si al offset hay que sumarle la pos inicial
         this.programCounter = offset;
     }
 
+    /**
+     * Metodo para ejecutar operaciones ret
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationRet(ALUOperations operation, BitsSet instruction){
         BitsSet offset = instruction.get(6,22);
         //TODO:FALTA sacar la direccion de retorno en la pila
         // this.programCounter offset = this.popStack();
+        //TODO: ver si al offset hay que sumarle la pos inicial
         this.programCounter = offset;
     }
 
+    /**
+     * Metodo para ejecutar operaciones syscall
+     * @param operation Operacion a ejecutar
+     * @param instruction Bits de la instruccion
+     */
     private void operationSysCall(ALUOperations operation, BitsSet instruction){
         //TODO: FALTA revisar como es eso de R3+ se toman como parametros
         //TODO: Hablar de como se va a ejecutar esto
     }
 
+    /**
+     * Metodo para mandar a ejecutar en la ALU
+     * @param operation Operacion a ejecutar
+     */
     public void executeInstruciton(ALUOperations operation){
         //TODO: Cambiar nombre a executeInstrucitonALU
         //TODO: Falta un metodo en CPUInterconnection para mandar a ejecutar la vara
@@ -367,10 +447,6 @@ public class ControlUnit {
 
     public void setProgramCounter(BitsSet programCounter) {
         this.programCounter = programCounter;
-    }
-
-    public BitsSet instruction(){
-        return null;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.simulacion;
 
 import com.simulacion.eventos.CacheBringsMemory;
+import com.simulacion.eventos.CacheDataReturn;
 import com.simulacion.eventos.StartCUCycle;
 
 public class ControlUnit {
@@ -31,7 +32,9 @@ public class ControlUnit {
 
     public void decodeInstruction(){
         ALUOperations operation = this.bitSetToALUOperations(this.instructionRegister.get(0,6));
-        this.executeInstruciton();
+        //TODO: el executeInstruciton se mete dentro de del metodo anterior para que valla a ejecutar lo que
+        // es y no tener que hacer el switch 2 veces.
+        //this.executeInstruciton(operation);
     }
 
     /**
@@ -267,8 +270,8 @@ public class ControlUnit {
 
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
-        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
-         this.internalBus.saveALUResultToRegister(registerResult);
+        this.executeInstruciton(operation);
+        this.internalBus.saveALUResultToRegister(registerResult);
     }
 
     private void operationRegisterRegisterInmediate(ALUOperations operation, BitsSet instruction){
@@ -278,7 +281,7 @@ public class ControlUnit {
 
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandB);
-        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
+        this.executeInstruciton(operation);
         this.internalBus.saveALUResultToRegister(registerResult);
     }
 
@@ -287,7 +290,7 @@ public class ControlUnit {
         int registerA = instruction.get(11,16).toInt();
 
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
-        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
+        this.executeInstruciton(operation);
         this.internalBus.saveALUResultToRegister(registerResult);
     }
 
@@ -296,27 +299,29 @@ public class ControlUnit {
         BitsSet inmmediate = instruction.get(11,27);
 
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandA);
-        //TODO: MANDAR A EJECUTAR LA INSTRUCCION
+        this.executeInstruciton(operation);
         this.internalBus.saveALUResultToRegister(registerResult);
     }
 
     private void operationRegisterMemory(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
         int registerResult = instruction.get(6,11).toInt();
         BitsSet offset = instruction.get(11,27);
-        //TODO: Falta mandar a cargar ese offset
-        //TODO: FALTA mandar a ejecutar la instruccion
+        //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
         this.internalBus.loadMemoryToRegister(registerResult, offset, operandSize, signed);
+        //TODO: ver el evento que genera
+        //bus.register(CacheDataReturn.class, evento -> {
+        //    instructionRegister = (BitsSet) evento.info[0];
+        //    this.decodeInstruction();
+        //});
     }
 
     private void operationMemoryRegister(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
         BitsSet offset = instruction.get(6,22);
         int register = instruction.get(22,27).toInt();
-        //TODO: Falta mandar a cargar ese offset
-        //TODO: FALTA mandar a ejecutar la instruccion
+        //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
         this.internalBus.storeRegisterToMemory(register,offset, operandSize);
+        //TODO: ver el evento que genera
     }
-
-
 
     private void operationMemoryRegisterRegister(ALUOperations operation, BitsSet instruction){
         BitsSet offset = instruction.get(6,22);
@@ -324,7 +329,7 @@ public class ControlUnit {
         int registerB = instruction.get(27,32).toInt();
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
-        //TODO: FALTA mandar a ejecutar la instruccion
+        //TODO: FALTA mandar a ejecutar la instruccion y hacer que la ALU haga esas instrucciones
         BitsSet result = this.internalBus.getALUResult();
         if (result.toInt() == 1){
             this.programCounter = offset;
@@ -350,8 +355,10 @@ public class ControlUnit {
         //TODO: Hablar de como se va a ejecutar esto
     }
 
-    public void executeInstruciton(){
+    public void executeInstruciton(ALUOperations operation){
+        //TODO: Cambiar nombre a executeInstrucitonALU
         //TODO: Falta un metodo en CPUInterconnection para mandar a ejecutar la vara
+        this.internalBus.executeOperation(operation);
     }
 
     public void setInternalBus(CPUInterconnection internalBus) {

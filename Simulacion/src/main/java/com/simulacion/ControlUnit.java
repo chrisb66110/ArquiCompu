@@ -168,39 +168,39 @@ public class ControlUnit {
                 break;
             case 32:
                 operation = ALUOperations.Lsb;
-                this.operationRegisterMemory(operation, instruction, OperandSize.Byte, true);
+                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Byte, true);
                 break;
             case 33:
                 operation = ALUOperations.Lub;
-                this.operationRegisterMemory(operation, instruction, OperandSize.Byte, false);
+                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Byte, false);
                 break;
             case 34:
                 operation = ALUOperations.Lsh;
-                this.operationRegisterMemory(operation, instruction, OperandSize.HalfWord, true);
+                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.HalfWord, true);
                 break;
             case 35:
                 operation = ALUOperations.Luh;
-                this.operationRegisterMemory(operation, instruction, OperandSize.HalfWord, false);
+                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.HalfWord, false);
                 break;
             case 36:
                 operation = ALUOperations.Lsw;
-                this.operationRegisterMemory(operation, instruction, OperandSize.Word, true);
+                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Word, true);
                 break;
             case 37:
                 operation = ALUOperations.Luw;
-                this.operationRegisterMemory(operation, instruction, OperandSize.Word, false);
+                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Word, false);
                 break;
             case 38:
                 operation = ALUOperations.Sb;
-                this.operationMemoryRegister(operation, instruction, OperandSize.Byte);
+                this.operationRegisterMemoryStore(operation, instruction, OperandSize.Byte);
                 break;
             case 39:
                 operation = ALUOperations.Sh;
-                this.operationMemoryRegister(operation, instruction, OperandSize.HalfWord);
+                this.operationRegisterMemoryStore(operation, instruction, OperandSize.HalfWord);
                 break;
             case 40:
                 operation = ALUOperations.Sw;
-                this.operationMemoryRegister(operation, instruction, OperandSize.Word);
+                this.operationRegisterMemoryStore(operation, instruction, OperandSize.Word);
                 break;
             case 41:
                 operation = ALUOperations.Jmp;
@@ -208,42 +208,42 @@ public class ControlUnit {
                 break;
             case 42:
                 operation = ALUOperations.Je;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 43:
                 operation = ALUOperations.Jne;
                 //Todo: en todas las operaciones de Jumps hay que hacerlas por cada
                 // una, y lo que se va a hacer es quue el BitsSet tenga funciones
                 // para igual, mayor, menor
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 44:
                 operation = ALUOperations.Jg;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 45:
                 operation = ALUOperations.Jges;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 46:
                 operation = ALUOperations.Jgeu;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 47:
                 operation = ALUOperations.Jls;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 48:
                 operation = ALUOperations.Jlu;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 49:
                 operation = ALUOperations.Jles;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 50:
                 operation = ALUOperations.Jleu;
-                this.operationMemoryRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, instruction);
                 break;
             case 51:
                 operation = ALUOperations.Call;
@@ -340,8 +340,9 @@ public class ControlUnit {
      * Metodo para ejecutar operaciones lsb, lub. lsh, luh, lsw, luw
      * @param operation Operacion a ejecutar
      * @param instruction Bits de la instruccion
+     * @param signed Cargar con signo
      */
-    private void operationRegisterMemory(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
+    private void operationRegisterMemoryLoad(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
         int registerResult = instruction.get(6,11).toInt();
         BitsSet offset = instruction.get(11,27);
         //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
@@ -359,9 +360,9 @@ public class ControlUnit {
      * @param operation Operacion a ejecutar
      * @param instruction Bits de la instruccion
      */
-    private void operationMemoryRegister(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
-        BitsSet offset = instruction.get(6,22);
-        int register = instruction.get(22,27).toInt();
+    private void operationRegisterMemoryStore(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
+        int register = instruction.get(6,11).toInt();
+        BitsSet offset = instruction.get(11,27);
         //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
         //TODO: ver si al offset hay que sumarle la pos inicial
         this.internalBus.storeRegisterToMemory(register,offset, operandSize);
@@ -377,10 +378,11 @@ public class ControlUnit {
      * @param operation Operacion a ejecutar
      * @param instruction Bits de la instruccion
      */
-    private void operationMemoryRegisterRegister(ALUOperations operation, BitsSet instruction){
-        BitsSet offset = instruction.get(6,22);
-        int registerA = instruction.get(22,27).toInt();
-        int registerB = instruction.get(27,32).toInt();
+    private void operationRegisterRegisterMemory(ALUOperations operation, BitsSet instruction){
+        int registerA = instruction.get(6,11).toInt();
+        int registerB = instruction.get(11,16).toInt();
+        BitsSet offset = instruction.get(16,32);
+
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
         //TODO: FALTA mandar a ejecutar la instruccion y hacer que la ALU haga esas instrucciones

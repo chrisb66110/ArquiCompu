@@ -44,10 +44,10 @@ public class CacheSet {
      * @param address the address to look for
      * @return the data in the address if it's found, null otherwise
      */
-    public BitSet find(BitSet address) {
+    public BitsSet find(BitsSet address) {
         //---------------------------------------------------------------------
         // Auxiliary Variables
-        BitSet result = null;
+        BitsSet result = null;
         int index = 0;
         //---------------------------------------------------------------------
         // Searching for the address in the array
@@ -82,7 +82,7 @@ public class CacheSet {
      * @param amount
      * @param data
      */
-    public void writeBits(BitSet address, OperandSize amount, BitSet data) {
+    public void writeBits(BitsSet address, OperandSize amount, BitsSet data) {
         //---------------------------------------------------------------------
         // Auxiliary variables.
         boolean updated = false;

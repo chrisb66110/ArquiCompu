@@ -2,17 +2,14 @@
 // Package
 package com.simulacion;
 //-----------------------------------------------------------------------------
-// Imports
-import java.util.BitSet;
-//-----------------------------------------------------------------------------
 /**
  * Class that emulates the behavior of a block inside a caché set
  */
 public class CacheBlock {
     //-------------------------------------------------------------------------
     // Global Variables
-    public BitSet data;
-    public BitSet tag;
+    public BitsSet data;
+    public BitsSet tag;
     public boolean valid;
     //-------------------------------------------------------------------------
     // Const.
@@ -27,8 +24,8 @@ public class CacheBlock {
      * @param blockSize the block size
      */
     public CacheBlock(int blockSize) {
-        this.data = new BitSet(blockSize);
-        this.tag = new BitSet(TAG_SIZE);
+        this.data = new BitsSet(blockSize);
+        this.tag = new BitsSet(TAG_SIZE);
         this.valid = false;
     }
     //-------------------------------------------------------------------------

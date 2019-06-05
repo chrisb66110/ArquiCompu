@@ -74,12 +74,71 @@ public class Cache {
     }
     //-------------------------------------------------------------------------
     // Methods
-    public BitSet[] getBits(BitSet address, OperandSize ammount){
-        return null;
+    /**
+     * 
+     */
+    /**
+     * Reads a block of the given size from the given address
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param address the requested address
+     * @param ammount the size to read from memory/caché
+     * @return  the data as a bitset if the address is 
+     *          the current level, null otherwise
+     */
+    public BitSet getBits(BitSet address, OperandSize ammount){
+        //---------------------------------------------------------------------
+        // Auxiliary Vars.
+        BitSet result = null;
+        //---------------------------------------------------------------------
+        // Calculate the set index to the given address
+        int setIndex = this.calculateSetIndex(address);
+        //---------------------------------------------------------------------
+        // try to fetch the data
+        result = this.sets[setIndex].find(address);
+        //---------------------------------------------------------------------
+        // if the data was not in this level then fetch it from the next level
+        if (result == null){
+            //-----------------------------------------------------------------
+            // getting the data from the next caché level
+            BitSet dataFromBelow = this.nextCache.getBits(address, ammount);
+            //-----------------------------------------------------------------
+            // saving it in this level
+            this.writeBits(address, ammount, dataFromBelow);
+            //-----------------------------------------------------------------
+        }
+        //---------------------------------------------------------------------
+        return result;
+        //---------------------------------------------------------------------
     }
 
-    public void writeBits(BitSet address, OperandSize ammount, BitSet [] data){
-
+    public void writeBits(BitSet address, OperandSize ammount, BitSet data){
+        
     }
     //-------------------------------------------------------------------------
+    /**
+     * Calculate the set index form the given address
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * 
+     * @param address the address to read/write
+     * @return the set number assigned the given address
+     */
+    private int calculateSetIndex (BitSet address) {
+        //---------------------------------------------------------------------
+        // Auxiliary Vars.
+        int addressInt = 0;
+        //---------------------------------------------------------------------
+        // Casting bitset to an integer
+        for (int index = address.length(); index >= 0 ; index--) {
+            if (address.get(index)) {
+                addressInt += Math.pow(2, index);
+            }
+        }
+        //---------------------------------------------------------------------
+        // computing the block number and the set index
+        return ((int) Math.floor(addressInt/this.blockSize) % this.sets.length);
+    }
 }

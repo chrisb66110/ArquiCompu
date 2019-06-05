@@ -25,6 +25,9 @@ public class Cache {
     private int hitTime;
     private EventsHandler eventHandler;
     //-------------------------------------------------------------------------
+    // Const.
+    private int BLOCK_AMOUNT = 7;
+    //-------------------------------------------------------------------------
     // Constructors
     /**
      * Class constructor that receives the caché level and some aspects of
@@ -35,8 +38,39 @@ public class Cache {
      * @param level caché level
      */
     public Cache(int sets, int blockSize, int level ){
-        // TODO:  program this constructor using the methods
-        //  of the other caché classes
+        //---------------------------------------------------------------------
+        // Setting the size of the caché
+        this.size = blockSize * sets * this.BLOCK_AMOUNT;
+        //---------------------------------------------------------------------
+        // Setting the asocitivity of the level
+        // TODO: find the correct name
+        this.asociativity = 7;
+        //---------------------------------------------------------------------
+        // Setting the creation of the caché sets
+        this.sets = new CacheSet[sets];
+        for (int index = 0; index < sets; index++) {
+            this.sets[index] = new CacheSet(BLOCK_AMOUNT, blockSize);
+        }
+        //---------------------------------------------------------------------
+        // Setting the block size
+        this.blockSize = blockSize;
+        //---------------------------------------------------------------------
+        // Setting the level
+        this.level = level;
+        //---------------------------------------------------------------------
+        // Setting the next caché level
+        // TODO: find this thing
+        // this.nextCache = ;
+        //---------------------------------------------------------------------
+        // TODO: find this thing
+        //this.memoryBus = ;
+        //---------------------------------------------------------------------
+        // TODO: find this thing
+        // this.hitTime = ;
+        //---------------------------------------------------------------------
+        // TODO: find this thing
+        // this.eventHandler = ;
+        //---------------------------------------------------------------------
     }
     //-------------------------------------------------------------------------
     // Methods

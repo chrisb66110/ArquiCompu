@@ -15,10 +15,17 @@ public class CacheBlock {
     public BitSet tag;
     public boolean valid;
     //-------------------------------------------------------------------------
+    // Const.
+    private final int TAG_SIZE = 32;
+    //-------------------------------------------------------------------------
     // Constructor
-    public CacheBlock() {
-        this.data = new BitSet();
-        this.tag = new BitSet();
+    /**
+     * Default constructor of the class.
+     * Sets 
+     */
+    public CacheBlock(int blockSize) {
+        this.data = new BitSet(blockSize);
+        this.tag = new BitSet(TAG_SIZE);
         this.valid = false;
     }
     //-------------------------------------------------------------------------

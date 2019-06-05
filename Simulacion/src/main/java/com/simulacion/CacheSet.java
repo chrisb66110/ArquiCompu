@@ -18,14 +18,22 @@ public class CacheSet {
     private CacheBlock[] blocks;
     //-------------------------------------------------------------------------
     // Constructors
-    public CacheSet(int blocks){
+    /**
+     * Constructor of the class CacheSets.
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param blocks the amount of blocks the set shall have
+     * @param blockSize the size of each block
+     */
+    public CacheSet(int blocks, int blockSize){
         //---------------------------------------------------------------------
         // Creation of the array.
         this.blocks = new CacheBlock[blocks];
         //---------------------------------------------------------------------
         // Creation of each block
         for (int index = 0; index < blocks; index++) {
-            this.blocks[index] = new CacheBlock();
+            this.blocks[index] = new CacheBlock(blockSize);
         }
         //---------------------------------------------------------------------
     }

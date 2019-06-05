@@ -96,17 +96,29 @@ public class Cache {
         // if the data was not in this level then fetch it from the next level
         if (result == null){
             //-----------------------------------------------------------------
-            // getting the data from the next caché level
-            // TODO: if this is the last level caché, the fetch the data from 
-            // TODO: memory not from the next level
-            BitSet dataFromBelow = this.nextCache.getBits(address, amount);
+            // the data to be saved in this level for the next read
+            BitSet dataFromBelow = null;
+            //-----------------------------------------------------------------
+            // check if this is the last level caché
+            //-----------------------------------------------------------------
+            if (this.nextCache != null) {
+                //-------------------------------------------------------------
+                // getting the data from the next caché level
+                dataFromBelow = this.nextCache.getBits(address, amount);
+                //-------------------------------------------------------------
+            } else {
+                //-------------------------------------------------------------
+                // getting the data from memory
+                // TODO:fetch the data from memory
+                //-------------------------------------------------------------
+            }
             //-----------------------------------------------------------------
             // saving it in this level
             this.writeBits(address, amount, dataFromBelow);
             //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
-        // TODO: cut this to the given amount of bits 
+        // TODO: cut this to the given amount of bits
         return result;
         //---------------------------------------------------------------------
     }
@@ -119,19 +131,38 @@ public class Cache {
      * @param address the address to write the data
      * @param amount the size of the data to be written
      * @param data the data to be written
+     * @return 
      */
     public void writeBits(BitSet address, OperandSize amount, BitSet data){
         //---------------------------------------------------------------------
         // Find the set number assigned to the address
         int setNumber = this.calculateSetIndex(address);
         //---------------------------------------------------------------------
-        // write the changes in the current caché level. 
-        this.sets[setNumber].writeBits(address, amount, data);
+        CacheSet assignedCacheSet = this.sets[setNumber];
         //---------------------------------------------------------------------
-        // write the changes in the next level.
-        // TODO: if this is the last level caché, the update must go to 
-        // TODO: memeory, not to the next level
-        this.nextCache.writeBits(address, amount, data);
+        // write the changes in the current caché level. 
+        boolean updated = assignedCacheSet.writeBits(address, amount, data);
+        //---------------------------------------------------------------------
+        // checking if this level was not updated
+        if (!updated) {
+            //-----------------------------------------------------------------
+            // caching  in this level.
+            assignedCacheSet.writeBits(address, amount, data);
+            //-----------------------------------------------------------------
+        }
+        //---------------------------------------------------------------------
+        // check if this is the last level caché
+        if (this.nextCache != null) {
+            //-----------------------------------------------------------------
+            // write the changes in the next level.
+            this.nextCache.writeBits(address, amount, data);
+            //-----------------------------------------------------------------
+        } else {
+            //-----------------------------------------------------------------
+            // write the changes in memory
+            // TODO: write the changes in memory
+            //-----------------------------------------------------------------
+        }
         //---------------------------------------------------------------------
     }
     /**

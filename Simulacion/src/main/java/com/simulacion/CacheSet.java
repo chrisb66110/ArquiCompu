@@ -80,8 +80,9 @@ public class CacheSet {
      * @param address
      * @param amount
      * @param data
+     * @return true if the update was successful, false otherwise
      */
-    public void writeBits(BitSet address, OperandSize amount, BitSet data) {
+    public boolean writeBits(BitSet address, OperandSize amount, BitSet data) {
         //---------------------------------------------------------------------
         // Auxiliary variables.
         boolean updated = false;
@@ -101,7 +102,10 @@ public class CacheSet {
             index++;
             //-----------------------------------------------------------------
         }
-        // TODO: if the block is not cached, should we found it and cache it?
+        //---------------------------------------------------------------------
+        // TODO: if the block was not update, find a victim
+        //---------------------------------------------------------------------
+        return updated;
         //---------------------------------------------------------------------
 	}
     //-------------------------------------------------------------------------

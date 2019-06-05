@@ -1,9 +1,9 @@
 package com.simulacion;
 
-import java.io.FileNotFoundException;
+import java.io.*;
 
 public class ProgramLoader {
-    MemoryManager memoryManager;
+    private MemoryManager memoryManager;
 
     public ProgramLoader(MemoryManager memoryManager) {
         this.memoryManager = memoryManager;
@@ -12,10 +12,33 @@ public class ProgramLoader {
     /**
      * Takes the file and loads the bytes in memory
      * @param path path to the file that is going to be run
-     * @throws FileNotFoundException if there's no file for the path given
+     * @throws IOException if there's no file for the path given
      * @return a BitSet that represents the initialAddress for execution
      */
-    public BitsSet loadProgram(String path) throws FileNotFoundException {
-        return null;
+    public BitsSet loadProgram(String path) throws IOException {
+        FileInputStream binaryFile = new FileInputStream(path);
+        ObjectInputStream is = new ObjectInputStream(binaryFile);
+
+        try {
+            int wordCounter = 0;
+            while(true){
+                BitsSet word = new BitsSet(Consts.WORD_SIZE);
+                for(int i=3; i>=0; i--){
+                    byte tempByte = is.readByte();
+                    for (int j=7; j>=0; j--){
+                        word.set((i*8) + j, ((tempByte >> j) & 1) == 1);
+                    }
+                }
+                memoryManager.writeBits(Consts.STACK_SIZE + wordCounter * 4, OperandSize.Word, word);
+            }
+        }
+        catch (EOFException ignored){
+            // End of file reached
+        }
+
+        is.close();
+        binaryFile.close();
+
+        return BitsSet.valueOf(Consts.STACK_SIZE+ Consts.DATA_SEGMENT_SIZE);
     }
 }

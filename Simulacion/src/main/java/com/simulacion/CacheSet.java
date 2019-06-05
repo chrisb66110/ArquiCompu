@@ -7,10 +7,6 @@ import java.util.BitSet;
 //-----------------------------------------------------------------------------
 /**
  * Class that emulates a set from an associative caché.
- *
- * @author Joseph Rementería (b55824)
- * @version 1.0
- * @since 04-06-2019
  */
 public class CacheSet {
     //-------------------------------------------------------------------------
@@ -43,7 +39,6 @@ public class CacheSet {
      * Find the data stored on the given address
      * 
      * @author Joseph Rementería (b55824)
-     * @since 04-06-2019
      * 
      * @param address the address to look for
      * @return the data in the address if it's found, null otherwise
@@ -72,6 +67,7 @@ public class CacheSet {
         }
         //---------------------------------------------------------------------
         return result;
+        //---------------------------------------------------------------------
     }
     //-------------------------------------------------------------------------
 }

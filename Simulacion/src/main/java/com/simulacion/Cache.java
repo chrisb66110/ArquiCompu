@@ -7,10 +7,6 @@ import java.util.BitSet;
 //-----------------------------------------------------------------------------
 /**
  * Class that emulates the behavoir of a caché chip
- *
- * @author Joseph Rementería (b55824)
- * @version 1.0
- * @since 04-06-2019
  */
 public class Cache {
     //-------------------------------------------------------------------------
@@ -116,11 +112,19 @@ public class Cache {
         return result;
         //---------------------------------------------------------------------
     }
-
+    /**
+     * Method that writes the given data in given address. All the levels 
+     * shall be updated and the data must be changed in memory too.
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param address
+     * @param ammount
+     * @param data
+     */
     public void writeBits(BitSet address, OperandSize ammount, BitSet data){
         
     }
-    //-------------------------------------------------------------------------
     /**
      * Calculate the set index form the given address
      * 
@@ -142,6 +146,10 @@ public class Cache {
         }
         //---------------------------------------------------------------------
         // computing the block number and the set index
-        return ((int) Math.floor(addressInt/this.blockSize) % this.sets.length);
+        return (
+            (int) Math.floor(addressInt/this.blockSize) % this.sets.length
+        );
+        //---------------------------------------------------------------------
     }
+    //-------------------------------------------------------------------------
 }

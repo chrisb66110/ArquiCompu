@@ -21,6 +21,9 @@ public class CacheBlock {
     // Constructor
     /**
      * Default constructor of the class.
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
      * @param blockSize the block size
      */
     public CacheBlock(int blockSize) {

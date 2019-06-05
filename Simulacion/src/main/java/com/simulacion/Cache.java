@@ -33,6 +33,8 @@ public class Cache {
      * Class constructor that receives the caché level and some aspects of
      * its capacity
      *
+     * @author Joseph Rementería (b55824)
+     * 
      * @param sets amount of caché sets
      * @param blockSize block size
      * @param level caché level
@@ -102,6 +104,8 @@ public class Cache {
         if (result == null){
             //-----------------------------------------------------------------
             // getting the data from the next caché level
+            // TODO: if this is the last level caché, the fetch the data from 
+            // TODO: memory not from the next level
             BitSet dataFromBelow = this.nextCache.getBits(address, ammount);
             //-----------------------------------------------------------------
             // saving it in this level
@@ -121,7 +125,6 @@ public class Cache {
      * Calculate the set index form the given address
      * 
      * @author Joseph Rementería (b55824)
-     * 
      * 
      * @param address the address to read/write
      * @return the set number assigned the given address

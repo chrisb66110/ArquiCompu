@@ -2,9 +2,6 @@
 // Package
 package com.simulacion;
 //-----------------------------------------------------------------------------
-// Imports
-import java.util.BitSet;
-//-----------------------------------------------------------------------------
 /**
  * Class that emulates the behavoir of a caché chip
  */
@@ -16,6 +13,7 @@ public class Cache {
     private CacheSet[] sets;
     private int blockSize;
     private int level;
+    private int hitTime;
     private Cache nextCache;
     private Bus memoryBus;
     private int hitTime;

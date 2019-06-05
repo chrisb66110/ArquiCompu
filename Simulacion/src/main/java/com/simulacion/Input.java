@@ -1,4 +1,4 @@
 package com.simulacion;
 
-public class Evento {
+public class Input {
 }

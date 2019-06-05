@@ -21,7 +21,7 @@ public class CacheBlock {
     // Constructor
     /**
      * Default constructor of the class.
-     * Sets 
+     * @param blockSize the block size
      */
     public CacheBlock(int blockSize) {
         this.data = new BitSet(blockSize);

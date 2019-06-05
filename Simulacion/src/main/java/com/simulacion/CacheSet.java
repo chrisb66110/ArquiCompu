@@ -39,8 +39,39 @@ public class CacheSet {
     }
     //-------------------------------------------------------------------------
     // Methods
-    public BitSet find(BitSet address){
-        return null;
+    /**
+     * Find the data stored on the given address
+     * 
+     * @author Joseph Rementería (b55824)
+     * @since 04-06-2019
+     * 
+     * @param address the address to look for
+     * @return the data in the address if it's found, null otherwise
+     */
+    public BitSet find(BitSet address) {
+        //---------------------------------------------------------------------
+        // Auxiliary Variables
+        BitSet result = null;
+        int index = 0;
+        //---------------------------------------------------------------------
+        // Searching for the address in the array
+        while ((result == null) && (index < this.blocks.length)) {
+            //-----------------------------------------------------------------
+            // Get the current cache block
+            CacheBlock currentCacheBlock = this.blocks[index];
+            //-----------------------------------------------------------------
+            // This if checks whether the address is in the current caché 
+            // block or not and verifies if the data is valid
+            if (
+                (currentCacheBlock.tag == address) && 
+                (currentCacheBlock.valid)
+            ) {
+                result = currentCacheBlock.data;
+            }
+            //-----------------------------------------------------------------
+        }
+        //---------------------------------------------------------------------
+        return result;
     }
     //-------------------------------------------------------------------------
 }

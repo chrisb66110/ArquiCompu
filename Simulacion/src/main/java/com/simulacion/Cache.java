@@ -1,12 +1,12 @@
 //-----------------------------------------------------------------------------
-// Paquete
+// Package
 package com.simulacion;
 //-----------------------------------------------------------------------------
 // Imports
 import java.util.BitSet;
 //-----------------------------------------------------------------------------
 /**
- * Clase que emula un chip de memoria caché en cualquiera de los niveles.
+ * Class that emulates the behavoir of a caché chip
  *
  * @author Joseph Rementería (b55824)
  * @version 1.0
@@ -14,7 +14,7 @@ import java.util.BitSet;
  */
 public class Cache {
     //-------------------------------------------------------------------------
-    // Variables globales
+    // Global Variables
     private long size;
     private int asociativity;
     private CacheSet[] sets;
@@ -25,28 +25,27 @@ public class Cache {
     private int hitTime;
     private EventsHandler eventHandler;
     //-------------------------------------------------------------------------
-    // Constructores
-
+    // Constructors
     /**
-     * Constructor de la clase que recibe el nivel de caché actual y otros
-     * parámetros de configuración de capacidad.
+     * Class constructor that receives the caché level and some aspects of
+     * its capacity
      *
-     * @param sets cantidad de sets en el nivel de caché
-     * @param blockSize tamaño del bloque de memoria..
-     * @param level el nivel de caché
+     * @param sets amount of caché sets
+     * @param blockSize block size
+     * @param level caché level
      */
     public Cache(int sets, int blockSize, int level ){
         // TODO:  program this constructor using the methods
         //  of the other caché classes
     }
     //-------------------------------------------------------------------------
-    // Métodos
+    // Methods
     public BitSet[] getBits(BitSet address, OperandSize ammount){
         return null;
     }
 
     public void writeBits(BitSet address, OperandSize ammount, BitSet [] data){
-        
+
     }
     //-------------------------------------------------------------------------
 }

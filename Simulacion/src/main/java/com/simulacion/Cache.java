@@ -73,19 +73,16 @@ public class Cache {
     //-------------------------------------------------------------------------
     // Methods
     /**
-     * 
-     */
-    /**
      * Reads a block of the given size from the given address
      * 
      * @author Joseph Rementería (b55824)
      * 
      * @param address the requested address
-     * @param ammount the size to read from memory/caché
+     * @param amount the size to read from memory/caché
      * @return  the data as a bitset if the address is 
      *          the current level, null otherwise
      */
-    public BitSet getBits(BitSet address, OperandSize ammount){
+    public BitSet getBits(BitSet address, OperandSize amount){
         //---------------------------------------------------------------------
         // Auxiliary Vars.
         BitSet result = null;
@@ -102,13 +99,14 @@ public class Cache {
             // getting the data from the next caché level
             // TODO: if this is the last level caché, the fetch the data from 
             // TODO: memory not from the next level
-            BitSet dataFromBelow = this.nextCache.getBits(address, ammount);
+            BitSet dataFromBelow = this.nextCache.getBits(address, amount);
             //-----------------------------------------------------------------
             // saving it in this level
-            this.writeBits(address, ammount, dataFromBelow);
+            this.writeBits(address, amount, dataFromBelow);
             //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
+        // TODO: cut this to the given amount of bits 
         return result;
         //---------------------------------------------------------------------
     }
@@ -118,12 +116,23 @@ public class Cache {
      * 
      * @author Joseph Rementería (b55824)
      * 
-     * @param address
-     * @param ammount
-     * @param data
+     * @param address the address to write the data
+     * @param amount the size of the data to be written
+     * @param data the data to be written
      */
-    public void writeBits(BitSet address, OperandSize ammount, BitSet data){
-        
+    public void writeBits(BitSet address, OperandSize amount, BitSet data){
+        //---------------------------------------------------------------------
+        // Find the set number assigned to the address
+        int setNumber = this.calculateSetIndex(address);
+        //---------------------------------------------------------------------
+        // write the changes in the current caché level. 
+        this.sets[setNumber].writeBits(address, amount, data);
+        //---------------------------------------------------------------------
+        // write the changes in the next level.
+        // TODO: if this is the last level caché, the update must go to 
+        // TODO: memeory, not to the next level
+        this.nextCache.writeBits(address, amount, data);
+        //---------------------------------------------------------------------
     }
     /**
      * Calculate the set index form the given address
@@ -153,3 +162,4 @@ public class Cache {
     }
     //-------------------------------------------------------------------------
 }
+//-----------------------------------------------------------------------------

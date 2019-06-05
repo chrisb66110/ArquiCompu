@@ -64,10 +64,46 @@ public class CacheSet {
                 result = currentCacheBlock.data;
             }
             //-----------------------------------------------------------------
+            // update the index
+            index++;
+            //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
         return result;
         //---------------------------------------------------------------------
     }
+    /**
+     * Method used for write the given data to the given address. 
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param address
+     * @param amount
+     * @param data
+     */
+    public void writeBits(BitSet address, OperandSize amount, BitSet data) {
+        //---------------------------------------------------------------------
+        // Auxiliary variables.
+        boolean updated = false;
+        int index = 0;
+        //---------------------------------------------------------------------
+        while ((!updated) && (index < this.blocks.length)) {
+            //-----------------------------------------------------------------
+            // Getting the current caché block
+            CacheBlock currentBlock = this.blocks[index];
+            //-----------------------------------------------------------------
+            // if the current block is a caché of the address
+            if (currentBlock.tag == address) {
+                currentBlock.data = data;
+                updated = true;
+            }
+            //-----------------------------------------------------------------
+            index++;
+            //-----------------------------------------------------------------
+        }
+        // TODO: if the block is not cached, should we found it and cache it?
+        //---------------------------------------------------------------------
+	}
     //-------------------------------------------------------------------------
 }
+//-----------------------------------------------------------------------------

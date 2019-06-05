@@ -21,9 +21,6 @@ public class Cache {
     private int hitTime;
     private EventsHandler eventHandler;
     //-------------------------------------------------------------------------
-    // Const.
-    private int BLOCK_AMOUNT = 7;
-    //-------------------------------------------------------------------------
     // Constructors
     /**
      * Class constructor that receives the caché level and some aspects of
@@ -37,17 +34,17 @@ public class Cache {
      */
     public Cache(int sets, int blockSize, int level ){
         //---------------------------------------------------------------------
-        // Setting the size of the caché
-        this.size = blockSize * sets * this.BLOCK_AMOUNT;
-        //---------------------------------------------------------------------
         // Setting the asocitivity of the level
         // TODO: find the correct name
         this.asociativity = 7;
         //---------------------------------------------------------------------
+        // Setting the size of the caché
+        this.size = blockSize * sets * this.asociativity;
+        //---------------------------------------------------------------------
         // Setting the creation of the caché sets
         this.sets = new CacheSet[sets];
         for (int index = 0; index < sets; index++) {
-            this.sets[index] = new CacheSet(BLOCK_AMOUNT, blockSize);
+            this.sets[index] = new CacheSet(this.asociativity, blockSize);
         }
         //---------------------------------------------------------------------
         // Setting the block size
@@ -113,7 +110,7 @@ public class Cache {
                 //-------------------------------------------------------------
             }
             //-----------------------------------------------------------------
-            // saving it in this level
+            // saving it in this level (because principle of locality)
             this.writeBits(address, amount, dataFromBelow);
             //-----------------------------------------------------------------
         }
@@ -138,18 +135,8 @@ public class Cache {
         // Find the set number assigned to the address
         int setNumber = this.calculateSetIndex(address);
         //---------------------------------------------------------------------
-        CacheSet assignedCacheSet = this.sets[setNumber];
-        //---------------------------------------------------------------------
         // write the changes in the current caché level. 
-        boolean updated = assignedCacheSet.writeBits(address, amount, data);
-        //---------------------------------------------------------------------
-        // checking if this level was not updated
-        if (!updated) {
-            //-----------------------------------------------------------------
-            // caching  in this level.
-            assignedCacheSet.writeBits(address, amount, data);
-            //-----------------------------------------------------------------
-        }
+        this.sets[setNumber].writeBits(address, amount, data);
         //---------------------------------------------------------------------
         // check if this is the last level caché
         if (this.nextCache != null) {

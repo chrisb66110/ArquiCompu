@@ -4,6 +4,7 @@ package com.simulacion;
 //-----------------------------------------------------------------------------
 // Imports
 import java.util.BitSet;
+import java.util.Random;
 //-----------------------------------------------------------------------------
 /**
  * Class that emulates a set from an associative caché.
@@ -30,6 +31,7 @@ public class CacheSet {
         // Creation of each block
         for (int index = 0; index < blocks; index++) {
             this.blocks[index] = new CacheBlock(blockSize);
+            this.blocks[index].valid = false;
         }
         //---------------------------------------------------------------------
     }
@@ -80,13 +82,13 @@ public class CacheSet {
      * @param address
      * @param amount
      * @param data
-     * @return true if the update was successful, false otherwise
      */
-    public boolean writeBits(BitSet address, OperandSize amount, BitSet data) {
+    public void writeBits(BitSet address, OperandSize amount, BitSet data) {
         //---------------------------------------------------------------------
         // Auxiliary variables.
         boolean updated = false;
         int index = 0;
+        int invalidBlockIndex = -1;
         //---------------------------------------------------------------------
         while ((!updated) && (index < this.blocks.length)) {
             //-----------------------------------------------------------------
@@ -97,15 +99,47 @@ public class CacheSet {
             if (currentBlock.tag == address) {
                 currentBlock.data = data;
                 updated = true;
+            } else if (!currentBlock.valid) {
+                //-------------------------------------------------------------
+                // Here we save the index of the last invalid block in the
+                // array. With this, we can know if there is a free space in
+                // it for the given address to be cached.
+                //  
+                invalidBlockIndex = index;
+                //-------------------------------------------------------------
             }
             //-----------------------------------------------------------------
+            // updating the index
             index++;
             //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
-        // TODO: if the block was not update, find a victim
-        //---------------------------------------------------------------------
-        return updated;
+        // if the block was not update, we add it
+        if (!updated) {
+            //-----------------------------------------------------------------
+            // checking if there is free spaces in the set
+            int savingBlockIndex = -1;
+            if (invalidBlockIndex != 1) {
+                //-------------------------------------------------------------
+                // since there is free space, the saving space is the last 
+                // free space
+                savingBlockIndex = invalidBlockIndex;
+                //-------------------------------------------------------------
+            } else {
+                //-------------------------------------------------------------
+                // otherwise, find a index victim
+                // TODO: we are using a random algorithm by now
+                Random rand = new Random();
+                savingBlockIndex = rand.nextInt(this.blocks.length);
+                //-------------------------------------------------------------
+            }
+            //-----------------------------------------------------------------
+            // saving the block in the assigned index
+            this.blocks[savingBlockIndex].data = data;
+            this.blocks[savingBlockIndex].tag = address;
+            this.blocks[savingBlockIndex].valid = true;
+            //-----------------------------------------------------------------
+        }
         //---------------------------------------------------------------------
 	}
     //-------------------------------------------------------------------------

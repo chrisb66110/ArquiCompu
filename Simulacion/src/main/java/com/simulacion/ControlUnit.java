@@ -10,8 +10,8 @@ public class ControlUnit {
     private RxBus bus = RxBus.getInstance();
 
     public ControlUnit() {
-        this.programCounter = new BitsSet(32);
-        this.instructionRegister = new BitsSet(32);
+        this.programCounter = new BitsSet(Consts.REGISTER_SIZE);
+        this.instructionRegister = new BitsSet(Consts.REGISTER_SIZE);
         //TODO: Creo que aqui va el ciclo, contiene el siguiente evento
         bus.register(StartCUCycle.class, event -> {
             this.fetchNextInstruction();

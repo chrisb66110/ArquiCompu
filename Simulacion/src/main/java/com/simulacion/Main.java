@@ -6,7 +6,7 @@ import com.simulacion.eventos.Halt;
 public class Main {
 
     public static void main(String[] args) {
-        RxBus bus = RxBus.getInstance();
+        /*RxBus bus = RxBus.getInstance();
 
         bus.register(Event.class, event -> {
             long num = 0;
@@ -24,7 +24,7 @@ public class Main {
         for(int i = 0; i< 10; i++) {
             bus.post(new Event(0, "Hola",null));
             System.out.println("Finitio");
-        }
+        }*/
 
         OperatingSystem os = new OperatingSystem();
 

@@ -8,10 +8,10 @@ public class ComputerBuilder {
     public static void buildComputer(OperatingSystem os) {
         Bus bus = new Bus();
         // TODO: definir el tamaño de la memoria
-        Memory memory = new Memory(0, bus);
+        Memory memory = new Memory(Consts.MEMORY_SIZE, bus);
         // TODO: definir las configuraciones de los caches
-        Cache L1DataCache = createCacheHierarchy(3, new long[]{}, new int[]{}, new int[]{},bus);
-        Cache L1InstCache = createCacheHierarchy(3, new long[]{}, new int[]{}, new int[]{},bus);
+        Cache L1DataCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{64, 8, 1}, new int[]{2, 4, 8},bus);
+        Cache L1InstCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{64, 8, 1}, new int[]{2, 4, 8},bus);
         CPU cpu = new CPU(L1DataCache, L1InstCache);
         EventHandler.getInstance().setCpu(cpu);
 
@@ -30,7 +30,7 @@ public class ComputerBuilder {
      */
     private static Cache createCacheHierarchy(int cacheLevels, long[] cacheSizes, int[] cacheAssociativities, int[] cacheHitTimes, Bus bus){
         Cache[] caches = new Cache[cacheLevels];
-        for(int i = cacheLevels-1; i >= 0; i++) {
+        for(int i = cacheLevels-1; i >= 0; i--) {
             caches[i] = i == 0 ?
                     new Cache(cacheSizes[i], cacheAssociativities[i], i + 1, cacheHitTimes[i], cacheLevels == 1 ? null : caches[i+1], cacheLevels == 1 ? bus : null)
                     :

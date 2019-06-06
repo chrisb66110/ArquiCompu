@@ -1,6 +1,7 @@
 package com.simulacion;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -25,6 +26,7 @@ public class OperatingSystem {
             Scanner reader = new Scanner(System.in);
             try {
                 int option = reader.nextInt();
+                reader.nextLine();
                 switch (option) {
                     case 1:
                         System.out.println("Digite la dirección completa del archivo que desea correr");
@@ -41,7 +43,7 @@ public class OperatingSystem {
             catch (InputMismatchException e){
                 System.out.println("Por favor digite un número");
             }
-            catch(FileNotFoundException e){
+            catch(IOException e){
                 System.out.println("No se encontró el archivo");
             }
         }

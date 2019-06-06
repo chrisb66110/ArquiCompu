@@ -17,13 +17,6 @@ public class CPUInterconnection {
 
     private RxBus bus = RxBus.getInstance();
 
-    public CPUInterconnection(){
-        this.registers = new BitsSet[32];
-        for (BitsSet regiter: registers) {
-            regiter = new BitsSet(32);
-        }
-    }
-
     public void loadRegisterToALU(int register, ALUOperands aluOperand){
         if (aluOperand == ALUOperands.OperandA){
             this.alu.setOperandA(this.registers[register]);

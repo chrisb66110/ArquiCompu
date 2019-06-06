@@ -18,7 +18,10 @@ public class CPU {
 
     CPU(Cache L1DataCache, Cache L1InstCache){
         this.run = true;
-        this.registers = new BitsSet[32];
+        this.registers = new BitsSet[Consts.REGISTERS_NUMBER];
+        for (BitsSet regiter: registers) {
+            regiter = new BitsSet(Consts.REGISTER_SIZE);
+        }
         this.alu = new ALU();
         this.dataCache = L1DataCache;
         this.instCache = L1InstCache;

@@ -229,39 +229,151 @@ public class BitsSet{
     }
 
     public boolean greater(BitsSet other){
-        //TODO: falta implementar
-        //TODO: hablar con los compañeros a ver si este no importa el signo o se nos olvido
+        //TODO: hablar con los compas si hago esto por comparacion unsigned(asi está)
+        int thisSize = this.length();
+        int otherSize = other.length();
+        if ( thisSize != otherSize) {
+            if ( thisSize < otherSize ) {
+                //Primero mas corto que el segundo
+                return false;
+            }else{
+                //Primero mas largo que el segundo
+                return true;
+            }
+        }
+        //Caso de cantidad de bits iguales
+        for (int i = 0; i < thisSize; i++) {
+            boolean thisVal = this.get(i);
+            boolean otherVal = other.get(i);
+            if (thisVal != otherVal) {
+                if(thisVal){
+                    //Primero en i es 1 y segundo es 0
+                    return true;
+                }else{
+                    //Primero en i es 0 y segundo es 1
+                    return false;
+                }
+            }
+        }
+        //Falso porque son iguales
         return false;
+        //TODO: hablar con los compañeros a ver si este no importa el signo o se nos olvido
     }
 
     public boolean greaterOrEqualSigned(BitsSet other){
-        //TODO: falta implementar
-        return false;
+        int thisVal = this.toInt();
+        int otherVal = other.toInt();
+        return thisVal >= otherVal;
     }
 
     public boolean greaterOrEqualUnsigned(BitsSet other){
-        //TODO: falta implementar
-        return false;
+        int thisSize = this.length();
+        int otherSize = other.length();
+        if ( thisSize != otherSize) {
+            if ( thisSize < otherSize ) {
+                //Primero mas corto que el segundo
+                return false;
+            }else{
+                //Primero mas largo que el segundo
+                return true;
+            }
+        }
+        //Caso de cantidad de bits iguales
+        for (int i = 0; i < thisSize; i++) {
+            boolean thisVal = this.get(i);
+            boolean otherVal = other.get(i);
+            if (thisVal != otherVal) {
+                if(thisVal){
+                    //Primero en i es 1 y segundo es 0
+                    return true;
+                }else{
+                    //Primero en i es 0 y segundo es 1
+                    return false;
+                }
+            }
+        }
+        //Falso porque son iguales
+        return true;
     }
 
     public boolean lessSigned(BitsSet other){
-        //TODO: falta implementar
-        return false;
+        int thisVal = this.toInt();
+        int otherVal = other.toInt();
+        return thisVal < otherVal;
     }
 
     public boolean lessUnsigned(BitsSet other){
-        //TODO: falta implementar
+        int thisSize = this.length();
+        int otherSize = other.length();
+        if ( thisSize != otherSize) {
+            if ( thisSize < otherSize ) {
+                //Primero mas corto que el segundo
+                return true;
+            }else{
+                //Primero mas largo que el segundo
+                return false;
+            }
+        }
+        //Caso de cantidad de bits iguales
+        for (int i = 0; i < thisSize; i++) {
+            boolean thisVal = this.get(i);
+            boolean otherVal = other.get(i);
+            if (thisVal != otherVal) {
+                if(!thisVal){
+                    //Primero en i es 0 y segundo es 1
+                    return true;
+                }else{
+                    //Primero en i es 0 y segundo es 1
+                    return false;
+                }
+            }
+        }
+        //Falso porque son iguales
         return false;
     }
 
     public boolean lessOrEqualSigned(BitsSet other){
-        //TODO: falta implementar
-        return false;
+        int thisVal = this.toInt();
+        int otherVal = other.toInt();
+        return thisVal <= otherVal;
     }
 
     public boolean lessOrEqualUnsigned(BitsSet other){
-        //TODO: falta implementar
-        return false;
+        int thisSize = this.length();
+        int otherSize = other.length();
+        if ( thisSize != otherSize) {
+            if ( thisSize < otherSize ) {
+                //Primero mas corto que el segundo
+                return true;
+            }else{
+                //Primero mas largo que el segundo
+                return false;
+            }
+        }
+        //Caso de cantidad de bits iguales
+        for (int i = 0; i < thisSize; i++) {
+            boolean thisVal = this.get(i);
+            boolean otherVal = other.get(i);
+            if (thisVal != otherVal) {
+                if(!thisVal){
+                    //Primero en i es 0 y segundo es 1
+                    return true;
+                }else{
+                    //Primero en i es 0 y segundo es 1
+                    return false;
+                }
+            }
+        }
+        //Falso porque son iguales
+        return true;
+    }
+
+    public static void main(String[] args) {
+        BitsSet bitsSet1 = BitsSet.valueOf(30);
+
+        BitsSet bitsSet2 = BitsSet.valueOf(33);
+
+        System.out.println(bitsSet1.greater(bitsSet2));
     }
 
 }

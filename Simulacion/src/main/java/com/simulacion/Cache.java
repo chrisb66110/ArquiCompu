@@ -16,7 +16,7 @@ public class Cache {
     private int hitTime;
     private Cache nextCache;
     private Bus memoryBus;
-    private EventHandler eventHandler;
+    private EventHandler eventHandler = EventHandler.getInstance();
     //-------------------------------------------------------------------------
     // Constructors
     /**
@@ -42,7 +42,6 @@ public class Cache {
     ) {
         //---------------------------------------------------------------------
         // Setting the asocitivity of the level
-        // TODO: find the correct name
         this.asociativity = associativity;
         //---------------------------------------------------------------------
         // Setting the size of the caché
@@ -68,9 +67,6 @@ public class Cache {
         // Setting hit time
         this.hitTime = hitTime;
         //---------------------------------------------------------------------
-        // TODO: find this thing
-        // this.eventHandler = ;
-        //---------------------------------------------------------------------
     }
     //-------------------------------------------------------------------------
     // Methods
@@ -78,7 +74,7 @@ public class Cache {
      * Reads a block of the given size from the given address
      * 
      * @author Joseph Rementería (b55824)
-     * 
+     * 32
      * @param address the requested address
      * @param amount the size to read from memory/caché
      * @return  the data as a bitset if the address is 
@@ -102,7 +98,6 @@ public class Cache {
             BitsSet dataFromBelow = null;
             //-----------------------------------------------------------------
             // check if this is the last level caché
-            //-----------------------------------------------------------------
             if (this.nextCache != null) {
                 //-------------------------------------------------------------
                 // getting the data from the next caché level

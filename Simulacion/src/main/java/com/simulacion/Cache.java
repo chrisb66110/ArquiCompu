@@ -101,19 +101,21 @@ public class Cache {
             if (this.nextCache != null) {
                 //-------------------------------------------------------------
                 // getting the data from the next caché level
+                // TODO: create the event... and wait for another one
                 dataFromBelow = this.nextCache.getBits(address, amount);
                 //-------------------------------------------------------------
             } else {
                 //-------------------------------------------------------------
                 // getting the data from memory
-                // TODO:fetch the data from memory
+                // TODO: fetch the data from memory and create the event...
+                // TODO: and wait for another one
                 //-------------------------------------------------------------
             }
             //-----------------------------------------------------------------
             // saving it in this level (because principle of locality)
             this.writeBits(address, amount, dataFromBelow);
             //-----------------------------------------------------------------
-        }
+        } // TODO: add the else to send the event to christopher
         //---------------------------------------------------------------------
         // TODO: cut this to the given amount of bits
         return result;
@@ -142,6 +144,7 @@ public class Cache {
         if (this.nextCache != null) {
             //-----------------------------------------------------------------
             // write the changes in the next level.
+            // TODO: copy from christopher xd
             this.nextCache.writeBits(address, amount, data);
             //-----------------------------------------------------------------
         } else {
@@ -166,6 +169,7 @@ public class Cache {
         int addressInt = 0;
         //---------------------------------------------------------------------
         // Casting bitset to an integer
+        // TODO: use the created one
         for (int index = address.length(); index >= 0 ; index--) {
             if (address.get(index)) {
                 addressInt += Math.pow(2, index);

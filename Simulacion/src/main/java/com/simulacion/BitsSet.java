@@ -18,8 +18,9 @@ public class BitsSet{
     }
 
     public static BitsSet valueOf(int number) {
-        BitsSet nuevo = new BitsSet(32);
-        for (int i = 0; i <32; ++i) {
+        //Integer.SIZE = 32
+        BitsSet nuevo = new BitsSet(Integer.SIZE);
+        for (int i = 0; i <Integer.SIZE; ++i) {
             nuevo.set(i,(number & (1 << i)) != 0);
         }
         return nuevo;
@@ -73,10 +74,6 @@ public class BitsSet{
         return this.bitSet.size();
     }
 
-    public boolean equals(Object obj) {
-        return this.bitSet.equals(obj);
-    }
-
     public Object clone() {
         return this.bitSet.clone();
     }
@@ -95,7 +92,8 @@ public class BitsSet{
 
     public int toInt(){
         int valint = 0;
-        for(int i = 0; i < 32; i++){
+        // Integer.SIZE = 32
+        for(int i = 0; i < Integer.SIZE; i++){
             boolean bit = this.bitSet.get(i);
             if(bit){
                 valint += ((int)1 << i);
@@ -200,6 +198,70 @@ public class BitsSet{
         int shift = other.toInt();
         int resp = (val >>> shift) | (val << (Integer.SIZE - shift));
         this.bitSet = BitsSet.valueOf(resp).bitSet;
+    }
+
+    public boolean equals(BitsSet other) {
+        int thisSize = this.length();
+        int otherSize = other.length();
+        if ( thisSize != otherSize ) {
+            return false;
+        }
+        for (int i = 0; i < thisSize; i++) {
+            if (this.get(i) != other.get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean notEquals(BitsSet other) {
+        int thisSize = this.length();
+        int otherSize = other.length();
+        if ( thisSize != otherSize ) {
+            return true;
+        }
+        for (int i = 0; i < thisSize; i++) {
+            if (this.get(i) != other.get(i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean greater(BitsSet other){
+        //TODO: falta implementar
+        //TODO: hablar con los compañeros a ver si este no importa el signo o se nos olvido
+        return false;
+    }
+
+    public boolean greaterOrEqualSigned(BitsSet other){
+        //TODO: falta implementar
+        return false;
+    }
+
+    public boolean greaterOrEqualUnsigned(BitsSet other){
+        //TODO: falta implementar
+        return false;
+    }
+
+    public boolean lessSigned(BitsSet other){
+        //TODO: falta implementar
+        return false;
+    }
+
+    public boolean lessUnsigned(BitsSet other){
+        //TODO: falta implementar
+        return false;
+    }
+
+    public boolean lessOrEqualSigned(BitsSet other){
+        //TODO: falta implementar
+        return false;
+    }
+
+    public boolean lessOrEqualUnsigned(BitsSet other){
+        //TODO: falta implementar
+        return false;
     }
 
 }

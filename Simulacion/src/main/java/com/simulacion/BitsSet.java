@@ -368,12 +368,4 @@ public class BitsSet{
         return true;
     }
 
-    public static void main(String[] args) {
-        BitsSet bitsSet1 = BitsSet.valueOf(30);
-
-        BitsSet bitsSet2 = BitsSet.valueOf(33);
-
-        System.out.println(bitsSet1.greater(bitsSet2));
-    }
-
 }

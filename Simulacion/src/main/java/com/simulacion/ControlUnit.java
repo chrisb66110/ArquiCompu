@@ -1,267 +1,288 @@
 package com.simulacion;
 
 import com.simulacion.eventos.*;
+import rx.Subscription;
 
+/**
+ * Clase para emular la unidad de control
+ */
 public class ControlUnit {
-    private BitsSet programCounter;
-    private BitsSet instructionRegister;
-    private CPUInterconnection internalBus;
-    private EventHandler eventHandler = EventHandler.getInstance();
-    private RxBus bus = RxBus.getInstance();
+    private BitsSet programCounter; //Puntero a la siguiente instruccion
+    private BitsSet instructionRegister; //Instruccion a ejecutar
+    private CPUInterconnection internalBus; //Interconecion interna del CPU
+    private EventHandler eventHandler = EventHandler.getInstance(); //Manejador de eventos
+    private RxBus bus = RxBus.getInstance(); //RXBus para los eventos
 
+    //Eventos utilizados en la clase
+    private Subscription startCUCycle; //Subscripcion al evento StartCUCycle
+    private Subscription cacheDataReturn; //Subscripcion al evento CacheBringsMemory
+    private Subscription aluExecutedInstruction; //Subscipcion al evento ALUExecutedInstruction
+
+    /**
+     * Constructor de la unidad de control
+     */
     public ControlUnit() {
         this.programCounter = new BitsSet(Consts.REGISTER_SIZE);
         this.instructionRegister = new BitsSet(Consts.REGISTER_SIZE);
-        //TODO: Creo que aqui va el ciclo, contiene el siguiente evento
-        bus.register(StartCUCycle.class, event -> {
+        //Este subscribe funciona como el cichlo porque se triggerea con el evento StartCUCycle
+        this.startCUCycle = bus.register(StartCUCycle.class, event -> {
             this.fetchNextInstruction();
         });
     }
 
-
+    /**
+     * Metodo para hacer el fetch de la instruccion y manda a decodificar
+     */
     public void fetchNextInstruction(){
-        //TODO: Revisar que ese metodo genere un evento CacheBringsMemory
         this.internalBus.loadInstructionToIR(this.programCounter);
-        bus.register(CacheBringsMemory.class, evento -> {
+        //Este subscribe queda esperando un evento CacheDataReturn, asi sabe cuando ya esta el dato disponible
+        cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
+            // Guarda la instruccion retornada de cache
             instructionRegister = (BitsSet) evento.info[0];
+            //Manda a decodificar y ejecutar la instruccion
             this.decodeInstruction();
+            cacheDataReturn.unsubscribe();
         });
     }
 
-    public void decodeInstruction(){
-        ALUOperations operation = this.bitSetToALUOperations(this.instructionRegister.get(0,6));
-        //TODO: el executeInstruciton se mete dentro de del metodo anterior para que valla a ejecutar lo que
-        // es y no tener que hacer el switch 2 veces.
-        //this.executeInstruciton(operation);
-    }
-
     /**
-     * Función que convierte de BitSet a ALUOperations.
-     * @param instruction BitSet de un byte donde está la instrucción.
-     * @return ALUOperations operación que decodificada.
+     * Metodo para decodificar la instruccion y manda a ejecutar
      */
-    private ALUOperations bitSetToALUOperations(BitsSet instruction){
+    public void decodeInstruction(){
+        //Valor entero de la instruccion, son los primeros 6 bits
+        int aluOperationsNumber = this.instructionRegister.get(0,6).toInt();
         //Operacion a ejecutar
         ALUOperations operation;
-        //La comparacion se hace con el numero decimal de la combinacion de bits de cada instruccion
-        //En este caso serian los ultimos bits del BitSet
-        switch(instruction.get(0,6).toInt()){
+        //Switch de la instruccion
+        switch(aluOperationsNumber){
             case 0:
                 operation = ALUOperations.Add;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 1:
                 operation = ALUOperations.Addi;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 2:
                 operation = ALUOperations.Sub;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 3:
                 operation = ALUOperations.Subi;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 4:
                 operation = ALUOperations.Mul;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 5:
                 operation = ALUOperations.Muli;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 6:
                 operation = ALUOperations.Div;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 7:
                 operation = ALUOperations.Divi;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 8:
                 operation = ALUOperations.Mod;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 9:
                 operation = ALUOperations.Modi;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 10:
                 operation = ALUOperations.And;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 11:
                 operation = ALUOperations.Andi;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 12:
                 operation = ALUOperations.Or;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 13:
                 operation = ALUOperations.Ori;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 14:
                 operation = ALUOperations.Xor;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 15:
                 operation = ALUOperations.Xori;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 16:
                 operation = ALUOperations.Not;
-                this.operationRegisterRegister(operation, instruction);
+                this.operationRegisterRegister(operation, this.instructionRegister);
                 break;
             case 17:
                 operation = ALUOperations.Noti;
-                this.operationRegisterInmediate(operation, instruction);
+                this.operationRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 18:
                 operation = ALUOperations.Sal;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 19:
                 operation = ALUOperations.Sali;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 20:
                 operation = ALUOperations.Sar;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 21:
                 operation = ALUOperations.Sari;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 22:
                 operation = ALUOperations.Sll;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 23:
                 operation = ALUOperations.Slli;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 24:
                 operation = ALUOperations.Slr;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 25:
                 operation = ALUOperations.Slri;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 26:
                 operation = ALUOperations.Scl;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 27:
                 operation = ALUOperations.Scli;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 28:
                 operation = ALUOperations.Scr;
-                this.operationRegisterRegisterRegister(operation, instruction);
+                this.operationRegisterRegisterRegister(operation, this.instructionRegister);
                 break;
             case 29:
                 operation = ALUOperations.Scri;
-                this.operationRegisterRegisterInmediate(operation, instruction);
+                this.operationRegisterRegisterInmediate(operation, this.instructionRegister);
                 break;
             case 32:
                 operation = ALUOperations.Lsb;
-                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Byte, true);
+                this.operationRegisterMemoryLoad(operation, this.instructionRegister, OperandSize.Byte, true);
                 break;
             case 33:
                 operation = ALUOperations.Lub;
-                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Byte, false);
+                this.operationRegisterMemoryLoad(operation, this.instructionRegister, OperandSize.Byte, false);
                 break;
             case 34:
                 operation = ALUOperations.Lsh;
-                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.HalfWord, true);
+                this.operationRegisterMemoryLoad(operation, this.instructionRegister, OperandSize.HalfWord, true);
                 break;
             case 35:
                 operation = ALUOperations.Luh;
-                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.HalfWord, false);
+                this.operationRegisterMemoryLoad(operation, this.instructionRegister, OperandSize.HalfWord, false);
                 break;
             case 36:
                 operation = ALUOperations.Lsw;
-                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Word, true);
+                this.operationRegisterMemoryLoad(operation, this.instructionRegister, OperandSize.Word, true);
                 break;
             case 37:
                 operation = ALUOperations.Luw;
-                this.operationRegisterMemoryLoad(operation, instruction, OperandSize.Word, false);
+                this.operationRegisterMemoryLoad(operation, this.instructionRegister, OperandSize.Word, false);
                 break;
             case 38:
                 operation = ALUOperations.Sb;
-                this.operationRegisterMemoryStore(operation, instruction, OperandSize.Byte);
+                this.operationRegisterMemoryStore(operation, this.instructionRegister, OperandSize.Byte);
                 break;
             case 39:
                 operation = ALUOperations.Sh;
-                this.operationRegisterMemoryStore(operation, instruction, OperandSize.HalfWord);
+                this.operationRegisterMemoryStore(operation, this.instructionRegister, OperandSize.HalfWord);
                 break;
             case 40:
                 operation = ALUOperations.Sw;
-                this.operationRegisterMemoryStore(operation, instruction, OperandSize.Word);
+                this.operationRegisterMemoryStore(operation, this.instructionRegister, OperandSize.Word);
                 break;
             case 41:
                 operation = ALUOperations.Jmp;
-                this.programCounter = instruction.get(6,22);
+                this.programCounter = this.instructionRegister.get(6,22);
                 break;
             case 42:
                 operation = ALUOperations.Je;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 43:
                 operation = ALUOperations.Jne;
-                //Todo: en todas las operaciones de Jumps hay que hacerlas por cada
-                // una, y lo que se va a hacer es quue el BitsSet tenga funciones
-                // para igual, mayor, menor
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 44:
                 operation = ALUOperations.Jg;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 45:
                 operation = ALUOperations.Jges;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 46:
                 operation = ALUOperations.Jgeu;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 47:
                 operation = ALUOperations.Jls;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 48:
                 operation = ALUOperations.Jlu;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 49:
                 operation = ALUOperations.Jles;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 50:
                 operation = ALUOperations.Jleu;
-                this.operationRegisterRegisterMemory(operation, instruction);
+                this.operationRegisterRegisterMemory(operation, this.instructionRegister);
                 break;
             case 51:
                 operation = ALUOperations.Call;
-                this.operationCall(operation, instruction);
+                this.operationCall(operation, this.instructionRegister);
                 break;
             case 53:
                 operation = ALUOperations.Ret;
-                this.operationRet(operation, instruction);
+                this.operationRet(operation, this.instructionRegister);
                 break;
             case 54:
                 operation = ALUOperations.Syscall;
-                this.operationSysCall(operation, instruction);
+                this.operationSysCall(operation, this.instructionRegister);
                 break;
             default:
                 operation = ALUOperations.Err;
                 //TODO: GENERAR EXCEPCION
         }
-        return operation;
+    }
+
+    /**
+     * Metodo para mandar a ejecutar en la ALU
+     * @param operation Operacion a ejecutar
+     * @param registerResult Registro donde se guardara el resultado de la ALU
+     */
+    private void executeInstrucitonALU(ALUOperations operation, int registerResult){
+        //Se manda a ejecutar la instruccion
+        this.internalBus.executeOperation(operation);
+        //Este subscribe queda esperando un evento ALUExecutedInstruction, asi sabe cuando ya la alu ejecuto
+        this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
+            //Se manda a guardar el valor en el registro indicado
+            this.internalBus.saveALUResultToRegister(registerResult);
+            this.aluExecutedInstruction.unsubscribe();
+        });
     }
 
     /**
@@ -270,17 +291,15 @@ public class ControlUnit {
      * @param instruction Bits de la instruccion
      */
     private void operationRegisterRegisterRegister(ALUOperations operation, BitsSet instruction){
+        //Se sacan operandos de la instruccion
         int registerResult = instruction.get(6,11).toInt();
         int registerA = instruction.get(11,16).toInt();
         int registerB = instruction.get(16,21).toInt();
-
+        //Se cargan los valores en la ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
-        this.executeInstruciton(operation);
-        //Evento de que la operacion ya se ejecuto
-        bus.register(ALUExecutedInstruction.class, evento -> {
-            this.internalBus.saveALUResultToRegister(registerResult);
-        });
+        //Se ejecuta la instruccion
+        this.executeInstrucitonALU(operation, registerResult);
     }
 
     /**
@@ -289,17 +308,15 @@ public class ControlUnit {
      * @param instruction Bits de la instruccion
      */
     private void operationRegisterRegisterInmediate(ALUOperations operation, BitsSet instruction){
+        //Se sacan los operandos de la instruccion
         int registerResult = instruction.get(6,11).toInt();
         int registerA = instruction.get(11,16).toInt();
         BitsSet inmmediate = instruction.get(16,32);
-
+        //Se cargan los valores a la ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandB);
-        this.executeInstruciton(operation);
-        //Evento de que la operacion ya se ejecuto
-        bus.register(ALUExecutedInstruction.class, evento -> {
-            this.internalBus.saveALUResultToRegister(registerResult);
-        });
+        //Se manda a ejecutar las instruccion
+        this.executeInstrucitonALU(operation, registerResult);
     }
 
     /**
@@ -308,15 +325,13 @@ public class ControlUnit {
      * @param instruction Bits de la instruccion
      */
     private void operationRegisterRegister(ALUOperations operation, BitsSet instruction){
+        //Se sacan los operandos de la instruccion
         int registerResult = instruction.get(6,11).toInt();
         int registerA = instruction.get(11,16).toInt();
-
+        //Se carga el operando en la ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
-        this.executeInstruciton(operation);
-        //Evento de que la operacion ya se ejecuto
-        bus.register(ALUExecutedInstruction.class, evento -> {
-            this.internalBus.saveALUResultToRegister(registerResult);
-        });
+        //Se manda a ejecutar las instruccion
+        this.executeInstrucitonALU(operation, registerResult);
     }
 
     /**
@@ -325,15 +340,13 @@ public class ControlUnit {
      * @param instruction Bits de la instruccion
      */
     private void operationRegisterInmediate(ALUOperations operation, BitsSet instruction){
+        //Se sacan los operandos de la instruccion
         int registerResult = instruction.get(6,11).toInt();
         BitsSet inmmediate = instruction.get(11,27);
-
+        //Se carga el operando en la ALU
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandA);
-        this.executeInstruciton(operation);
-        //Evento de que la operacion ya se ejecuto
-        bus.register(ALUExecutedInstruction.class, evento -> {
-            this.internalBus.saveALUResultToRegister(registerResult);
-        });
+        //Se manda a ejecutar las instruccion
+        this.executeInstrucitonALU(operation, registerResult);
     }
 
     /**
@@ -343,16 +356,12 @@ public class ControlUnit {
      * @param signed Cargar con signo
      */
     private void operationRegisterMemoryLoad(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
+        //Se sacan los operandos de la instruccion
         int registerResult = instruction.get(6,11).toInt();
         BitsSet offset = instruction.get(11,27);
-        //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
         //TODO: ver si al offset hay que sumarle la pos inicial
+        //Se manda a ejecutar las instruccion
         this.internalBus.loadMemoryToRegister(registerResult, offset, operandSize, signed);
-        //Evento de que la cache ya retorno datos
-        bus.register(CacheDataReturn.class, evento -> {
-            instructionRegister = (BitsSet) evento.info[0];
-            //TODO: Ver si hay que hacer algo mas
-        });
     }
 
     /**
@@ -361,15 +370,12 @@ public class ControlUnit {
      * @param instruction Bits de la instruccion
      */
     private void operationRegisterMemoryStore(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
+        //Se sacan los operandos de la instruccion
         int register = instruction.get(6,11).toInt();
         BitsSet offset = instruction.get(11,27);
-        //TODO: El ejecutar de esta es ejecutar la siguiente funcion verdad?
         //TODO: ver si al offset hay que sumarle la pos inicial
+        //Se manda a ejecutar la instruccion
         this.internalBus.storeRegisterToMemory(register,offset, operandSize);
-        //Evento de que la cache ya escribio datos
-        bus.register(CacheWroteData.class, evento -> {
-            //TODO: Ver que hay que hacer, OJO porque hay que ver como espera el ciclo de arriba si se hace
-        });
     }
 
     /**
@@ -379,21 +385,27 @@ public class ControlUnit {
      * @param instruction Bits de la instruccion
      */
     private void operationRegisterRegisterMemory(ALUOperations operation, BitsSet instruction){
+        //Se sacan los operandos de la instruccion
         int registerA = instruction.get(6,11).toInt();
         int registerB = instruction.get(11,16).toInt();
         BitsSet offset = instruction.get(16,32);
-
+        // Se cargan los valores en la ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
-        //TODO: FALTA mandar a ejecutar la instruccion y hacer que la ALU haga esas instrucciones
-        //Evento de que la cache ya escribio datos
-        bus.register(ALUExecutedInstruction.class, evento -> {
-            //TODO: Ver si hay que hacer algo mas
+        //Se manda a ejecutar la instruccion
+        this.internalBus.executeOperation(operation);
+        //Este subscribe queda esperando un evento ALUExecutedInstruction, asi sabe cuando ya la alu ejecuto
+        this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
+            //Se piden los datos respuesta de la ALU
             BitsSet result = this.internalBus.getALUResult();
-            if (result.toInt() == 1){
+            //Se comprueba el resultado de la ALU a ver si fue verdadero
+            //0: False
+            //X !=0 : True
+            if (result.toInt() != 0){
                 //TODO: ver si al offset hay que sumarle la pos inicial
                 this.programCounter = offset;
             }
+            this.aluExecutedInstruction.unsubscribe();
         });
     }
 
@@ -434,19 +446,17 @@ public class ControlUnit {
     }
 
     /**
-     * Metodo para mandar a ejecutar en la ALU
-     * @param operation Operacion a ejecutar
+     * Metodo cambiar el bus interno
+     * @param internalBus Bus interno
      */
-    public void executeInstruciton(ALUOperations operation){
-        //TODO: Cambiar nombre a executeInstrucitonALU
-        //TODO: Falta un metodo en CPUInterconnection para mandar a ejecutar la vara
-        this.internalBus.executeOperation(operation);
-    }
-
     public void setInternalBus(CPUInterconnection internalBus) {
         this.internalBus = internalBus;
     }
 
+    /**
+     * Metodo cambiar programCounter
+     * @param programCounter Valor del programCounter
+     */
     public void setProgramCounter(BitsSet programCounter) {
         this.programCounter = programCounter;
     }

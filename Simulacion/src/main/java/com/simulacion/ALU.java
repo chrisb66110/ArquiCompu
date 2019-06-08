@@ -1,5 +1,7 @@
 package com.simulacion;
 
+import com.simulacion.eventos.ALUExecutedInstruction;
+
 /**
  * Clase para emular la ALU
  */
@@ -7,6 +9,15 @@ public class ALU {
     private BitsSet OperandA; //Primer operando de la ALU
     private BitsSet OperandB; //Segundo operando de la ALU
     private BitsSet result; //Resultado al ejecutar operacion
+    private EventHandler eventHandler; //Manejador de eventos
+
+    /**
+     * Constructor que recibe el manejador de eventos
+     * @param eventHandler Manejador de eventos
+     */
+    public ALU(EventHandler eventHandler){
+        this.eventHandler = eventHandler;
+    }
 
     /**
      * Funcion para retornar el valor del resultado de la ALU
@@ -37,6 +48,8 @@ public class ALU {
      * @param operation Operacion a ejecutar
      */
     public void executeOperation(ALUOperations operation){
+        //TODO: Cargar ciclos dependiendo de la instruccion, buscar como poner valor en el enun
+        int ciclos = 0;
         switch(operation){
             case Add:
                 this.operationAdd();
@@ -158,6 +171,7 @@ public class ALU {
                 //TODO: Generar excepcion
                 break;
         }
+        this.eventHandler.addEvent(new ALUExecutedInstruction(ciclos,null));
     }
 
     /**

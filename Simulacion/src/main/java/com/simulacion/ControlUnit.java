@@ -50,6 +50,7 @@ public class ControlUnit {
      * Metodo para hacer el fetch de la instruccion y manda a decodificar
      */
     public void fetchNextInstruction(){
+        //TODO: ver si puedo mover este subscribe a CPUInterconnection, hay que pasar por parametros de este constructor el IR
         //Este subscribe queda esperando un evento CacheDataReturn, asi sabe cuando ya esta el dato disponible
         cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
             // Guarda la instruccion retornada de cache
@@ -237,11 +238,13 @@ public class ControlUnit {
      * @param registerResult Registro donde se guardara el resultado de la ALU
      */
     private void executeInstrucitonALU(ALUOperations operation, int registerResult){
+        //TODO: ver si puedo mover este subscribe a CPUInterconnection
         //Este subscribe queda esperando un evento ALUExecutedInstruction, asi sabe cuando ya la alu ejecuto
         this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
             //Se manda a guardar el valor en el registro indicado
             this.internalBus.saveALUResultToRegister(registerResult);
             this.aluExecutedInstruction.unsubscribe();
+            //TODO: aqui se debe generar un evento de fin de instruccion
         });
         //Se manda a ejecutar la instruccion
         this.internalBus.executeOperation(operation);
@@ -354,6 +357,7 @@ public class ControlUnit {
         // Se cargan los valores en la ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
+        //TODO: ver si puedo mover este subscribe a CPUInterconnection, hay que pasar por parametros de este constructor el pc
         //Este subscribe queda esperando un evento ALUExecutedInstruction, asi sabe cuando ya la alu ejecuto
         this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
             //Se piden los datos respuesta de la ALU
@@ -366,6 +370,7 @@ public class ControlUnit {
                 this.programCounter = offset;
             }
             this.aluExecutedInstruction.unsubscribe();
+            //TODO: aqui se debe generar un evento de fin de instruccion
         });
         //Se manda a ejecutar la instruccion
         this.internalBus.executeOperation(operation);
@@ -382,6 +387,7 @@ public class ControlUnit {
         // this.saveStack();
         //TODO: ver si al offset hay que sumarle la pos inicial
         this.programCounter = offset;
+        //TODO: aqui se debe generar un evento de fin de instruccion
     }
 
     /**
@@ -395,6 +401,7 @@ public class ControlUnit {
         // this.programCounter offset = this.popStack();
         //TODO: ver si al offset hay que sumarle la pos inicial
         this.programCounter = offset;
+        //TODO: aqui se debe generar un evento de fin de instruccion
     }
 
     /**
@@ -405,6 +412,7 @@ public class ControlUnit {
     private void operationSysCall(ALUOperations operation, BitsSet instruction){
         //TODO: FALTA revisar como es eso de R3+ se toman como parametros
         //TODO: Hablar de como se va a ejecutar esto
+        //TODO: aqui se debe generar un evento de fin de instruccion
     }
 
 }

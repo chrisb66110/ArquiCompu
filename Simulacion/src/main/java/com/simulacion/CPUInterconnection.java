@@ -2,6 +2,7 @@ package com.simulacion;
 
 import com.simulacion.eventos.CacheDataReturn;
 import com.simulacion.eventos.CacheWroteData;
+import rx.Subscription;
 
 /**
  * Clase para emular la interconexion de los componentes de la CPU
@@ -13,6 +14,8 @@ public class CPUInterconnection {
     private Cache dataCache; // Cache de datos
     private Cache instCache; // Cache de instrucciones
     private RxBus bus = RxBus.getInstance(); //Singleton de RXBus
+    private Subscription cacheDataReturn;
+    private Subscription cacheWroteData;
 
 
     /**
@@ -85,15 +88,6 @@ public class CPUInterconnection {
     }
 
     /**
-     *
-     * @param Immediate
-     * @param register
-     */
-    public void loadImmediateToRegister(BitsSet Immediate, int register){
-        //TODO: Para que era este metodo?
-    }
-
-    /**
      * Metodo para cargar un valor de memoria en un registro
      * @param register Numero de registro donde se quiere cargar el valor
      * @param offset Offset de memoria donde se quiere traer el valor
@@ -101,14 +95,24 @@ public class CPUInterconnection {
      * @param signed Booleano indicando si el valor leido es con signo o sin signo
      */
     public void loadMemoryToRegister(int register, BitsSet offset, OperandSize ammount, boolean signed){
-        //TODO: Revisar que ese metodo genere el evento de que ya cache retorno los datos
-        this.instCache.getBits(offset,ammount);
-        //TODO: REVISAR EL FUNCIONAMIENTO DE LA SUBSCRIPCION PORQUE APENAS LA PEGUE
         //Evento de que la cache ya retorno datos
-        bus.register(CacheDataReturn.class, evento -> {
-            //instructionRegister = (BitsSet) evento.info[0];
-            //TODO: Ver si hay que hacer algo mas
+        this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
+            registers[register] = (BitsSet) evento.info[0];
+            if(!signed){
+                //Caso donde hay que copiar el signo
+                if (ammount == OperandSize.Byte) {
+                    //Se copiar el signo desde el bit 8
+                    //TODO: copiar el ultimo bit a los demas apartir del 8
+                } else if (ammount == OperandSize.HalfWord) {
+                    //Se copiar el signo desde el bit 16
+                    //TODO: copiar el ultimo bit a los demas apartir del 16
+                }
+            }
+            this.cacheDataReturn.unsubscribe();
+            //TODO: aqui se debe generar un evento de fin de instruccion
         });
+        //Se mandan a traer datos a la cache
+        this.instCache.getBits(offset,ammount);
     }
 
     /**
@@ -118,13 +122,13 @@ public class CPUInterconnection {
      * @param ammount Tamaño del valor que se quiere cargar
      */
     public void storeRegisterToMemory(int register, BitsSet offset, OperandSize ammount){
-        //TODO: Revisar que ese metodo genere el evento de que ya cache escribio los datos
-        this.instCache.writeBits(offset, ammount, this.registers[register]);
-        //TODO: REVISAR EL FUNCIONAMIENTO DE LA SUBSCRIPCION PORQUE APENAS LA PEGUE
         //Evento de que la cache ya escribio datos
-        bus.register(CacheWroteData.class, evento -> {
-            //TODO: Ver que hay que hacer, OJO porque hay que ver como espera el ciclo de arriba si se hace
+        this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
+            this.cacheWroteData.unsubscribe();
+            //TODO: aqui se debe generar un evento de fin de instruccion
         });
+        //Se mandan a escribir los datos
+        this.instCache.writeBits(offset, ammount, this.registers[register]);
     }
 
     /**

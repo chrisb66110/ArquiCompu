@@ -6,7 +6,7 @@ public class ComputerBuilder {
      * @param os The operating system in order to set the references to the computer components
      */
     public static void buildComputer(OperatingSystem os) {
-        Bus bus = new Bus();
+        Bus bus = new Bus(4, 32, 32);
         // TODO: definir el tamaño de la memoria
         Memory memory = new Memory(Consts.MEMORY_SIZE, bus);
         // TODO: definir las configuraciones de los caches

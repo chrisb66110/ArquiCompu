@@ -2,6 +2,7 @@ package com.simulacion;
 
 import com.simulacion.eventos.Halt;
 import com.simulacion.eventos.StartCUCycle;
+import rx.Subscription;
 
 
 public class CPU {

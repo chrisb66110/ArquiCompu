@@ -2,6 +2,9 @@
 // Package
 package com.simulacion;
 //-----------------------------------------------------------------------------
+// Imports
+import com.simulacion.eventos.CacheDataReturn;
+//-----------------------------------------------------------------------------
 /**
  * Class that emulates the behavoir of a caché chip
  */
@@ -74,7 +77,7 @@ public class Cache {
      * Reads a block of the given size from the given address
      * 
      * @author Joseph Rementería (b55824)
-     * 32
+     * 
      * @param address the requested address
      * @param amount the size to read from memory/caché
      * @return  the data as a bitset if the address is 
@@ -115,9 +118,36 @@ public class Cache {
             // saving it in this level (because principle of locality)
             this.writeBits(address, amount, dataFromBelow);
             //-----------------------------------------------------------------
-        } // TODO: add the else to send the event to christopher
+        } else {
+            //-----------------------------------------------------------------
+            // reduce the size of the reading. 
+            int bitsSetCutIndex = -1;
+            switch (amount) {
+                case Word:
+                    bitsSetCutIndex = 32;
+                    break;
+                case HalfWord:
+                bitsSetCutIndex = 16;
+                    break;
+                case Byte:
+                bitsSetCutIndex = 8;
+                    break;
+
+            }
+            result = result.get(
+                result.length()-bitsSetCutIndex, result.length()
+            );
+            //-----------------------------------------------------------------
+            // Setting the result in the info array
+            Object[] info = new Object[1];
+            info[0] = result;
+            //-----------------------------------------------------------------
+            // creating the event to the data to be read
+            CacheDataReturn event = new CacheDataReturn(this.hitTime, info);
+            this.eventHandler.addEvent(event);
+            //-----------------------------------------------------------------
+        }
         //---------------------------------------------------------------------
-        // TODO: cut this to the given amount of bits
         return result;
         //---------------------------------------------------------------------
     }

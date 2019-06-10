@@ -15,6 +15,9 @@ public class CPUInterconnection {
     private Cache dataCache; // Data cache.
     private Cache instCache; // Instruction cache.
     private RxBus bus = RxBus.getInstance(); //Singleton by RXBus.
+    private EventHandler eventHandler = EventHandler.getInstance(); //Event manager.
+
+    //Events used in the class
     private Subscription cacheDataReturn; //Subscription to the CacheDataReturn event.
 
     /**
@@ -115,8 +118,9 @@ public class CPUInterconnection {
                             registers[register].get(Consts.HALFWORD_SIZE-1));
                 }
             }
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
+            this.eventHandler.addEvent(new CacheDataReturn(0,null));
             this.cacheDataReturn.unsubscribe();
-            //TODO: aqui se debe generar un evento de fin de instruccion
         });
         //It is sent to bring data to the cache
         this.dataCache.getBits(offset,ammount);
@@ -131,10 +135,11 @@ public class CPUInterconnection {
     public void storeRegisterToMemory(int register, BitsSet offset, OperandSize ammount){
         //This subscribe is waiting for a CacheDataReturn event, so you know when the operation finished
         this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
+            this.eventHandler.addEvent(new CacheWroteData(0,null));
             this.cacheWroteData.unsubscribe();
-            //TODO: aqui se debe generar un evento de fin de instruccion
         });
-        //It is sent to write the data
+        //Write data in to cache
         this.dataCache.writeBits(offset, ammount, this.registers[register]);
     }
 
@@ -143,7 +148,26 @@ public class CPUInterconnection {
      * @param address Offset to bring the instruction.
      */
     public void loadInstructionToIR(BitsSet address){
-        //TODO: Revisar que ese metodo genere el evento de que ya cache retorno los datos
+        //Get data from instruction cache
         this.instCache.getBits(address,OperandSize.Word);
+    }
+
+    /**
+     * Method to save data in the stack.
+     * @param address Address in stack.
+     * @param programCounter Data to save in stack
+     */
+    public void pushStack(BitsSet address, BitsSet programCounter){
+        //Write data in to stack
+        this.dataCache.writeBits(address, OperandSize.Word, programCounter);
+    }
+
+    /**
+     * Method to load data from in the stack
+     * @param address Address to get data from the stack
+     */
+    public void popStack(BitsSet address){
+        //Get data from stack
+        this.dataCache.getBits(address,OperandSize.Word);
     }
 }

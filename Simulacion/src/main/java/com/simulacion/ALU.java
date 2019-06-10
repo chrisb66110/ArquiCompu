@@ -40,8 +40,7 @@ public class ALU {
      * @param operation Operation to execute.
      */
     public void executeOperation(ALUOperations operation){
-        //TODO: Cargar ciclos dependiendo de la instruccion, buscar como poner valor en el enun
-        int cycles = 0;
+        int cycles = 1;
         switch(operation){
             case Add:
                 this.operationAdd();

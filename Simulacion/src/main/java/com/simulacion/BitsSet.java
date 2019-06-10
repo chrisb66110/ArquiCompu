@@ -76,6 +76,16 @@ public class BitsSet{
     }
 
     /**
+     * Method to change the bits values since fromIndex to toIndex.
+     * @param fromIndex Position where it starts, includes the value of this position.
+     * @param toIndex Next position to which it ends, that is, excludes this position.
+     * @param value New value.
+     */
+    public void set(int fromIndex, int toIndex, boolean value) {
+        this.bitSet.set(fromIndex, toIndex, value);
+    }
+
+    /**
      * Function to know the amount of bits used.
      * @return Cantidad de bits utilizados.
      */

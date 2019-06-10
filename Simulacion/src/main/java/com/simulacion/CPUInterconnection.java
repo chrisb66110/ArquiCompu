@@ -11,7 +11,6 @@ public class CPUInterconnection {
     private BitsSet [] registers; // CPU registers.
     private ALU alu; // ALU.
     private ControlUnit controlUnit; //Control unit.
-    //TODO: Revisar cuando se jalan datos
     private Subscription cacheWroteData; //Subscription to the CacheWroteData event.
     private Cache dataCache; // Data cache.
     private Cache instCache; // Instruction cache.
@@ -75,6 +74,7 @@ public class CPUInterconnection {
      */
     public void saveALUResultToRegister(int register){
         //TODO: Ver si hay que revisar que el BitSet no hace overflow
+        //TODO: Ver si hago un this.alu.getResult().get(0,32);
         this.registers[register] = this.alu.getResult();
     }
 
@@ -84,6 +84,7 @@ public class CPUInterconnection {
      */
     public BitsSet getALUResult(){
         //TODO: Ver si hay que revisar que el BitSet no hace overflow
+        //TODO: Ver si hago un this.alu.getResult().get(0,32);
         return this.alu.getResult();
     }
 
@@ -101,18 +102,24 @@ public class CPUInterconnection {
             if(!signed){
                 //Case where there are that copy the sign
                 if (ammount == OperandSize.Byte) {
-                    //The sign is copied from bit 8
-                    //TODO: copiar el ultimo bit a los demas apartir del 8
+                    //The sign is copied from bit 7, since 8 to 32
+                    //Consts.BYTE_SIZE = 8
+                    registers[register].set(Consts.BYTE_SIZE,
+                            Consts.REGISTER_SIZE,
+                            registers[register].get(Consts.BYTE_SIZE-1));
                 } else if (ammount == OperandSize.HalfWord) {
-                    //The sign is copied from bit 16
-                    //TODO: copiar el ultimo bit a los demas apartir del 16
+                    //The sign is copied from bit 15, since 8 to 32
+                    //Consts.HALFWORD_SIZE = 15
+                    registers[register].set(Consts.HALFWORD_SIZE,
+                            Consts.REGISTER_SIZE,
+                            registers[register].get(Consts.HALFWORD_SIZE-1));
                 }
             }
             this.cacheDataReturn.unsubscribe();
             //TODO: aqui se debe generar un evento de fin de instruccion
         });
         //It is sent to bring data to the cache
-        this.instCache.getBits(offset,ammount);
+        this.dataCache.getBits(offset,ammount);
     }
 
     /**
@@ -128,7 +135,7 @@ public class CPUInterconnection {
             //TODO: aqui se debe generar un evento de fin de instruccion
         });
         //It is sent to write the data
-        this.instCache.writeBits(offset, ammount, this.registers[register]);
+        this.dataCache.writeBits(offset, ammount, this.registers[register]);
     }
 
     /**

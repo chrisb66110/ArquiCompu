@@ -50,7 +50,6 @@ public class ControlUnit {
      * Method to do the fetch of the instruction and send to decode.
      */
     public void fetchNextInstruction(){
-        //TODO: ver si puedo mover este subscribe a CPUInterconnection, hay que pasar por parametros de este constructor el IR
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
         cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
             //Save the returned cache instruction
@@ -190,6 +189,7 @@ public class ControlUnit {
                 break;
             case 41:
                 this.programCounter = this.instructionRegister.get(6,22);
+                //TODO: Aqui se genera un evento de fin de instruccion
                 break;
             case 42:
                 this.operationRegisterRegisterMemory(ALUOperations.Je, this.instructionRegister);
@@ -228,7 +228,9 @@ public class ControlUnit {
                 this.operationSysCall(ALUOperations.Syscall, this.instructionRegister);
                 break;
             default:
-                //TODO: GENERAR EXCEPCION
+                //TODO: revisar excepcion
+                //throw new Exception("No se reconoce la insruccion");
+                break;
         }
     }
 
@@ -238,7 +240,6 @@ public class ControlUnit {
      * @param registerResult Record where the result of the ALU will be kept.
      */
     private void executeInstrucitonALU(ALUOperations operation, int registerResult){
-        //TODO: ver si puedo mover este subscribe a CPUInterconnection
         //This subscribe is waiting for an ALUExecutedInstruction event, so it knows when the alu executes
         this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
             //It is sent to save the value in the indicated register
@@ -357,7 +358,6 @@ public class ControlUnit {
         //Values are loaded into the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
-        //TODO: ver si puedo mover este subscribe a CPUInterconnection, hay que pasar por parametros de este constructor el pc
         //This subscribe is waiting for an ALUExecutedInstruction event, so it knows when the alu executes
         this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
             //The result is requested to the ALU

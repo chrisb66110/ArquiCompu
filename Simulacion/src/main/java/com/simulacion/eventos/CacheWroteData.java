@@ -6,6 +6,6 @@ package com.simulacion.eventos;
  */
 public class CacheWroteData extends Event {
     public CacheWroteData(int cycles, Object[] info) {
-        super(cycles, "Cache escribió datos", info);
+        super(cycles, "Cache wrote the data", info);
     }
 }

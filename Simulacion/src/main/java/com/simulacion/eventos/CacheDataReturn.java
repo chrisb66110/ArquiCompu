@@ -6,6 +6,6 @@ package com.simulacion.eventos;
  */
 public class CacheDataReturn extends Event {
     public CacheDataReturn(int cycles, Object[] info) {
-        super(cycles, "Cache retorna datos", info);
+        super(cycles, "Cache data return", info);
     }
 }

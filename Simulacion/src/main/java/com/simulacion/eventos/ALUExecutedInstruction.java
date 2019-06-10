@@ -6,6 +6,6 @@ package com.simulacion.eventos;
  */
 public class ALUExecutedInstruction extends Event{
     public ALUExecutedInstruction(int cycles, Object[] info) {
-        super(cycles, "Operacion de ALU ejecutada", info);
+        super(cycles, "ALU executed instruction", info);
     }
 }

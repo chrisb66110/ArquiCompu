@@ -3,164 +3,163 @@ package com.simulacion;
 import java.util.BitSet;
 
 /**
- * Clase para el manejo de bits
+ * Class for handling bits.
  */
 public class BitsSet{
 
-    private BitSet bitSet; //Clase para manejar bits
+    private BitSet bitSet; //Class to handle bits.
 
     /**
-     * Constructor sin parametros
+     * Constructor without parameters.
      */
     public BitsSet(){
         this.bitSet = new BitSet();
     }
 
     /**
-     * Constructor a partir de un BitSet
-     * @param bitSet BitSet con el que desea construir el BitsSet
+     * Constructor from a BitSet.
+     * @param bitSet BitSet to build the BitsSet.
      */
     public BitsSet(BitSet bitSet){
         this.bitSet = bitSet;
     }
 
     /**
-     * Constructor con n bits
-     * @param nbits Cantidad de bits para el bitsset
+     * Constructor with n bits.
+     * @param nbits Amount of bits for the BitsSet.
      */
     public BitsSet(int nbits) {
         this.bitSet = new BitSet(nbits);
     }
 
     /**
-     * Funcion estatica para construir un BitsSet a partir de un numero entero
-     * Convierte el numero en bits para ir agregandolos a la estructura
-     * @param number Entero que desea tener en el BitsSet
-     * @return Retorna un objeto BitsSet que contiene los bits del numero del parametro
+     * Static function to build a BitsSet from a number.
+     * @param number Integer to convert to BitsSet.
+     * @return Returns a BitsSet object that contains the bits of the parameter number.
      */
     public static BitsSet valueOf(int number) {
         //Integer.SIZE = 32
-        BitsSet nuevo = new BitsSet(Integer.SIZE);
+        BitsSet newBits = new BitsSet(Integer.SIZE);
         for (int i = 0; i <Integer.SIZE; ++i) {
-            nuevo.set(i,(number & (1 << i)) != 0);
+            newBits.set(i,(number & (1 << i)) != 0);
         }
-        return nuevo;
+        return newBits;
     }
 
     /**
-     * Funcion que retorna el valor de la posicion bitIndex en la estructura
-     * @param bitIndex Posicion de bit que desea conocer
-     * @return Booleano con el valor de la posicion bitIndex
+     * Function that returns the value of the bitIndex position in the structure.
+     * @param bitIndex Bit position.
+     * @return Boolean with the value of the bitIndex position.
      */
     public boolean get(int bitIndex) {
         return this.bitSet.get(bitIndex);
     }
 
     /**
-     * Funcion que retorna un BitsSet con los bits indicados desde fromIndex hasta toIndex,
-     * iniciando en la posicion 0 con el valor de la posicion fromIndex
-     * @param fromIndex Posicion donde inicia, incluye el valor de esta posicion
-     * @param toIndex Posicion siguiente a la que termina, es decir, excluye esta posicion
-     * @return Retorna BitsSet con los bits indicados desde fromIndex hasta toIndex
+     * Function that returns a BitsSet with the indicated bits from fromIndex to toIndex,
+     * starting at position 0 with the value of the fromIndex position.
+     * @param fromIndex Position where it starts, includes the value of this position.
+     * @param toIndex Next position to which it ends, that is, excludes this position.
+     * @return Returns BitsSet with the indicated bits from fromIndex to toIndex.
      */
     public BitsSet get(int fromIndex, int toIndex) {
         return new BitsSet(this.bitSet.get(fromIndex, toIndex));
     }
 
     /**
-     * Metodo para cambiar el valor del bit de la posicion bitIndex
-     * @param bitIndex Posicion que desea cambiar el valor
-     * @param value Valor nuevo
+     * Method to change the bit value of the bitIndex position.
+     * @param bitIndex Position that you want to change the value.
+     * @param value New value.
      */
     public void set(int bitIndex, boolean value) {
         this.bitSet.set(bitIndex, value);
     }
 
     /**
-     * Funcion para saber la cantidad de bits utilizados
-     * @return Cantidad de bits utilizados
+     * Function to know the amount of bits used.
+     * @return Cantidad de bits utilizados.
      */
     public int length() {
         return this.bitSet.length();
     }
 
     /**
-     * Funcion que retorna una copia del objeto
-     * @return Retorna copia del objeto
+     * Function that returns a copy of the object.
+     * @return Return copy of the object.
      */
     public Object clone() {
         return this.bitSet.clone();
     }
 
     /**
-     * Funcion que retorna una string con los bits del bitset, 32 bits
-     * @return Retorna string de 32 caracteres
+     * Function that returns a string with bit bits, 32 bits.
+     * @return Returns 32 character string.
      */
     public String toString() {
-        String x = "";
+        String bitsString = "";
         for (int i = 0; i < 32; i++) {
             if (i%8 == 0 && i != 0){
-                //Separa cada byte
-                x = " " + x;
+                //Separate each byte
+                bitsString = " " + bitsString;
             }
             boolean index = this.bitSet.get(i);
-            x = (index?"1":"0") + x;
+            bitsString = (index?"1":"0") + bitsString;
         }
-        return x;
+        return bitsString;
     }
 
     /**
-     * Funcion que convierte el BitsSet a entero
-     * @return Entero que representa los bits del BitsSet
+     * Function that converts the BitsSet to a Integer.
+     * @return Integer that represents the bits of the BitsSet.
      */
     public int toInt(){
-        int valint = 0;
+        int valInt = 0;
         // Integer.SIZE = 32
         for(int i = 0; i < Integer.SIZE; i++){
             boolean bit = this.bitSet.get(i);
             if(bit){
-                valint += ((int)1 << i);
+                valInt += ((int)1 << i);
             }
         }
-        return valint;
+        return valInt;
     }
 
     /**
-     * Metodo para cambiar el negar el valor de los bits desde fromIndex hasta toIndex
-     * @param fromIndex Indice donde inicia a cambiar los valores
-     * @param toIndex Indice despues de donde termina de cambiar los valores
+     * Method to deny the value of the bits from fromIndex to toIndex.
+     * @param fromIndex Index where start to change the values.
+     * @param toIndex Index after where values change.
      */
     public void flip(int fromIndex, int toIndex) {
         this.bitSet.flip(fromIndex, toIndex);
     }
 
     /**
-     * Metodo que le aplica operacion AND a los bits utilizando los bits de other
-     * @param other Segundo operando para el AND
+     * Method that applies AND operation to the bits using other bits.
+     * @param other Second operand for the AND.
      */
     public void and(BitsSet other) {
         this.bitSet.and(other.bitSet);
     }
 
     /**
-     * Metodo que le aplica operacion OR a los bits utilizando los bits de other
-     * @param other Segundo operando para el OR
+     * Method that applies OR operation to the bits using other bits.
+     * @param other Second operand for the OR.
      */
     public void or(BitsSet other) {
         this.bitSet.or(other.bitSet);
     }
 
     /**
-     * Metodo que le aplica un XOR a los bits utilizando los bits de other
-     * @param other Segundo operando para el XOR
+     * Method that applies an XOR to the bits using other bits.
+     * @param other Second operand for the XOR.
      */
     public void xor(BitsSet other) {
         this.bitSet.xor(other.bitSet);
     }
 
     /**
-     * Metodo que le aplica una suma a los bits utilizando los bits de other
-     * @param other Segundo operando para la suma
+     * Method that applies a sum to the bits using other bits.
+     * @param other Second operating for the sum.
      */
     public void add(BitsSet other){
         int bitset1 = this.toInt();
@@ -170,8 +169,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica una resta a los bits utilizando los bits de other
-     * @param other Segundo operando para la resta
+     * Method that applies a subtraction to the bits using the other bits.
+     * @param other Second operand for subtraction.
      */
     public void sub(BitsSet other){
         int bitset1 = this.toInt();
@@ -181,8 +180,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica una multiplicacion a los bits utilizando los bits de other
-     * @param other Segundo operando para la multiplicacion
+     * Method that applies a multiplication to the bits using other bits.
+     * @param other Second operand for multiplication.
      */
     public void mul(BitsSet other){
         int bitset1 = this.toInt();
@@ -192,8 +191,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica una divicion a los bits utilizando los bits de other
-     * @param other Segundo operando para la divicion
+     * Method that applies a division to the bits using the other bits.
+     * @param other Second operating for the division.
      */
     public void div(BitsSet other){
         int bitset1 = this.toInt();
@@ -203,8 +202,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica la operacion modulo a los bits utilizando los bits de other
-     * @param other Segundo operando para el modulo
+     * Method that applies the module operation to the bits using the other bits.
+     * @param other Second operand for the module.
      */
     public void mod(BitsSet other){
         int bitset1 = this.toInt();
@@ -214,8 +213,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica un corrimiento aritmético hacia la izquierda(SAL) a los bits utilizando los bits de other
-     * @param other Segundo operando para el SAL, indica la cantidad de corrimientos.
+     * Method that applies an arithmetic shift to the left (SAL) to the bits using the other bits.
+     * @param other Second operand for the SAL, indicates the amount of shifts.
      */
     public void sal(BitsSet other){
         int val = this.toInt();
@@ -225,8 +224,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica un corrimiento aritmético hacia la derecha(SAR) a los bits utilizando los bits de other
-     * @param other Segundo operando para el SAR, indica la cantidad de corrimientos.
+     * Method that applies an arithmetical shift to the right (SAR) to the bits using other bits.
+     * @param other Second operating for the SAR, indicates the number of shifts.
      */
     public void sar(BitsSet other){
         int val = this.toInt();
@@ -236,16 +235,16 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica un corrimiento lógico hacia la izquierda(SLL) a los bits utilizando los bits de other
-     * @param other Segundo operando para el SLL, indica la cantidad de corrimientos.
+     * Method that applies a logical shift to the left (SLL) to the bits using other bits.
+     * @param other Second operand for the SLL, indicates the number of slides.
      */
     public void sll(BitsSet other){
         this.sal(other);
     }
 
     /**
-     * Metodo que le aplica un corrimiento lógico hacia la derecha(SLR) a los bits utilizando los bits de other
-     * @param other Segundo operando para el SLR, indica la cantidad de corrimientos.
+     * Method that applies a logical shift to the right (SLR) to the bits using other bits.
+     * @param other Second operand for the SLR, indicates the number of slides.
      */
     public void slr(BitsSet other){
         int val = this.toInt();
@@ -255,8 +254,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica un corrimiento circular hacia la izquierda(SCL) a los bits utilizando los bits de other
-     * @param other Segundo operando para el SCL, indica la cantidad de corrimientos.
+     * Method that applies a circular shift to the left (SCL) to the bits using the other bits.
+     * @param other Second operand for the SCL, indicates the number of slides.
      */
     public void scl(BitsSet other){
         int val = this.toInt();
@@ -266,8 +265,8 @@ public class BitsSet{
     }
 
     /**
-     * Metodo que le aplica un corrimiento lógico hacia la derecha(SCR) a los bits utilizando los bits de other
-     * @param other Segundo operando para el SCR, indica la cantidad de corrimientos.
+     * Method that applies a logical shift to the right (SCR) to the bits using other bits.
+     * @param other Second operand for the SCR, indicates the amount of shifts.
      */
     public void scr(BitsSet other){
         int val = this.toInt();
@@ -277,92 +276,82 @@ public class BitsSet{
     }
 
     /**
-     * Funcion que retorna verdadero si ambos BitsSet son iguales
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es igual al otro BitsSet
+     * Function that returns true if both BitsSets are equal.
+     * @param other Second BitsSet to make the comparison.
+     * @return True if this BitsSet is the same as the other BitsSet.
      */
     public boolean equals(BitsSet other) {
         int thisSize = this.length();
         int otherSize = other.length();
         if ( thisSize != otherSize ) {
-            //Caso donde la cantidad de bits es distinta
+            //Case where the number of bits is different
             return false;
         }
-        //Caso donde la cantidad de bits es igual
+        //Case where the number of bits is the same
         for (int i = 0; i < thisSize; i++) {
             if (this.get(i) != other.get(i)) {
-                //Caso donde el bit i es distinto en los BitsSets
+                //Case where the bit i is different in the BitsSets
                 return false;
             }
         }
-        //Caso donde son igaules
+        //Case where they are equal
         return true;
     }
 
     /**
-     * Funcion que retorna verdadero si ambos BitsSet no son iguales
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet no es igual al otro BitsSet
+     * Function that returns true if both BitsSets are not equal.
+     * @param other Second BitsSet to make the comparison.
+     * @return True if this BitsSet is not equal to the other BitsSet.
      */
     public boolean notEquals(BitsSet other) {
         int thisSize = this.length();
         int otherSize = other.length();
         if ( thisSize != otherSize ) {
-            //Caso donde la cantidad de bits es distinta
+            //Case where the number of bits is different
             return true;
         }
-        //Caso donde la cantidad de bits es la misma
+        //Case where the number of bits is the same
         for (int i = 0; i < thisSize; i++) {
             if (this.get(i) != other.get(i)) {
-                //Caso donde el bit i es distinto en los BitsSets
+                //Case where the bit i is different in the BitsSets
                 return true;
             }
         }
-        //Caso donde son iguales
+        //Case where they are equal
         return false;
     }
 
     /**
-     * Funcion que retorna verdadero este BitsSet es mayor que el otro BitsSet, comparacion sin signo
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es mayor que el otro BitsSet
+     * Function that returns true this BitsSet is greater than the other BitsSet, comparison unsigned.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is greater than the other BitsSet.
      */
     public boolean greater(BitsSet other){
-        //TODO: hablar con los compas si hago esto por comparacion unsigned(asi está)
         int thisSize = this.length();
         int otherSize = other.length();
         if ( thisSize != otherSize) {
-            if ( thisSize < otherSize ) {
-                //Primero mas corto que el segundo
-                return false;
-            }else{
-                //Primero mas largo que el segundo
-                return true;
-            }
+            //True if first longer than the second
+            //False if first shorter than the second
+            return thisSize > otherSize;
         }
-        //Caso de cantidad de bits iguales
+        //Number of equal bits
         for (int i = 0; i < thisSize; i++) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
-                if(thisVal){
-                    //Primero en i es 1 y segundo es 0
-                    return true;
-                }else{
-                    //Primero en i es 0 y segundo es 1
-                    return false;
-                }
+                //True if first in i is 1 and second is 0
+                //False if first in i is 0 and second is 1
+                return thisVal;
             }
         }
-        //Falso porque son iguales
+        //False because they are the same
         return false;
-        //TODO: hablar con los compañeros a ver si este no importa el signo o se nos olvido
     }
 
     /**
-     * Funcion que retorna verdadero este BitsSet es mayor o igual que el otro BitsSet, comparacion con signo
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es mayor o igual que el otro BitsSet
+     * Function that returns true this BitsSet is greater than or equal to the other BitsSet, comparison with signed.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is greater than or equal to the other BitsSet.
      */
     public boolean greaterOrEqualSigned(BitsSet other){
         int thisVal = this.toInt();
@@ -371,44 +360,36 @@ public class BitsSet{
     }
 
     /**
-     * Funcion que retorna verdadero este BitsSet es mayor o igual que el otro BitsSet, comparacion sin signo
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es mayor o igual que el otro BitsSet
+     * Function that returns true this BitsSet is greater than or equal to the other BitsSet, comparison unsigned.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is greater than or equal to the other BitsSet.
      */
     public boolean greaterOrEqualUnsigned(BitsSet other){
         int thisSize = this.length();
         int otherSize = other.length();
         if ( thisSize != otherSize) {
-            if ( thisSize < otherSize ) {
-                //Primero mas corto que el segundo
-                return false;
-            }else{
-                //Primero mas largo que el segundo
-                return true;
-            }
+            //False if first shorter than the second
+            //True if Ffrst longer than the second
+            return thisSize > otherSize;
         }
-        //Caso de cantidad de bits iguales
+        //Number of equal bits
         for (int i = 0; i < thisSize; i++) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
-                if(thisVal){
-                    //Primero en i es 1 y segundo es 0
-                    return true;
-                }else{
-                    //Primero en i es 0 y segundo es 1
-                    return false;
-                }
+                //True if first in i is 1 and second is 0
+                //False if first in i is 0 and second is 1
+                return thisVal;
             }
         }
-        //Falso porque son iguales
+        //False because they are the same
         return true;
     }
 
     /**
-     * Funcion que retorna verdadero este BitsSet es menor que el otro BitsSet, comparacion con signo
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es menor que el otro BitsSet
+     * Function that returns true this BitsSet is less than the other BitsSet, comparison signed.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is less than the other BitsSet.
      */
     public boolean lessSigned(BitsSet other){
         int thisVal = this.toInt();
@@ -417,44 +398,36 @@ public class BitsSet{
     }
 
     /**
-     * Funcion que retorna verdadero este BitsSet es menor que el otro BitsSet, comparacion sin signo
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es menor que el otro BitsSet
+     * Function that returns true this BitsSet is less than the other BitsSet, comparison unsigned.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is less than the other BitsSet.
      */
     public boolean lessUnsigned(BitsSet other){
         int thisSize = this.length();
         int otherSize = other.length();
         if ( thisSize != otherSize) {
-            if ( thisSize < otherSize ) {
-                //Primero mas corto que el segundo
-                return true;
-            }else{
-                //Primero mas largo que el segundo
-                return false;
-            }
+            //True if first shorter than the second
+            //False if first longer than the second
+            return thisSize < otherSize;
         }
-        //Caso de cantidad de bits iguales
+        //Number of equal bits
         for (int i = 0; i < thisSize; i++) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
-                if(!thisVal){
-                    //Primero en i es 0 y segundo es 1
-                    return true;
-                }else{
-                    //Primero en i es 0 y segundo es 1
-                    return false;
-                }
+                //True if first in i is 0 and second is 1
+                //False if first in i is 1 and second is 0
+                return !thisVal;
             }
         }
-        //Falso porque son iguales
+        //False because they are the same
         return false;
     }
 
     /**
-     * Funcion que retorna verdadero este BitsSet es menor o igual que el otro BitsSet, comparacion con signo
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es menor o igual que el otro BitsSet
+     * Function that returns true this BitsSet is less or equal to the other BitsSet, comparison signed.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is less than or equal to the other BitsSet.
      */
     public boolean lessOrEqualSigned(BitsSet other){
         int thisVal = this.toInt();
@@ -463,37 +436,29 @@ public class BitsSet{
     }
 
     /**
-     * Funcion que retorna verdadero este BitsSet es menor o igual que el otro BitsSet, comparacion sin signo
-     * @param other Segundo BitsSet para realizar la comparacion
-     * @return True si este BitsSet es menor o igual que el otro BitsSet
+     * Function that returns true this BitsSet is less than or equal to the other BitsSet, comparison signed.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is less than or equal to the other BitsSet.
      */
     public boolean lessOrEqualUnsigned(BitsSet other){
         int thisSize = this.length();
         int otherSize = other.length();
         if ( thisSize != otherSize) {
-            if ( thisSize < otherSize ) {
-                //Primero mas corto que el segundo
-                return true;
-            }else{
-                //Primero mas largo que el segundo
-                return false;
-            }
+            //True if first shorter than the second
+            //False if first longer than the second
+            return thisSize < otherSize;
         }
-        //Caso de cantidad de bits iguales
+        //Number of equal bits
         for (int i = 0; i < thisSize; i++) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
-                if(!thisVal){
-                    //Primero en i es 0 y segundo es 1
-                    return true;
-                }else{
-                    //Primero en i es 0 y segundo es 1
-                    return false;
-                }
+                //True if first in i is 0 and second is 1
+                //False if first in i is 1 and second is 0
+                return !thisVal;
             }
         }
-        //Falso porque son iguales
+        //False because they are the same
         return true;
     }
 

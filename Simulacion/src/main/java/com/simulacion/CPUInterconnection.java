@@ -5,26 +5,26 @@ import com.simulacion.eventos.CacheWroteData;
 import rx.Subscription;
 
 /**
- * Clase para emular la interconexion de los componentes de la CPU
+ * Class to emulate the interconnection of the CPU components.
  */
 public class CPUInterconnection {
-    private BitsSet [] registers; // Registros de la CPU
-    private ALU alu; // ALU
-    private ControlUnit controlUnit; //Unidad de control
-    private Cache dataCache; // Cache de datos
-    private Cache instCache; // Cache de instrucciones
-    private RxBus bus = RxBus.getInstance(); //Singleton de RXBus
-    private Subscription cacheDataReturn;
-    private Subscription cacheWroteData;
-
+    private BitsSet [] registers; // CPU registers.
+    private ALU alu; // ALU.
+    private ControlUnit controlUnit; //Control unit.
+    //TODO: Revisar cuando se jalan datos
+    private Subscription cacheWroteData; //Subscription to the CacheWroteData event.
+    private Cache dataCache; // Data cache.
+    private Cache instCache; // Instruction cache.
+    private RxBus bus = RxBus.getInstance(); //Singleton by RXBus.
+    private Subscription cacheDataReturn; //Subscription to the CacheDataReturn event.
 
     /**
-     * Constructor
-     * @param registers Vector de registros, 32 registros
-     * @param alu ALU
-     * @param controlUnit Unidad de control
-     * @param dataCache Cache de datos
-     * @param instCache Cache de instrucciones
+     * CPUInterconection Constructor.
+     * @param registers Vector records, 32 records.
+     * @param alu ALU.
+     * @param controlUnit Control unit.
+     * @param dataCache Data cache.
+     * @param instCache Instruction cache.
      */
     CPUInterconnection(BitsSet[] registers, ALU alu, ControlUnit controlUnit, Cache dataCache, Cache instCache){
         this.registers = registers;
@@ -35,9 +35,9 @@ public class CPUInterconnection {
     }
 
     /**
-     * Metodo para cargar un registro en la ALU
-     * @param register Numero de registros que quiere meter en la ALU
-     * @param aluOperand Operando de la ALU donde quiere cargar el registro
+     * Method to load a record in the ALU.
+     * @param register Number of register you want to put in the ALU.
+     * @param aluOperand ALU Operand to load the register.
      */
     public void loadRegisterToALU(int register, ALUOperands aluOperand){
         if (aluOperand == ALUOperands.OperandA){
@@ -48,9 +48,9 @@ public class CPUInterconnection {
     }
 
     /**
-     * Metodo para cargar un inmediato en la ALU
-     * @param immediate Valor inmediato que quiere cargar en la ALU
-     * @param aluOperand Operando de la ALU donde quiere cargar el registro
+     * Method to load an immediate in the ALU.
+     * @param immediate Immediate value to load in the ALU.
+     * @param aluOperand ALU Operand to load the immediate.
      */
     public void loadImmediateToALU(BitsSet immediate, ALUOperands aluOperand){
         //TODO: Ver si hay que revisar que el BitSet es de 32
@@ -62,16 +62,16 @@ public class CPUInterconnection {
     }
 
     /**
-     * Metodo para mandar a ejecutar la operacion a la ALU
-     * @param operation Operacion que quiere ejecutar
+     * Method to send the operation to the ALU.
+     * @param operation Operation to execute.
      */
     public void executeOperation(ALUOperations operation){
         this.alu.executeOperation(operation);
     }
 
     /**
-     * Metodo para guardar el resultado de la ALU en un registro
-     * @param register Numero de registro donde se quiere guardar el resultado de la ALU
+     * Method to save the result of the ALU in a register.
+     * @param register Register number to save the result of the ALU.
      */
     public void saveALUResultToRegister(int register){
         //TODO: Ver si hay que revisar que el BitSet no hace overflow
@@ -79,8 +79,8 @@ public class CPUInterconnection {
     }
 
     /**
-     * Metodo para obtener el resultado de la ALU
-     * @return Valor actual de la ALU
+     * Method to return the result of the ALU.
+     * @return Result of the ALU.
      */
     public BitsSet getALUResult(){
         //TODO: Ver si hay que revisar que el BitSet no hace overflow
@@ -88,52 +88,52 @@ public class CPUInterconnection {
     }
 
     /**
-     * Metodo para cargar un valor de memoria en un registro
-     * @param register Numero de registro donde se quiere cargar el valor
-     * @param offset Offset de memoria donde se quiere traer el valor
-     * @param ammount Tamaño del valor que se quiere cargar
-     * @param signed Booleano indicando si el valor leido es con signo o sin signo
+     * Method to load a memory value in a register.
+     * @param register Register number to load the value.
+     * @param offset Memory offset to bring the value.
+     * @param ammount Size of the value to be loaded.
+     * @param signed Boolean indicating whether the value read is signed or unsigned.
      */
     public void loadMemoryToRegister(int register, BitsSet offset, OperandSize ammount, boolean signed){
-        //Evento de que la cache ya retorno datos
+        //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
         this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
             registers[register] = (BitsSet) evento.info[0];
             if(!signed){
-                //Caso donde hay que copiar el signo
+                //Case where there are that copy the sign
                 if (ammount == OperandSize.Byte) {
-                    //Se copiar el signo desde el bit 8
+                    //The sign is copied from bit 8
                     //TODO: copiar el ultimo bit a los demas apartir del 8
                 } else if (ammount == OperandSize.HalfWord) {
-                    //Se copiar el signo desde el bit 16
+                    //The sign is copied from bit 16
                     //TODO: copiar el ultimo bit a los demas apartir del 16
                 }
             }
             this.cacheDataReturn.unsubscribe();
             //TODO: aqui se debe generar un evento de fin de instruccion
         });
-        //Se mandan a traer datos a la cache
+        //It is sent to bring data to the cache
         this.instCache.getBits(offset,ammount);
     }
 
     /**
-     * Metodo para guardar en memoria el valor de un registro
-     * @param register Numero de registro donde se toma el valor
-     * @param offset Offset donde se quiere guardar el valor
-     * @param ammount Tamaño del valor que se quiere cargar
+     * Method to store the value of a record in memory.
+     * @param register Register number where the value is taken.
+     * @param offset Offset to save the value.
+     * @param ammount Size of the value to be save.
      */
     public void storeRegisterToMemory(int register, BitsSet offset, OperandSize ammount){
-        //Evento de que la cache ya escribio datos
+        //This subscribe is waiting for a CacheDataReturn event, so you know when the operation finished
         this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
             this.cacheWroteData.unsubscribe();
             //TODO: aqui se debe generar un evento de fin de instruccion
         });
-        //Se mandan a escribir los datos
+        //It is sent to write the data
         this.instCache.writeBits(offset, ammount, this.registers[register]);
     }
 
     /**
-     * Metodo para cargar una instruccion en el IR
-     * @param address Offset donde se quiere traer la instruccion
+     * Method to load an instruction in the IR.
+     * @param address Offset to bring the instruction.
      */
     public void loadInstructionToIR(BitsSet address){
         //TODO: Revisar que ese metodo genere el evento de que ya cache retorno los datos

@@ -7,6 +7,7 @@ import java.util.List;
 
 public class EventHandler {
     private List<EventEntry> eventList;
+    private RxBus bus = RxBus.getInstance();
     private CPU cpu;
 
     private static final EventHandler INSTANCE = new EventHandler();
@@ -20,11 +21,14 @@ public class EventHandler {
         eventList.add(new EventEntry(cpu.getClock() + event.cycles, event));
     }
 
-    public Event fireEvent(long clock){
-        return null;
+    public void fireEvent(long clock){
+        if(eventList.get(0).eventTime == clock){
+            bus.post(eventList.get(0).event);
+            eventList.remove(0);
+        }
     }
 
-    private class EventEntry{
+    private class EventEntry {
         public long eventTime;
         public Event event;
 

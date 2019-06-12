@@ -71,7 +71,7 @@ public class ControlUnit {
      */
     public void decodeInstruction(){
         //Integer value of the instruction, are the first 6 bits
-        int aluOperationsNumber = this.instructionRegister.get(0,6).toInt();
+        int aluOperationsNumber = this.instructionRegister.get(26,32).toInt();
         //Instruction switch
         switch(aluOperationsNumber){
             case 0:
@@ -193,10 +193,10 @@ public class ControlUnit {
                 break;
             case 41:
                 //Sum the offset to the PC
-                BitsSet offset = this.instructionRegister.get(6,22);
+                BitsSet offset = this.instructionRegister.get(10,26);
                 this.programCounter.add(offset);
-                //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-                this.eventHandler.addEvent(new StartCUCycle(0,null));
+                //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+                this.eventHandler.addEvent(new StartCUCycle(1,null));
                 break;
             case 42:
                 this.operationRegisterRegisterMemory(ALUOperations.Je, this.instructionRegister);
@@ -251,8 +251,8 @@ public class ControlUnit {
             //It is sent to save the value in the indicated register
             this.internalBus.saveALUResultToRegister(registerResult);
             this.aluExecutedInstruction.unsubscribe();
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-            this.eventHandler.addEvent(new StartCUCycle(0,null));
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
         });
         //It is sent to execute the instruction
         this.internalBus.executeOperation(operation);
@@ -265,9 +265,9 @@ public class ControlUnit {
      */
     private void operationRegisterRegisterRegister(ALUOperations operation, BitsSet instruction){
         //The operands of the instruction are extracted
-        int registerResult = instruction.get(6,11).toInt();
-        int registerA = instruction.get(11,16).toInt();
-        int registerB = instruction.get(16,21).toInt();
+        int registerResult = instruction.get(21,26).toInt();
+        int registerA = instruction.get(16,21).toInt();
+        int registerB = instruction.get(11,16).toInt();
         //Values are loaded into the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
@@ -282,9 +282,9 @@ public class ControlUnit {
      */
     private void operationRegisterRegisterInmediate(ALUOperations operation, BitsSet instruction){
         //The operands of the instruction are extracted
-        int registerResult = instruction.get(6,11).toInt();
-        int registerA = instruction.get(11,16).toInt();
-        BitsSet inmmediate = instruction.get(16,32);
+        int registerResult = instruction.get(21,26).toInt();
+        int registerA = instruction.get(16,21).toInt();
+        BitsSet inmmediate = instruction.get(0,16);
         //The values are loaded to the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandB);
@@ -299,8 +299,8 @@ public class ControlUnit {
      */
     private void operationRegisterRegister(ALUOperations operation, BitsSet instruction){
         //The operands of the instruction are extracted
-        int registerResult = instruction.get(6,11).toInt();
-        int registerA = instruction.get(11,16).toInt();
+        int registerResult = instruction.get(21,26).toInt();
+        int registerA = instruction.get(16,21).toInt();
         //The operand in the ALU is loaded
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         //It is sent to execute the instruction
@@ -314,8 +314,8 @@ public class ControlUnit {
      */
     private void operationRegisterInmediate(ALUOperations operation, BitsSet instruction){
         //The operands of the instruction are extracted.
-        int registerResult = instruction.get(6,11).toInt();
-        BitsSet inmmediate = instruction.get(11,27);
+        int registerResult = instruction.get(21,26).toInt();
+        BitsSet inmmediate = instruction.get(5,21);
         //The operand in the ALU is loaded
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandA);
         //It is sent to execute the instruction
@@ -330,8 +330,8 @@ public class ControlUnit {
      */
     private void operationRegisterMemoryLoad(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
         //The operands of the instruction are extracted
-        int registerResult = instruction.get(6,11).toInt();
-        BitsSet offset = instruction.get(11,27);
+        int registerResult = instruction.get(21,26).toInt();
+        BitsSet offset = instruction.get(5,21);
         //TODO: ver si al offset hay que sumarle la pos inicial
         //It is sent to execute the instruction
         this.internalBus.loadMemoryToRegister(registerResult, offset, operandSize, signed);
@@ -344,8 +344,8 @@ public class ControlUnit {
      */
     private void operationRegisterMemoryStore(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
         //The operands of the instruction are removed
-        int register = instruction.get(6,11).toInt();
-        BitsSet offset = instruction.get(11,27);
+        int register = instruction.get(21,26).toInt();
+        BitsSet offset = instruction.get(5,21);
         //TODO: ver si al offset hay que sumarle la pos inicial
         //It is sent to execute the instruction
         this.internalBus.storeRegisterToMemory(register,offset, operandSize);
@@ -359,9 +359,9 @@ public class ControlUnit {
      */
     private void operationRegisterRegisterMemory(ALUOperations operation, BitsSet instruction){
         //The operands of the instruction are extracted
-        int registerA = instruction.get(6,11).toInt();
-        int registerB = instruction.get(11,16).toInt();
-        BitsSet offset = instruction.get(16,32);
+        int registerA = instruction.get(21,26).toInt();
+        int registerB = instruction.get(16,21).toInt();
+        BitsSet offset = instruction.get(0,16);
         //Values are loaded into the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
@@ -377,8 +377,8 @@ public class ControlUnit {
                 this.programCounter.add(offset);
             }
             this.aluExecutedInstruction.unsubscribe();
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-            this.eventHandler.addEvent(new StartCUCycle(0,null));
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
         });
         //It is sent to execute the instruction
         this.internalBus.executeOperation(operation);
@@ -390,13 +390,13 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      */
     private void operationCall(ALUOperations operation, BitsSet instruction){
-        BitsSet offset = instruction.get(6,22);
+        BitsSet offset = instruction.get(10,26);
         //The push of the complete pc
         this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
             //Sum the offset to the PC
             this.programCounter.add(offset);
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-            this.eventHandler.addEvent(new StartCUCycle(0,null));
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
             this.cacheWroteData.unsubscribe();
         });
         //Sum 32 to the stackPointer, for increase the stack pointer
@@ -416,8 +416,8 @@ public class ControlUnit {
             //Assigns the pointer to the PC
             //info: programCounter in the stack
             this.programCounter = (BitsSet) evento.info[0];
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-            this.eventHandler.addEvent(new StartCUCycle(0,null));
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
             this.cacheDataReturn.unsubscribe();
         });
         //Extract programCounter to the stack
@@ -433,7 +433,7 @@ public class ControlUnit {
      */
     private void operationSysCall(ALUOperations operation, BitsSet instruction){
         this.syscallExecuted = bus.register(SyscallExecuted.class, evento -> {
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
             this.eventHandler.addEvent(new StartCUCycle(1,null));
             this.syscallExecuted.unsubscribe();
         });

@@ -1,7 +1,6 @@
 package com.simulacion;
 
-import com.simulacion.eventos.CacheDataReturn;
-import com.simulacion.eventos.CacheWroteData;
+import com.simulacion.eventos.*;
 import rx.Subscription;
 
 /**
@@ -118,8 +117,8 @@ public class CPUInterconnection {
                             registers[register].get(Consts.HALFWORD_SIZE-1));
                 }
             }
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-            this.eventHandler.addEvent(new CacheDataReturn(0,null));
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
             this.cacheDataReturn.unsubscribe();
         });
         //It is sent to bring data to the cache
@@ -135,8 +134,8 @@ public class CPUInterconnection {
     public void storeRegisterToMemory(int register, BitsSet offset, OperandSize ammount){
         //This subscribe is waiting for a CacheDataReturn event, so you know when the operation finished
         this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-            this.eventHandler.addEvent(new CacheWroteData(0,null));
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
             this.cacheWroteData.unsubscribe();
         });
         //Write data in to cache

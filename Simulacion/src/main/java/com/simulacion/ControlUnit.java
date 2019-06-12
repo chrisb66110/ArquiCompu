@@ -432,15 +432,13 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      */
     private void operationSysCall(ALUOperations operation, BitsSet instruction){
-        //TODO: FALTA revisar como es eso de R3+ se toman como parametros, revisar si hay que meter esos valores en info
         this.syscallExecuted = bus.register(SyscallExecuted.class, evento -> {
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 0
-            this.eventHandler.addEvent(new StartCUCycle(0,null));
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
             this.syscallExecuted.unsubscribe();
         });
         //Sent to run syscall
-        this.eventHandler.addEvent(new SyscallRun(0,null));
-        //TODO: revisar que cuando se ejecuta un syscall, al terminar se genere el evento SyscallExecuted
+        this.eventHandler.addEvent(new SyscallRun(1,new Object[]{internalBus.getRegisterData(1), new BitsSet[]{internalBus.getRegisterData(3)}}));
     }
 
 }

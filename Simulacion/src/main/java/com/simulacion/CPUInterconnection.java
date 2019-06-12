@@ -170,4 +170,13 @@ public class CPUInterconnection {
         //Get data from stack
         this.dataCache.getBits(address,OperandSize.Word);
     }
+
+    /**
+     * Returns the data of a register
+     * @param index the number of the register
+     * @return the data inside the register
+     */
+    public BitsSet getRegisterData(int index){
+        return registers[index];
+    }
 }

@@ -8,11 +8,14 @@ import rx.Subscription;
  */
 public class ControlUnit {
     //Const
-    private final int INFO_INDEX_LEVEL = 1;
-    private final int LEVEL = -1;
-    private final int INFO_INDEX_DATA = 0;
+    private final int INFO_INDEX_LEVEL = 1; //Index of the level number in the info in event.
+    private final int LEVEL = -1; //Number to represent that the cache return data to the CPU.
+    private final int INFO_INDEX_DATA = 0; //Index of data in the info in event.
+    private final int INITIAL_STACK_POINTER = 127; //Initial stack pointer.
+    private final BitsSet PUSH = BitsSet.valueOf(-4); //Number to mov the stack pointer in a push.
+    private final BitsSet POP = BitsSet.valueOf(4); //Number to mov the stack pointer in a pop.
 
-    private BitsSet stackPointer = BitsSet.valueOf(0);//Pointer to the last address used, it necessary sum the PC to get data
+    private BitsSet stackPointer = BitsSet.valueOf(this.INITIAL_STACK_POINTER); //Pointer to the last address non used
     private BitsSet programCounter; //Pointer to the next instruction.
     private BitsSet instructionRegister; //Instruction to execute.
     private CPUInterconnection internalBus; //Internal interconnection of the CPU.
@@ -408,10 +411,10 @@ public class ControlUnit {
             this.eventHandler.addEvent(new StartCUCycle(1,null));
             this.cacheWroteData.unsubscribe();
         });
-        //Sum 32 to the stackPointer, for increase the stack pointer
-        this.stackPointer.add(BitsSet.valueOf(Consts.WORD_SIZE));
         //Save programCounter in the stack
         this.internalBus.pushStack(this.stackPointer, this.programCounter);
+        //Sum 4 to the stackPointer, for decrease the stack pointer
+        this.stackPointer.add(this.PUSH);
     }
 
     /**
@@ -425,16 +428,16 @@ public class ControlUnit {
             if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
                 //Assigns the pointer to the PC
                 //info: programCounter in the stack
-                this.programCounter = (BitsSet) evento.info[0];
+                this.programCounter = (BitsSet) evento.info[this.INFO_INDEX_DATA];
                 //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
                 this.eventHandler.addEvent(new StartCUCycle(1, null));
                 this.cacheDataReturn.unsubscribe();
             }
         });
+        //Subtract 32 to the stackPointer, after because pointer the last used, for decrease the stack pointer
+        this.stackPointer.sub(this.POP);
         //Extract programCounter to the stack
         this.internalBus.popStack(this.stackPointer);
-        //Subtract 32 to the stackPointer, after because pointer the last used, for decrease the stack pointer
-        this.stackPointer.sub(BitsSet.valueOf(Consts.WORD_SIZE));
     }
 
     /**

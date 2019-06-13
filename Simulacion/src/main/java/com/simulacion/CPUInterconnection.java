@@ -8,9 +8,9 @@ import rx.Subscription;
  */
 public class CPUInterconnection {
     //Const
-    private final int LEVEL = -1;
-    private final int INFO_INDEX_LEVEL = -1;
-    private final int INFO_INDEX_DATA = -1;
+    private final int LEVEL = -1; //Number to represent that the cache return data to the CPU.
+    private final int INFO_INDEX_LEVEL = 1; //Index of the level number in the info in event.
+    private final int INFO_INDEX_DATA = 0; //Index of data in the info in event.
 
     private BitsSet [] registers; // CPU registers.
     private ALU alu; // ALU.
@@ -26,7 +26,7 @@ public class CPUInterconnection {
 
     /**
      * CPUInterconection Constructor.
-     * @param registers Vector records, 32 records.
+     * @param registers Vector registers, 32 registers.
      * @param alu ALU.
      * @param controlUnit Control unit.
      * @param dataCache Data cache.

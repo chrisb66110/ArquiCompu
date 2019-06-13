@@ -204,8 +204,11 @@ public class ControlUnit {
             case 43:
                 this.operationRegisterRegisterMemory(ALUOperations.Jne, this.instructionRegister);
                 break;
-            case 44:
-                this.operationRegisterRegisterMemory(ALUOperations.Jg, this.instructionRegister);
+            case 57:
+                this.operationRegisterRegisterMemory(ALUOperations.Jgs, this.instructionRegister);
+                break;
+            case 58:
+                this.operationRegisterRegisterMemory(ALUOperations.Jgu, this.instructionRegister);
                 break;
             case 45:
                 this.operationRegisterRegisterMemory(ALUOperations.Jges, this.instructionRegister);

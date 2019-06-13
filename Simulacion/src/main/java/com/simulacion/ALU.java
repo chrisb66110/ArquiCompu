@@ -137,8 +137,11 @@ public class ALU {
             case Jne:
                 this.operationJne();
                 break;
-            case Jg:
-                this.operationJg();
+            case Jgs:
+                this.operationJgs();
+                break;
+            case Jgu:
+                this.operationJgu();
                 break;
             case Jges:
                 this.operationJges();
@@ -311,10 +314,22 @@ public class ALU {
     }
 
     /**
-     * Method to execute the operation jg.
+     * Method to execute the operation jgs.
      */
-    private void operationJg(){
-        boolean res = this.OperandA.greater(this.OperandB);
+    private void operationJgs(){
+        boolean res = this.OperandA.greaterSigned(this.OperandB);
+        if(res){
+            this.result = BitsSet.valueOf(1);
+        }else{
+            this.result = BitsSet.valueOf(0);
+        }
+    }
+
+    /**
+     * Method to execute the operation jgu.
+     */
+    private void operationJgu(){
+        boolean res = this.OperandA.greaterUnsigned(this.OperandB);
         if(res){
             this.result = BitsSet.valueOf(1);
         }else{

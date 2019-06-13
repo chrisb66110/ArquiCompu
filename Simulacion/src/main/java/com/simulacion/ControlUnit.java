@@ -171,31 +171,31 @@ public class ControlUnit {
                 this.operationRegisterRegisterInmediate(ALUOperations.Scri, this.instructionRegister);
                 break;
             case 32:
-                this.operationRegisterMemoryLoad(ALUOperations.Lsb, this.instructionRegister, OperandSize.Byte, true);
+                this.operationRegisterRegisterMemoryLoad(ALUOperations.Lsb, this.instructionRegister, OperandSize.Byte, true);
                 break;
             case 33:
-                this.operationRegisterMemoryLoad(ALUOperations.Lub, this.instructionRegister, OperandSize.Byte, false);
+                this.operationRegisterRegisterMemoryLoad(ALUOperations.Lub, this.instructionRegister, OperandSize.Byte, false);
                 break;
             case 34:
-                this.operationRegisterMemoryLoad(ALUOperations.Lsh, this.instructionRegister, OperandSize.HalfWord, true);
+                this.operationRegisterRegisterMemoryLoad(ALUOperations.Lsh, this.instructionRegister, OperandSize.HalfWord, true);
                 break;
             case 35:
-                this.operationRegisterMemoryLoad(ALUOperations.Luh, this.instructionRegister, OperandSize.HalfWord, false);
+                this.operationRegisterRegisterMemoryLoad(ALUOperations.Luh, this.instructionRegister, OperandSize.HalfWord, false);
                 break;
             case 36:
-                this.operationRegisterMemoryLoad(ALUOperations.Lsw, this.instructionRegister, OperandSize.Word, true);
+                this.operationRegisterRegisterMemoryLoad(ALUOperations.Lsw, this.instructionRegister, OperandSize.Word, true);
                 break;
             case 37:
-                this.operationRegisterMemoryLoad( ALUOperations.Luw, this.instructionRegister, OperandSize.Word, false);
+                this.operationRegisterRegisterMemoryLoad( ALUOperations.Luw, this.instructionRegister, OperandSize.Word, false);
                 break;
             case 38:
-                this.operationRegisterMemoryStore(ALUOperations.Sb, this.instructionRegister, OperandSize.Byte);
+                this.operationRegisterRegisterMemoryStore(ALUOperations.Sb, this.instructionRegister, OperandSize.Byte);
                 break;
             case 39:
-                this.operationRegisterMemoryStore(ALUOperations.Sh, this.instructionRegister, OperandSize.HalfWord);
+                this.operationRegisterRegisterMemoryStore(ALUOperations.Sh, this.instructionRegister, OperandSize.HalfWord);
                 break;
             case 40:
-                this.operationRegisterMemoryStore(ALUOperations.Sw, this.instructionRegister, OperandSize.Word);
+                this.operationRegisterRegisterMemoryStore(ALUOperations.Sw, this.instructionRegister, OperandSize.Word);
                 break;
             case 41:
                 //Sum the offset to the PC
@@ -337,13 +337,13 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      * @param signed Load signed.
      */
-    private void operationRegisterMemoryLoad(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
+    private void operationRegisterRegisterMemoryLoad(ALUOperations operation, BitsSet instruction, OperandSize operandSize, boolean signed){
         //The operands of the instruction are extracted
         int registerResult = instruction.get(21,26).toInt();
-        BitsSet offset = instruction.get(5,21);
-        //TODO: ver si al offset hay que sumarle la pos inicial
+        int registerIndex = instruction.get(16,21).toInt();
+        BitsSet offset = instruction.get(0,16);
         //It is sent to execute the instruction
-        this.internalBus.loadMemoryToRegister(registerResult, offset, operandSize, signed);
+        this.internalBus.loadMemoryToRegister(registerResult, registerIndex, offset, operandSize, signed);
     }
 
     /**
@@ -351,13 +351,13 @@ public class ControlUnit {
      * @param operation Operation to execute.
      * @param instruction Instruction bits.
      */
-    private void operationRegisterMemoryStore(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
+    private void operationRegisterRegisterMemoryStore(ALUOperations operation, BitsSet instruction, OperandSize operandSize){
         //The operands of the instruction are removed
-        int register = instruction.get(21,26).toInt();
-        BitsSet offset = instruction.get(5,21);
-        //TODO: ver si al offset hay que sumarle la pos inicial
+        int registerResult = instruction.get(21,26).toInt();
+        int registerIndex = instruction.get(16,21).toInt();
+        BitsSet offset = instruction.get(0,16);
         //It is sent to execute the instruction
-        this.internalBus.storeRegisterToMemory(register,offset, operandSize);
+        this.internalBus.storeRegisterToMemory(registerResult, registerIndex, offset, operandSize);
     }
 
     /**
@@ -422,12 +422,14 @@ public class ControlUnit {
     private void operationRet(ALUOperations operation, BitsSet instruction){
         // The pop is to PC complete
         this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
-            //Assigns the pointer to the PC
-            //info: programCounter in the stack
-            this.programCounter = (BitsSet) evento.info[0];
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
-            this.cacheDataReturn.unsubscribe();
+            if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
+                //Assigns the pointer to the PC
+                //info: programCounter in the stack
+                this.programCounter = (BitsSet) evento.info[0];
+                //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+                this.eventHandler.addEvent(new StartCUCycle(1, null));
+                this.cacheDataReturn.unsubscribe();
+            }
         });
         //Extract programCounter to the stack
         this.internalBus.popStack(this.stackPointer);

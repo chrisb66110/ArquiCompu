@@ -4,6 +4,7 @@ package com.simulacion;
 //-----------------------------------------------------------------------------
 // Imports
 import com.simulacion.eventos.CacheDataReturn;
+import rx.Subscription;
 //-----------------------------------------------------------------------------
 /**
  * Class that emulates the behavoir of a caché chip
@@ -20,6 +21,10 @@ public class Cache {
     private Cache nextCache;
     private Bus memoryBus;
     private EventHandler eventHandler = EventHandler.getInstance();
+    private RxBus rxSubscriptor = RxBus.getInstance();
+    //-------------------------------------------------------------------------
+    // Events
+    private Subscription cacheReadsCache;
     //-------------------------------------------------------------------------
     // Constructors
     /**

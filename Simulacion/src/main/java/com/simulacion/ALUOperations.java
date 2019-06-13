@@ -56,5 +56,7 @@ public enum ALUOperations {
     Jleu,
     Call,
     Ret,
-    Syscall
+    Syscall,
+    Push,
+    Pop
 }

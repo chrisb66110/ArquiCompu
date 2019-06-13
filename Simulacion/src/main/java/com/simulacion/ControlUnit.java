@@ -201,11 +201,7 @@ public class ControlUnit {
                 this.operationRegisterRegisterMemoryStore(ALUOperations.Sw, this.instructionRegister, OperandSize.Word);
                 break;
             case 41:
-                //Sum the offset to the PC
-                BitsSet offset = this.instructionRegister.get(10,26);
-                this.programCounter.add(offset);
-                //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-                this.eventHandler.addEvent(new StartCUCycle(1,null));
+                this.operationJump(ALUOperations.Jmp, this.instructionRegister);
                 break;
             case 42:
                 this.operationRegisterRegisterMemory(ALUOperations.Je, this.instructionRegister);
@@ -245,6 +241,12 @@ public class ControlUnit {
                 break;
             case 54:
                 this.operationSysCall(ALUOperations.Syscall, this.instructionRegister);
+                break;
+            case 55:
+                this.operationPushRegisterToStack(ALUOperations.Push, this.instructionRegister);
+                break;
+            case 56:
+                this.operationPopRegisterToStack(ALUOperations.Pop, this.instructionRegister);
                 break;
             default:
                 //TODO: revisar excepcion
@@ -364,6 +366,19 @@ public class ControlUnit {
     }
 
     /**
+     * Method to execute operation Jump.
+     * @param operation Operation to execute.
+     * @param instrucction Instruction bits.
+     */
+    private void operationJump(ALUOperations operation, BitsSet instrucction){
+        //Sum the offset to the PC
+        BitsSet offset = instrucction.get(10,26);
+        this.programCounter.add(offset);
+        //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+        this.eventHandler.addEvent(new StartCUCycle(1,null));
+    }
+
+    /**
      * Method to execute operations je, jne, jg, jges, jgeu, jl, jlu, jles, jleu.
      * This method has to be changed to each one to see if the PC is changed.
      * @param operation Operation to execute.
@@ -412,7 +427,7 @@ public class ControlUnit {
             this.cacheWroteData.unsubscribe();
         });
         //Save programCounter in the stack
-        this.internalBus.pushStack(this.stackPointer, this.programCounter);
+        this.internalBus.pushPCToStack(this.stackPointer, this.programCounter);
         //Sum 4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
     }
@@ -434,10 +449,10 @@ public class ControlUnit {
                 this.cacheDataReturn.unsubscribe();
             }
         });
-        //Subtract 32 to the stackPointer, after because pointer the last used, for decrease the stack pointer
+        //Subtract 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
         this.stackPointer.sub(this.POP);
         //Extract programCounter to the stack
-        this.internalBus.popStack(this.stackPointer);
+        this.internalBus.popStackToPC(this.stackPointer);
     }
 
     /**
@@ -453,6 +468,34 @@ public class ControlUnit {
         });
         //Sent to run syscall
         this.eventHandler.addEvent(new SyscallRun(1,new Object[]{internalBus.getRegisterData(1), new BitsSet[]{internalBus.getRegisterData(3)}}));
+    }
+
+    /**
+     * Method to execute push operation.
+     * @param operation Operation to execute.
+     * @param instruction Instruction bits.
+     */
+    private void operationPushRegisterToStack(ALUOperations operation, BitsSet instruction){
+        //Register to save in stack
+        int register = instruction.get(21,26).toInt();
+        //Save register in the stack
+        this.internalBus.pushRegisterToStack(this.stackPointer, register);
+        //Sub 4 to the stackPointer, for decrease the stack pointer
+        this.stackPointer.add(this.PUSH);
+    }
+
+    /**
+     * Method to execute pop operation.
+     * @param operation Operation to execute.
+     * @param instruction Instruction bits.
+     */
+    private void operationPopRegisterToStack(ALUOperations operation, BitsSet instruction){
+        //Register to save in stack
+        int register = instruction.get(21,26).toInt();
+        //Save register in the stack
+        this.internalBus.popStackToRegister(this.stackPointer, register);
+        //Sum 4 to the stackPointer, for increase the stack pointer
+        this.stackPointer.add(this.POP);
     }
 
 }

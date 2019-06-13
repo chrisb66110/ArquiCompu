@@ -167,19 +167,55 @@ public class CPUInterconnection {
     /**
      * Method to save data in the stack.
      * @param address Address in stack.
-     * @param programCounter Data to save in stack
+     * @param programCounter Data to save in stack.
      */
-    public void pushStack(BitsSet address, BitsSet programCounter){
+    public void pushPCToStack(BitsSet address, BitsSet programCounter){
         //Write data in to stack
         this.dataCache.writeBits(address, OperandSize.Word, programCounter);
     }
 
     /**
      * Method to load data from in the stack
+     * @param address Address to get data from the stack.
+     */
+    public void popStackToPC(BitsSet address){
+        //Get data from stack
+        this.dataCache.getBits(address,OperandSize.Word);
+    }
+
+    /**
+     * Method to save data in the stack.
+     * @param address Address in stack.
+     * @param register Register number to save in stack.
+     */
+    public void pushRegisterToStack(BitsSet address, int register){
+        //The push of the complete register
+        this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
+            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            this.eventHandler.addEvent(new StartCUCycle(1,null));
+            this.cacheWroteData.unsubscribe();
+        });
+        //Write register in to stack
+        this.dataCache.writeBits(address, OperandSize.Word, this.registers[register]);
+    }
+
+    /**
+     * Method to load data from in the stack
      * @param address Address to get data from the stack
      */
-    public void popStack(BitsSet address){
-        //Get data from stack
+    public void popStackToRegister(BitsSet address, int register){
+        // The pop is to register complete
+        this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
+            if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
+                //Assigns the data to the register
+                //info: register in the stack
+                this.registers[register] = (BitsSet) evento.info[this.INFO_INDEX_DATA];
+                //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+                this.eventHandler.addEvent(new StartCUCycle(1, null));
+                this.cacheDataReturn.unsubscribe();
+            }
+        });
+        //Get register from stack
         this.dataCache.getBits(address,OperandSize.Word);
     }
 

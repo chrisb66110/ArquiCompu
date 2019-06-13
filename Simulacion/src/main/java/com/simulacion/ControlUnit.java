@@ -266,7 +266,7 @@ public class ControlUnit {
             this.internalBus.saveALUResultToRegister(registerResult);
             this.aluExecutedInstruction.unsubscribe();
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
         });
         //It is sent to execute the instruction
         this.internalBus.executeOperation(operation);
@@ -348,7 +348,7 @@ public class ControlUnit {
         int registerIndex = instruction.get(16,21).toInt();
         BitsSet offset = instruction.get(0,16);
         //It is sent to execute the instruction
-        this.internalBus.loadMemoryToRegister(registerResult, registerIndex, offset, operandSize, signed);
+        this.internalBus.loadMemoryToRegister(operation, registerResult, registerIndex, offset, operandSize, signed);
     }
 
     /**
@@ -362,7 +362,7 @@ public class ControlUnit {
         int registerIndex = instruction.get(16,21).toInt();
         BitsSet offset = instruction.get(0,16);
         //It is sent to execute the instruction
-        this.internalBus.storeRegisterToMemory(registerResult, registerIndex, offset, operandSize);
+        this.internalBus.storeRegisterToMemory(operation, registerResult, registerIndex, offset, operandSize);
     }
 
     /**
@@ -375,7 +375,7 @@ public class ControlUnit {
         BitsSet offset = instrucction.get(10,26);
         this.programCounter.add(offset);
         //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-        this.eventHandler.addEvent(new StartCUCycle(1,null));
+        this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
     }
 
     /**
@@ -405,7 +405,7 @@ public class ControlUnit {
             }
             this.aluExecutedInstruction.unsubscribe();
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
         });
         //It is sent to execute the instruction
         this.internalBus.executeOperation(operation);
@@ -423,7 +423,7 @@ public class ControlUnit {
             //Sum the offset to the PC
             this.programCounter.add(offset);
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
             this.cacheWroteData.unsubscribe();
         });
         //Save programCounter in the stack
@@ -445,7 +445,7 @@ public class ControlUnit {
                 //info: programCounter in the stack
                 this.programCounter = (BitsSet) evento.info[this.INFO_INDEX_DATA];
                 //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-                this.eventHandler.addEvent(new StartCUCycle(1, null));
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
                 this.cacheDataReturn.unsubscribe();
             }
         });
@@ -463,7 +463,7 @@ public class ControlUnit {
     private void operationSysCall(ALUOperations operation, BitsSet instruction){
         this.syscallExecuted = bus.register(SyscallExecuted.class, evento -> {
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
             this.syscallExecuted.unsubscribe();
         });
         //Sent to run syscall
@@ -479,7 +479,7 @@ public class ControlUnit {
         //Register to save in stack
         int register = instruction.get(21,26).toInt();
         //Save register in the stack
-        this.internalBus.pushRegisterToStack(this.stackPointer, register);
+        this.internalBus.pushRegisterToStack(operation, this.stackPointer, register);
         //Sub 4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
     }
@@ -493,7 +493,7 @@ public class ControlUnit {
         //Register to save in stack
         int register = instruction.get(21,26).toInt();
         //Save register in the stack
-        this.internalBus.popStackToRegister(this.stackPointer, register);
+        this.internalBus.popStackToRegister(operation, this.stackPointer, register);
         //Sum 4 to the stackPointer, for increase the stack pointer
         this.stackPointer.add(this.POP);
     }

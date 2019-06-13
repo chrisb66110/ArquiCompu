@@ -41,7 +41,7 @@ public class CPUInterconnection {
     }
 
     /**
-     * Method to load a record in the ALU.
+     * Method to load a register in the ALU.
      * @param register Number of register you want to put in the ALU.
      * @param aluOperand ALU Operand to load the register.
      */
@@ -102,7 +102,7 @@ public class CPUInterconnection {
      * @param ammount Size of the value to be loaded.
      * @param signed Boolean indicating whether the value read is signed or unsigned.
      */
-    public void loadMemoryToRegister(int registerResult, int registerIndex, BitsSet offset, OperandSize ammount, boolean signed){
+    public void loadMemoryToRegister(ALUOperations operation, int registerResult, int registerIndex, BitsSet offset, OperandSize ammount, boolean signed){
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
         this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
             if ((int)evento.info[this.INFO_INDEX_LEVEL] != this.LEVEL){
@@ -124,7 +124,7 @@ public class CPUInterconnection {
                     }
                 }
                 //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-                this.eventHandler.addEvent(new StartCUCycle(1,null));
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
                 this.cacheDataReturn.unsubscribe();
             }
         });
@@ -136,16 +136,16 @@ public class CPUInterconnection {
     }
 
     /**
-     * Method to store the value of a record in memory.
+     * Method to store the value of a register in memory.
      * @param registerResult Register number where the value is taken.
      * @param offset Offset to save the value.
      * @param ammount Size of the value to be save.
      */
-    public void storeRegisterToMemory(int registerResult, int registerIndex, BitsSet offset, OperandSize ammount){
+    public void storeRegisterToMemory(ALUOperations operation, int registerResult, int registerIndex, BitsSet offset, OperandSize ammount){
         //This subscribe is waiting for a CacheWroteData event, so you know when the operation finished
         this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
             this.cacheWroteData.unsubscribe();
         });
         //Add offset and index from register
@@ -188,11 +188,11 @@ public class CPUInterconnection {
      * @param address Address in stack.
      * @param register Register number to save in stack.
      */
-    public void pushRegisterToStack(BitsSet address, int register){
+    public void pushRegisterToStack(ALUOperations operation, BitsSet address, int register){
         //The push of the complete register
         this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
             this.cacheWroteData.unsubscribe();
         });
         //Write register in to stack
@@ -203,7 +203,7 @@ public class CPUInterconnection {
      * Method to load data from in the stack
      * @param address Address to get data from the stack
      */
-    public void popStackToRegister(BitsSet address, int register){
+    public void popStackToRegister(ALUOperations operation, BitsSet address, int register){
         // The pop is to register complete
         this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
             if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
@@ -211,7 +211,7 @@ public class CPUInterconnection {
                 //info: register in the stack
                 this.registers[register] = (BitsSet) evento.info[this.INFO_INDEX_DATA];
                 //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-                this.eventHandler.addEvent(new StartCUCycle(1, null));
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
                 this.cacheDataReturn.unsubscribe();
             }
         });

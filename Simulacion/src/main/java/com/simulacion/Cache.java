@@ -4,6 +4,7 @@ package com.simulacion;
 //-----------------------------------------------------------------------------
 // Imports
 import com.simulacion.eventos.CacheDataReturn;
+
 import rx.Subscription;
 //-----------------------------------------------------------------------------
 /**
@@ -21,7 +22,11 @@ public class Cache {
     private Cache nextCache;
     private Bus memoryBus;
     private EventHandler eventHandler = EventHandler.getInstance();
-    private RxBus rxSubscriptor = RxBus.getInstance();
+    private RxBus rxSubscriber = RxBus.getInstance();
+    //-------------------------------------------------------------------------
+    // Constants
+    private final int INFO_DATA_INDEX = 0;
+    private final int INFO_LEVEL_INDEX = 0;
     //-------------------------------------------------------------------------
     // Events
     private Subscription cacheReadsCache;
@@ -88,7 +93,7 @@ public class Cache {
      * @return  the data as a bitset if the address is 
      *          the current level, null otherwise
      */
-    public BitsSet getBits(BitsSet address, OperandSize amount){
+    public void getBits(BitsSet address, OperandSize amount){
         //---------------------------------------------------------------------
         // Auxiliary Vars.
         BitsSet result = null;
@@ -102,15 +107,35 @@ public class Cache {
         // if the data was not in this level then fetch it from the next level
         if (result == null){
             //-----------------------------------------------------------------
-            // the data to be saved in this level for the next read
-            BitsSet dataFromBelow = null;
-            //-----------------------------------------------------------------
             // check if this is the last level caché
             if (this.nextCache != null) {
                 //-------------------------------------------------------------
+                this.cacheReadsCache = this.rxSubscriber.register(
+                    CacheDataReturn.class, 
+                    event -> {
+                        //-----------------------------------------------------
+                        // Check if the event has my information
+                        if (this.level == (int) event.info[INFO_LEVEL_INDEX]) {                
+                            //-------------------------------------------------
+                            // saving it in this level 
+                            // (because principle of locality)
+                            this.writeLocal(
+                                address,
+                                amount, 
+                                (BItsSet) info[this.INFO_DATA_INDEX]
+                            );
+                            //-------------------------------------------------
+                            //-------------------------------------------------
+                            this.cacheReadsCache.unsubscribe();
+                            //-------------------------------------------------
+                        }
+                        //-----------------------------------------------------
+                    }
+                );
+                //-------------------------------------------------------------
                 // getting the data from the next caché level
                 // TODO: create the event... and wait for another one
-                dataFromBelow = this.nextCache.getBits(address, amount);
+                this.nextCache.getBits(address, amount);
                 //-------------------------------------------------------------
             } else {
                 //-------------------------------------------------------------
@@ -119,10 +144,6 @@ public class Cache {
                 // TODO: and wait for another one
                 //-------------------------------------------------------------
             }
-            //-----------------------------------------------------------------
-            // saving it in this level (because principle of locality)
-            this.writeBits(address, amount, dataFromBelow);
-            //-----------------------------------------------------------------
         } else {
             //-----------------------------------------------------------------
             // reduce the size of the reading. 
@@ -137,15 +158,15 @@ public class Cache {
                 case Byte:
                 bitsSetCutIndex = 8;
                     break;
-
             }
             result = result.get(
                 result.length()-bitsSetCutIndex, result.length()
             );
             //-----------------------------------------------------------------
             // Setting the result in the info array
-            Object[] info = new Object[1];
-            info[0] = result;
+            Object[] info = new Object[2];
+            info[this.INFO_DATA_INDEX] = result;
+            info[this.INFO_LEVEL_INDEX] = this.level - 1;
             //-----------------------------------------------------------------
             // creating the event to the data to be read
             CacheDataReturn event = new CacheDataReturn(this.hitTime, info);
@@ -153,7 +174,7 @@ public class Cache {
             //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
-        return result;
+        // return result;
         //---------------------------------------------------------------------
     }
     /**

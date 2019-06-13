@@ -1,5 +1,8 @@
 package com.simulacion;
 
+/**
+ * Enum to represent operations.
+ */
 public enum ALUOperations {
     Add,
     Addi,
@@ -52,6 +55,5 @@ public enum ALUOperations {
     Jleu,
     Call,
     Ret,
-    Syscall,
-    Err
+    Syscall
 }

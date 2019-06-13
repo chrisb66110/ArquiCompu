@@ -1,11 +1,11 @@
 package com.simulacion.eventos;
 
 /**
- * Evento para indicar que la ALU ya ejecutó la instrucción
- * info es null, no necesita retornar nada
+ * Event to indicate that the ALU has already executed the instruction.
+ * info is null, do not need to return anything.
  */
 public class ALUExecutedInstruction extends Event{
     public ALUExecutedInstruction(int cycles, Object[] info) {
-        super(cycles, "Operacion ejecutada", info);
+        super(cycles, "ALU executed instruction", info);
     }
 }

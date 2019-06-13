@@ -50,4 +50,12 @@ public class CPU {
     public long getClock() {
         return clock;
     }
+
+    /**
+     * Saves the data inside the r2 register
+     * @param data the data to be saved
+     */
+    public void saveSyscallData(BitsSet data){
+        registers[2] = data;
+    }
 }

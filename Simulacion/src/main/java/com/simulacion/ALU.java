@@ -3,53 +3,44 @@ package com.simulacion;
 import com.simulacion.eventos.ALUExecutedInstruction;
 
 /**
- * Clase para emular la ALU
+ * Class to emulate the ALU.
  */
 public class ALU {
-    private BitsSet OperandA; //Primer operando de la ALU
-    private BitsSet OperandB; //Segundo operando de la ALU
-    private BitsSet result; //Resultado al ejecutar operacion
-    private EventHandler eventHandler; //Manejador de eventos
+    private BitsSet OperandA; //First operator of the ALU.
+    private BitsSet OperandB; //Second operator of the ALU.
+    private BitsSet result; //Result when executing operation.
+    private EventHandler eventHandler = EventHandler.getInstance(); //Event manager.
 
     /**
-     * Constructor que recibe el manejador de eventos
-     * @param eventHandler Manejador de eventos
-     */
-    public ALU(EventHandler eventHandler){
-        this.eventHandler = eventHandler;
-    }
-
-    /**
-     * Funcion para retornar el valor del resultado de la ALU
-     * @return Valor del resultado de la ALU
+     * Function to return the value of the result of the ALU.
+     * @return Value of the result of the ALU.
      */
     public BitsSet getResult() {
         return this.result;
     }
 
     /**
-     * Metodo para cambiar el valor del primer operando de la ALU
-     * @param operandA Nuevo valor del primer operando
+     * Method to change the value of the first operand of the ALU.
+     * @param operandA New value of the first operand.
      */
     public void setOperandA(BitsSet operandA) {
         this.OperandA = operandA;
     }
 
     /**
-     * Metodo para cambiar el valor del segundo operando de la ALU
-     * @param operandB Nuevo valor del primer segundo
+     * Method to change the value of the second operand of the ALU.
+     * @param operandB New value of the first second.
      */
     public void setOperandB(BitsSet operandB) {
         this.OperandB = operandB;
     }
 
     /**
-     * Metodo para ejecutar una instruccion en la ALU
-     * @param operation Operacion a ejecutar
+     * Method to execute an instruction in the ALU.
+     * @param operation Operation to execute.
      */
     public void executeOperation(ALUOperations operation){
-        //TODO: Cargar ciclos dependiendo de la instruccion, buscar como poner valor en el enun
-        int ciclos = 0;
+        int cycles = 1;
         switch(operation){
             case Add:
                 this.operationAdd();
@@ -167,15 +158,16 @@ public class ALU {
             case Jleu:
                 this.operationJleu();
                 break;
-            case Err:
-                //TODO: Generar excepcion
+            default:
+                //TODO: revisar excepcion
+                //throw new Exception("No se reconoce la insruccion");
                 break;
         }
-        this.eventHandler.addEvent(new ALUExecutedInstruction(ciclos,null));
+        this.eventHandler.addEvent(new ALUExecutedInstruction(cycles,null));
     }
 
     /**
-     * Metodo para ejecutar la operacion add
+     * Method to execute the operation add.
      */
     private void operationAdd(){
         this.result = this.OperandA;
@@ -183,7 +175,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion sub
+     * Method to execute the operation sub.
      */
     private void operationSub(){
         this.result = this.OperandA;
@@ -191,7 +183,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion mul
+     * Method to execute the operation mul.
      */
     private void operationMul(){
         this.result = this.OperandA;
@@ -199,7 +191,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion div
+     * Method to execute the operation div.
      */
     private void operationDiv(){
         this.result = this.OperandA;
@@ -207,7 +199,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion mod
+     * Method to execute the operation mod.
      */
     private void operationMod(){
         this.result = this.OperandA;
@@ -215,7 +207,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion and
+     * Method to execute the operation and.
      */
     private void operationAnd(){
         this.result = this.OperandA;
@@ -223,7 +215,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion or
+     * Method to execute the operation or.
      */
     private void operationOr(){
         this.result = this.OperandA;
@@ -231,7 +223,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion xor
+     * Method to execute the operation xor.
      */
     private void operationXor(){
         this.result = this.OperandA;
@@ -239,7 +231,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion not
+     * Method to execute the operation not.
      */
     private void operationNot(){
         this.result = this.OperandA;
@@ -247,7 +239,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion sal
+     * Method to execute the operation sal.
      */
     private void operationSal(){
         this.result = this.OperandA;
@@ -255,7 +247,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion sar
+     * Method to execute the operation sar.
      */
     private void operationSar(){
         this.result = this.OperandA;
@@ -263,7 +255,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion sll
+     * Method to execute the operation sll.
      */
     private void operationSll(){
         this.result = this.OperandA;
@@ -271,7 +263,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion slr
+     * Method to execute the operation slr.
      */
     private void operationSlr(){
         this.result = this.OperandA;
@@ -279,7 +271,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion scl
+     * Method to execute the operation scl.
      */
     private void operationScl(){
         this.result = this.OperandA;
@@ -287,7 +279,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion scr
+     * Method to execute the operation scr.
      */
     private void operationScr(){
         this.result = this.OperandA;
@@ -295,7 +287,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion je
+     * Method to execute the operation je.
      */
     private void operationJe(){
         boolean res = this.OperandA.equals(this.OperandB);
@@ -307,7 +299,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jne
+     * Method to execute the operation jne.
      */
     private void operationJne(){
         boolean res = this.OperandA.notEquals(this.OperandB);
@@ -319,7 +311,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jg
+     * Method to execute the operation jg.
      */
     private void operationJg(){
         boolean res = this.OperandA.greater(this.OperandB);
@@ -331,7 +323,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jgeu
+     * Method to execute the operation jgeu.
      */
     private void operationJgeu(){
         boolean res = this.OperandA.greaterOrEqualUnsigned(this.OperandB);
@@ -343,7 +335,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jges
+     * Method to execute the operation jges.
      */
     private void operationJges(){
         boolean res = this.OperandA.greaterOrEqualSigned(this.OperandB);
@@ -355,7 +347,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jls
+     * Method to execute the operation jls.
      */
     private void operationJls(){
         boolean res = this.OperandA.lessSigned(this.OperandB);
@@ -367,7 +359,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jlu
+     * Method to execute the operation jlu.
      */
     private void operationJlu(){
         boolean res = this.OperandA.lessUnsigned(this.OperandB);
@@ -379,7 +371,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jles
+     * Method to execute the operation jles.
      */
     private void operationJles(){
         boolean res = this.OperandA.lessOrEqualSigned(this.OperandB);
@@ -391,7 +383,7 @@ public class ALU {
     }
 
     /**
-     * Metodo para ejecutar la operacion jleu
+     * Method to execute the operation jleu.
      */
     private void operationJleu(){
         boolean res = this.OperandA.lessOrEqualUnsigned(this.OperandB);

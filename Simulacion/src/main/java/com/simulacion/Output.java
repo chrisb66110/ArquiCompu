@@ -1,9 +1,34 @@
 package com.simulacion;
 
 public class Output {
-    MemoryManager memoryManager;
+    private MemoryManager memoryManager;
 
     public Output(MemoryManager memoryManager) {
         this.memoryManager = memoryManager;
+    }
+
+    /**
+     * Prints the characters until it finds a \0
+     * @param address the address where the string begins
+     */
+    public void printString(BitsSet address) {
+        boolean eofFound = false;
+        String string = "";
+        while(!eofFound) {
+            char character = (char) memoryManager.getBits(address.toInt(), OperandSize.Byte).toInt();
+            if (character != '\0')
+                string = string + character;
+            else
+                eofFound = true;
+        }
+        System.out.print(string);
+    }
+
+    /**
+     * Prints the number represented by the BitsSet
+     * @param number the number to be printed
+     */
+    public void printNumber(BitsSet number) {
+        System.out.print(number.toInt());
     }
 }

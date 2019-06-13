@@ -117,16 +117,18 @@ public class Cache {
                         // Check if the event has my information
                         if (this.level == (int) event.info[INFO_LEVEL_INDEX]) {                
                             //-------------------------------------------------
-                            // saving it in this level 
-                            // (because principle of locality)
+                            // saving it in this level (because principle of
+                            // locality)
                             this.writeLocal(
                                 address,
                                 amount, 
                                 (BitsSet) event.info[this.INFO_DATA_INDEX]
                             );
                             //-------------------------------------------------
-                            //-------------------------------------------------
-                            this.cacheReadsCache.unsubscribe();
+                            // Creating the event to send the data
+                            this.createDataReturnedEvent(
+                                (BitsSet)event.info[this.INFO_DATA_INDEX]
+                            );
                             //-------------------------------------------------
                         }
                         //-----------------------------------------------------
@@ -134,7 +136,6 @@ public class Cache {
                 );
                 //-------------------------------------------------------------
                 // getting the data from the next caché level
-                // TODO: create the event... and wait for another one
                 this.nextCache.getBits(address, amount);
                 //-------------------------------------------------------------
             } else {
@@ -164,17 +165,23 @@ public class Cache {
             );
             //-----------------------------------------------------------------
             // Setting the result in the info array
-            Object[] info = new Object[2];
-            info[this.INFO_DATA_INDEX] = result;
-            info[this.INFO_LEVEL_INDEX] = this.level - 1;
-            //-----------------------------------------------------------------
-            // creating the event to the data to be read
-            CacheDataReturn event = new CacheDataReturn(this.hitTime, info);
-            this.eventHandler.addEvent(event);
+            this.createDataReturnedEvent(result);
             //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
         // return result;
+        //---------------------------------------------------------------------
+    }
+    private void createDataReturnedEvent(BitsSet reading) {
+        //---------------------------------------------------------------------
+        // Setting the result in the info array
+        Object[] info = new Object[2];
+        info[this.INFO_DATA_INDEX] = reading;
+        info[this.INFO_LEVEL_INDEX] = this.level - 1;
+        //---------------------------------------------------------------------
+        // creating the event to the data to be read
+        CacheDataReturn event = new CacheDataReturn(this.hitTime, info);
+        this.eventHandler.addEvent(event);
         //---------------------------------------------------------------------
     }
     /**
@@ -188,7 +195,7 @@ public class Cache {
      * @param data the data to be written
      * @return 
      */
-    public void writeBits(BitsSet address, OperandSize amount, BitsSet data){
+    public void writeBits(BitsSet address, OperandSize amount, BitsSet data) {
         //---------------------------------------------------------------------
         // Update this level.
         this.writeLocal(address, amount, data);
@@ -218,7 +225,7 @@ public class Cache {
      * @param data the data to be written
      * @return 
      */
-    public void writeLocal(BitsSet address, OperandSize amount, BitsSet data){
+    private void writeLocal(BitsSet address, OperandSize amount, BitsSet data){
         //---------------------------------------------------------------------
         // Find the set number assigned to the address
         int setNumber = this.calculateSetIndex(address);

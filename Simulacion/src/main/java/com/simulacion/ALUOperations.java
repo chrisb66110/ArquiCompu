@@ -60,9 +60,13 @@ public enum ALUOperations {
     Push (2),
     Pop (2);
 
-    public final int cycles;
+    public final int cycles; //Instruction cycles
 
-    private ALUOperations(int cycles){
+    /**
+     * ALUOperations constructor.
+     * @param cycles Instruction cycles
+     */
+    ALUOperations(int cycles){
         this.cycles = cycles;
     }
 }

@@ -15,12 +15,14 @@ public class ControlUnit {
     private final BitsSet PUSH = BitsSet.valueOf(-4); //Number to mov the stack pointer in a push.
     private final BitsSet POP = BitsSet.valueOf(4); //Number to mov the stack pointer in a pop.
 
+    //Registers
     private BitsSet stackPointer = BitsSet.valueOf(this.INITIAL_STACK_POINTER); //Pointer to the last address non used
     private BitsSet programCounter; //Pointer to the next instruction.
     private BitsSet instructionRegister; //Instruction to execute.
+
     private CPUInterconnection internalBus; //Internal interconnection of the CPU.
     private EventHandler eventHandler = EventHandler.getInstance(); //Event manager.
-    private RxBus bus = RxBus.getInstance(); //RXBus for events.
+    private RxBus rXBus = RxBus.getInstance(); //RXBus for events.
 
     //Events used in the class
     private Subscription startCUCycle; //Subscription to the StartCUCycle event.
@@ -36,14 +38,14 @@ public class ControlUnit {
         this.programCounter = new BitsSet(Consts.REGISTER_SIZE);
         this.instructionRegister = new BitsSet(Consts.REGISTER_SIZE);
         //This subscribe works like the cycle because it is triggered by the StartCUCycle event
-        this.startCUCycle = bus.register(StartCUCycle.class, event -> {
+        this.startCUCycle = rXBus.register(StartCUCycle.class, event -> {
             this.fetchNextInstruction();
         });
     }
 
     /**
-     * Method to change the internal bus.
-     * @param internalBus Internal bus.
+     * Method to change the internal rXBus.
+     * @param internalBus Internal rXBus.
      */
     public void setInternalBus(CPUInterconnection internalBus) {
         this.internalBus = internalBus;
@@ -62,7 +64,7 @@ public class ControlUnit {
      */
     public void fetchNextInstruction(){
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
-        this.cacheDataReturn = bus.register(CacheDataReturn.class, event -> {
+        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, event -> {
             if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
                 //Save the returned cache instruction
                 instructionRegister = (BitsSet) event.info[this.INFO_INDEX_DATA];
@@ -261,11 +263,11 @@ public class ControlUnit {
      */
     private void executeInstrucitonALU(ALUOperations operation, int registerResult){
         //This subscribe is waiting for an ALUExecutedInstruction event, so it knows when the alu executes
-        this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
+        this.aluExecutedInstruction = rXBus.register(ALUExecutedInstruction.class, event -> {
             //It is sent to save the value in the indicated register
             this.internalBus.saveALUResultToRegister(registerResult);
             this.aluExecutedInstruction.unsubscribe();
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            //Event to execute next instruction
             this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
         });
         //It is sent to execute the instruction
@@ -374,7 +376,7 @@ public class ControlUnit {
         //Sum the offset to the PC
         BitsSet offset = instrucction.get(10,26);
         this.programCounter.add(offset);
-        //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+        //Event to execute next instruction
         this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
     }
 
@@ -393,7 +395,7 @@ public class ControlUnit {
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
         //This subscribe is waiting for an ALUExecutedInstruction event, so it knows when the alu executes
-        this.aluExecutedInstruction = bus.register(ALUExecutedInstruction.class, evento -> {
+        this.aluExecutedInstruction = rXBus.register(ALUExecutedInstruction.class, evento -> {
             //The result is requested to the ALU
             BitsSet result = this.internalBus.getALUResult();
             //The result of the ALU is checked to see if it was true
@@ -404,7 +406,7 @@ public class ControlUnit {
                 this.programCounter.add(offset);
             }
             this.aluExecutedInstruction.unsubscribe();
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            //Event to execute next instruction
             this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
         });
         //It is sent to execute the instruction
@@ -419,10 +421,10 @@ public class ControlUnit {
     private void operationCall(ALUOperations operation, BitsSet instruction){
         BitsSet offset = instruction.get(10,26);
         //The push of the complete pc
-        this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
+        this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
             //Sum the offset to the PC
             this.programCounter.add(offset);
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+            //Event to execute next instruction
             this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
             this.cacheWroteData.unsubscribe();
         });
@@ -439,12 +441,12 @@ public class ControlUnit {
      */
     private void operationRet(ALUOperations operation, BitsSet instruction){
         // The pop is to PC complete
-        this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
+        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, evento -> {
             if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
                 //Assigns the pointer to the PC
                 //info: programCounter in the stack
                 this.programCounter = (BitsSet) evento.info[this.INFO_INDEX_DATA];
-                //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+                //Event to execute next instruction
                 this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
                 this.cacheDataReturn.unsubscribe();
             }
@@ -461,8 +463,8 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      */
     private void operationSysCall(ALUOperations operation, BitsSet instruction){
-        this.syscallExecuted = bus.register(SyscallExecuted.class, evento -> {
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+        this.syscallExecuted = rXBus.register(SyscallExecuted.class, evento -> {
+            //Event to execute next instruction
             this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
             this.syscallExecuted.unsubscribe();
         });

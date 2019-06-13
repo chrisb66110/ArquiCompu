@@ -122,7 +122,7 @@ public class Cache {
                             this.writeLocal(
                                 address,
                                 amount, 
-                                (BItsSet) info[this.INFO_DATA_INDEX]
+                                (BitsSet) event.info[this.INFO_DATA_INDEX]
                             );
                             //-------------------------------------------------
                             //-------------------------------------------------
@@ -190,17 +190,14 @@ public class Cache {
      */
     public void writeBits(BitsSet address, OperandSize amount, BitsSet data){
         //---------------------------------------------------------------------
-        // Find the set number assigned to the address
-        int setNumber = this.calculateSetIndex(address);
-        //---------------------------------------------------------------------
-        // write the changes in the current caché level. 
-        this.sets[setNumber].writeBits(address, amount, data);
+        // Update this level.
+        this.writeLocal(address, amount, data);
         //---------------------------------------------------------------------
         // check if this is the last level caché
         if (this.nextCache != null) {
             //-----------------------------------------------------------------
             // write the changes in the next level.
-            // TODO: copy from christopher xd
+            // TODO:writeLocal copy from christopher xd
             this.nextCache.writeBits(address, amount, data);
             //-----------------------------------------------------------------
         } else {
@@ -211,6 +208,26 @@ public class Cache {
         }
         //---------------------------------------------------------------------
     }
+    /**
+     * Method that writes the given data in given address just for  this level.
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param address the address to write the data
+     * @param amount the size of the data to be written
+     * @param data the data to be written
+     * @return 
+     */
+    public void writeLocal(BitsSet address, OperandSize amount, BitsSet data){
+        //---------------------------------------------------------------------
+        // Find the set number assigned to the address
+        int setNumber = this.calculateSetIndex(address);
+        //---------------------------------------------------------------------
+        // write the changes in the current caché level. 
+        this.sets[setNumber].writeBits(address, amount, data);
+        //---------------------------------------------------------------------
+    }
+
     /**
      * Calculate the set index form the given address
      * 

@@ -16,7 +16,6 @@ public class Cache {
     private long size;
     private int asociativity;
     private CacheSet[] sets;
-    private int BLOCK_SIZE = 512;
     private int level;
     private int hitTime;
     private Cache nextCache;
@@ -25,11 +24,13 @@ public class Cache {
     private RxBus rxSubscriber = RxBus.getInstance();
     //-------------------------------------------------------------------------
     // Constants
+    private int BLOCK_SIZE = 32;
     private final int INFO_DATA_INDEX = 0;
     private final int INFO_LEVEL_INDEX = 0;
     //-------------------------------------------------------------------------
     // Events
     private Subscription cacheReadsCache;
+    private Subscription cacheReadsMemory;
     //-------------------------------------------------------------------------
     // Constructors
     /**
@@ -141,6 +142,7 @@ public class Cache {
             } else {
                 //-------------------------------------------------------------
                 // getting the data from memory
+                
                 // TODO: fetch the data from memory and create the event...
                 // TODO: and wait for another one
                 //-------------------------------------------------------------

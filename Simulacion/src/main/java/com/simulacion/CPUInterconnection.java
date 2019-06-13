@@ -7,6 +7,11 @@ import rx.Subscription;
  * Class to emulate the interconnection of the CPU components.
  */
 public class CPUInterconnection {
+    //Const
+    private final int LEVEL = -1;
+    private final int INFO_INDEX_LEVEL = -1;
+    private final int INFO_INDEX_DATA = -1;
+
     private BitsSet [] registers; // CPU registers.
     private ALU alu; // ALU.
     private ControlUnit controlUnit; //Control unit.
@@ -100,26 +105,28 @@ public class CPUInterconnection {
     public void loadMemoryToRegister(int register, BitsSet offset, OperandSize ammount, boolean signed){
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
         this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
-            registers[register] = (BitsSet) evento.info[0];
-            if(!signed){
-                //Case where there are that copy the sign
-                if (ammount == OperandSize.Byte) {
-                    //The sign is copied from bit 7, since 8 to 32
-                    //Consts.BYTE_SIZE = 8
-                    registers[register].set(Consts.BYTE_SIZE,
-                            Consts.REGISTER_SIZE,
-                            registers[register].get(Consts.BYTE_SIZE-1));
-                } else if (ammount == OperandSize.HalfWord) {
-                    //The sign is copied from bit 15, since 8 to 32
-                    //Consts.HALFWORD_SIZE = 15
-                    registers[register].set(Consts.HALFWORD_SIZE,
-                            Consts.REGISTER_SIZE,
-                            registers[register].get(Consts.HALFWORD_SIZE-1));
+            if ((int)evento.info[this.INFO_INDEX_LEVEL] != this.LEVEL){
+                registers[register] = (BitsSet) evento.info[this.INFO_INDEX_DATA];
+                if(!signed){
+                    //Case where there are that copy the sign
+                    if (ammount == OperandSize.Byte) {
+                        //The sign is copied from bit 7, since 8 to 32
+                        //Consts.BYTE_SIZE = 8
+                        registers[register].set(Consts.BYTE_SIZE,
+                                Consts.REGISTER_SIZE,
+                                registers[register].get(Consts.BYTE_SIZE-1));
+                    } else if (ammount == OperandSize.HalfWord) {
+                        //The sign is copied from bit 15, since 8 to 32
+                        //Consts.HALFWORD_SIZE = 15
+                        registers[register].set(Consts.HALFWORD_SIZE,
+                                Consts.REGISTER_SIZE,
+                                registers[register].get(Consts.HALFWORD_SIZE-1));
+                    }
                 }
+                //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
+                this.eventHandler.addEvent(new StartCUCycle(1,null));
+                this.cacheDataReturn.unsubscribe();
             }
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
-            this.cacheDataReturn.unsubscribe();
         });
         //It is sent to bring data to the cache
         this.dataCache.getBits(offset,ammount);
@@ -132,7 +139,7 @@ public class CPUInterconnection {
      * @param ammount Size of the value to be save.
      */
     public void storeRegisterToMemory(int register, BitsSet offset, OperandSize ammount){
-        //This subscribe is waiting for a CacheDataReturn event, so you know when the operation finished
+        //This subscribe is waiting for a CacheWroteData event, so you know when the operation finished
         this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
             //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
             this.eventHandler.addEvent(new StartCUCycle(1,null));

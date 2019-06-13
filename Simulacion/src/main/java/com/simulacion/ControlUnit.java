@@ -7,7 +7,11 @@ import rx.Subscription;
  * Class to emulate the control unit.
  */
 public class ControlUnit {
-    //TODO: hablar que actualmente el stackpointer apunta a la ultima utilizanda y que esta posicion deberia ser relativa
+    //Const
+    private final int INFO_INDEX_LEVEL = 1;
+    private final int LEVEL = -1;
+    private final int INFO_INDEX_DATA = 0;
+
     private BitsSet stackPointer = BitsSet.valueOf(0);//Pointer to the last address used, it necessary sum the PC to get data
     private BitsSet programCounter; //Pointer to the next instruction.
     private BitsSet instructionRegister; //Instruction to execute.
@@ -56,11 +60,13 @@ public class ControlUnit {
     public void fetchNextInstruction(){
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
         this.cacheDataReturn = bus.register(CacheDataReturn.class, event -> {
-            //Save the returned cache instruction
-            instructionRegister = (BitsSet) event.info[0];
-            //Command to decode and execute the instruction
-            this.decodeInstruction();
-            this.cacheDataReturn.unsubscribe();
+            if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
+                //Save the returned cache instruction
+                instructionRegister = (BitsSet) event.info[this.INFO_INDEX_DATA];
+                //Command to decode and execute the instruction
+                this.decodeInstruction();
+                this.cacheDataReturn.unsubscribe();
+            }
         });
         //It is sent to look for the data
         this.internalBus.loadInstructionToIR(this.programCounter);

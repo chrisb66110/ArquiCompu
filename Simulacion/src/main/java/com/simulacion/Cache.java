@@ -4,6 +4,7 @@ package com.simulacion;
 //-----------------------------------------------------------------------------
 // Imports
 import com.simulacion.eventos.CacheDataReturn;
+import com.simulacion.eventos.CacheWroteData;
 
 import rx.Subscription;
 //-----------------------------------------------------------------------------
@@ -26,11 +27,12 @@ public class Cache {
     // Constants
     private int BLOCK_SIZE = 32;
     private final int INFO_DATA_INDEX = 0;
-    private final int INFO_LEVEL_INDEX = 0;
+    private final int INFO_LEVEL_INDEX = 1;
     //-------------------------------------------------------------------------
     // Events
     private Subscription cacheReadsCache;
     private Subscription cacheReadsMemory;
+    private Subscription cacheWritesCache;
     //-------------------------------------------------------------------------
     // Constructors
     /**
@@ -174,6 +176,14 @@ public class Cache {
         // return result;
         //---------------------------------------------------------------------
     }
+    /**
+     * 
+     * Creates the event to unlock the code from above
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param reading the BitsSet read from this level
+     */
     private void createDataReturnedEvent(BitsSet reading) {
         //---------------------------------------------------------------------
         // Setting the result in the info array
@@ -205,16 +215,54 @@ public class Cache {
         // check if this is the last level caché
         if (this.nextCache != null) {
             //-----------------------------------------------------------------
+            // Creating the event to write in the cache levels from bellow
+            this.cacheWritesCache = this.rxSubscriber.register(
+                CacheWroteData.class,
+                event -> {
+                    //---------------------------------------------------------
+                    // Cheching whether the event is ours or not 
+                    if (
+                        this.level == 
+                        (int) event.info[this.INFO_LEVEL_INDEX-1]
+                    ) {
+                        //-----------------------------------------------------
+                        // Creates the event to unlock the previous level
+                        this.createWriteEvent();
+                        //-----------------------------------------------------
+                    }
+                    //---------------------------------------------------------
+                }
+            );
+            //-----------------------------------------------------------------
             // write the changes in the next level.
-            // TODO:writeLocal copy from christopher xd
             this.nextCache.writeBits(address, amount, data);
             //-----------------------------------------------------------------
         } else {
             //-----------------------------------------------------------------
             // write the changes in memory
+
             // TODO: write the changes in memory
             //-----------------------------------------------------------------
         }
+        //---------------------------------------------------------------------
+        
+        //---------------------------------------------------------------------
+    }
+    /**
+     * 
+     * Creates the event to unlock the code from above
+     * 
+     * @author Joseph Rementería (b55824)
+     */
+    private void createWriteEvent() {
+        //---------------------------------------------------------------------
+        // Setting the result in the info array
+        Object[] info = new Object[1];
+        info[this.INFO_LEVEL_INDEX-1] = this.level - 1;
+        //---------------------------------------------------------------------
+        // creating the event to the data to be read
+        CacheWroteData event = new CacheWroteData(this.hitTime, info);
+        this.eventHandler.addEvent(event);
         //---------------------------------------------------------------------
     }
     /**

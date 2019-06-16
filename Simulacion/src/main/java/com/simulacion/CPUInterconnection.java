@@ -7,21 +7,28 @@ import rx.Subscription;
  * Class to emulate the interconnection of the CPU components.
  */
 public class CPUInterconnection {
+    //Const
+    private final int LEVEL = -1; //Number to represent that the cache return data to the CPU.
+    private final int INFO_INDEX_LEVEL = 1; //Index of the level number in the info in event.
+    private final int INFO_INDEX_DATA = 0; //Index of data in the info in event.
+
     private BitsSet [] registers; // CPU registers.
     private ALU alu; // ALU.
     private ControlUnit controlUnit; //Control unit.
-    private Subscription cacheWroteData; //Subscription to the CacheWroteData event.
+    private RxBus rXBus = RxBus.getInstance(); //Singleton by RXBus.
+    private EventHandler eventHandler = EventHandler.getInstance(); //Event manager.
+
+    //Caches
     private Cache dataCache; // Data cache.
     private Cache instCache; // Instruction cache.
-    private RxBus bus = RxBus.getInstance(); //Singleton by RXBus.
-    private EventHandler eventHandler = EventHandler.getInstance(); //Event manager.
 
     //Events used in the class
     private Subscription cacheDataReturn; //Subscription to the CacheDataReturn event.
+    private Subscription cacheWroteData; //Subscription to the CacheWroteData event.
 
     /**
      * CPUInterconection Constructor.
-     * @param registers Vector records, 32 records.
+     * @param registers Vector registers, 32 registers.
      * @param alu ALU.
      * @param controlUnit Control unit.
      * @param dataCache Data cache.
@@ -36,7 +43,7 @@ public class CPUInterconnection {
     }
 
     /**
-     * Method to load a record in the ALU.
+     * Method to load a register in the ALU.
      * @param register Number of register you want to put in the ALU.
      * @param aluOperand ALU Operand to load the register.
      */
@@ -92,54 +99,62 @@ public class CPUInterconnection {
 
     /**
      * Method to load a memory value in a register.
-     * @param register Register number to load the value.
+     * @param registerResult Register number to load the value.
      * @param offset Memory offset to bring the value.
      * @param ammount Size of the value to be loaded.
      * @param signed Boolean indicating whether the value read is signed or unsigned.
      */
-    public void loadMemoryToRegister(int register, BitsSet offset, OperandSize ammount, boolean signed){
+    public void loadMemoryToRegister(ALUOperations operation, int registerResult, int registerIndex, BitsSet offset, OperandSize ammount, boolean signed){
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
-        this.cacheDataReturn = bus.register(CacheDataReturn.class, evento -> {
-            registers[register] = (BitsSet) evento.info[0];
-            if(!signed){
-                //Case where there are that copy the sign
-                if (ammount == OperandSize.Byte) {
-                    //The sign is copied from bit 7, since 8 to 32
-                    //Consts.BYTE_SIZE = 8
-                    registers[register].set(Consts.BYTE_SIZE,
-                            Consts.REGISTER_SIZE,
-                            registers[register].get(Consts.BYTE_SIZE-1));
-                } else if (ammount == OperandSize.HalfWord) {
-                    //The sign is copied from bit 15, since 8 to 32
-                    //Consts.HALFWORD_SIZE = 15
-                    registers[register].set(Consts.HALFWORD_SIZE,
-                            Consts.REGISTER_SIZE,
-                            registers[register].get(Consts.HALFWORD_SIZE-1));
+        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, evento -> {
+            if ((int)evento.info[this.INFO_INDEX_LEVEL] != this.LEVEL){
+                registers[registerResult] = (BitsSet) evento.info[this.INFO_INDEX_DATA];
+                if(!signed){
+                    //Case where there are that copy the sign
+                    if (ammount == OperandSize.Byte) {
+                        //The sign is copied from bit 7, since 8 to 32
+                        //Consts.BYTE_SIZE = 8
+                        registers[registerResult].set(Consts.BYTE_SIZE,
+                                Consts.REGISTER_SIZE,
+                                registers[registerResult].get(Consts.BYTE_SIZE-1));
+                    } else if (ammount == OperandSize.HalfWord) {
+                        //The sign is copied from bit 15, since 8 to 32
+                        //Consts.HALFWORD_SIZE = 15
+                        registers[registerResult].set(Consts.HALFWORD_SIZE,
+                                Consts.REGISTER_SIZE,
+                                registers[registerResult].get(Consts.HALFWORD_SIZE-1));
+                    }
                 }
+                //Event to execute next instruction
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
+                this.cacheDataReturn.unsubscribe();
             }
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
-            this.cacheDataReturn.unsubscribe();
         });
+        //Add offset and index from register
+        BitsSet address = (BitsSet)offset.clone();
+        address.add(registers[registerIndex]);
         //It is sent to bring data to the cache
-        this.dataCache.getBits(offset,ammount);
+        this.dataCache.getBits(address,ammount);
     }
 
     /**
-     * Method to store the value of a record in memory.
-     * @param register Register number where the value is taken.
+     * Method to store the value of a register in memory.
+     * @param registerResult Register number where the value is taken.
      * @param offset Offset to save the value.
      * @param ammount Size of the value to be save.
      */
-    public void storeRegisterToMemory(int register, BitsSet offset, OperandSize ammount){
-        //This subscribe is waiting for a CacheDataReturn event, so you know when the operation finished
-        this.cacheWroteData = bus.register(CacheWroteData.class, evento -> {
-            //TODO: Aqui se genera un evento de fin de instruccion, le mando un 1
-            this.eventHandler.addEvent(new StartCUCycle(1,null));
+    public void storeRegisterToMemory(ALUOperations operation, int registerResult, int registerIndex, BitsSet offset, OperandSize ammount){
+        //This subscribe is waiting for a CacheWroteData event, so you know when the operation finished
+        this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
+            //Event to execute next instruction
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
             this.cacheWroteData.unsubscribe();
         });
+        //Add offset and index from register
+        BitsSet address = (BitsSet)offset.clone();
+        address.add(registers[registerIndex]);
         //Write data in to cache
-        this.dataCache.writeBits(offset, ammount, this.registers[register]);
+        this.dataCache.writeBits(address, ammount, this.registers[registerResult]);
     }
 
     /**
@@ -154,19 +169,55 @@ public class CPUInterconnection {
     /**
      * Method to save data in the stack.
      * @param address Address in stack.
-     * @param programCounter Data to save in stack
+     * @param programCounter Data to save in stack.
      */
-    public void pushStack(BitsSet address, BitsSet programCounter){
+    public void pushPCToStack(BitsSet address, BitsSet programCounter){
         //Write data in to stack
         this.dataCache.writeBits(address, OperandSize.Word, programCounter);
     }
 
     /**
      * Method to load data from in the stack
+     * @param address Address to get data from the stack.
+     */
+    public void popStackToPC(BitsSet address){
+        //Get data from stack
+        this.dataCache.getBits(address,OperandSize.Word);
+    }
+
+    /**
+     * Method to save data in the stack.
+     * @param address Address in stack.
+     * @param register Register number to save in stack.
+     */
+    public void pushRegisterToStack(ALUOperations operation, BitsSet address, int register){
+        //The push of the complete register
+        this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
+            //Event to execute next instruction
+            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
+            this.cacheWroteData.unsubscribe();
+        });
+        //Write register in to stack
+        this.dataCache.writeBits(address, OperandSize.Word, this.registers[register]);
+    }
+
+    /**
+     * Method to load data from in the stack
      * @param address Address to get data from the stack
      */
-    public void popStack(BitsSet address){
-        //Get data from stack
+    public void popStackToRegister(ALUOperations operation, BitsSet address, int register){
+        // The pop is to register complete
+        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, evento -> {
+            if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
+                //Assigns the data to the register
+                //info: register in the stack
+                this.registers[register] = (BitsSet) evento.info[this.INFO_INDEX_DATA];
+                //Event to execute next instruction
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
+                this.cacheDataReturn.unsubscribe();
+            }
+        });
+        //Get register from stack
         this.dataCache.getBits(address,OperandSize.Word);
     }
 

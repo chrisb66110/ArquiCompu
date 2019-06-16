@@ -332,11 +332,22 @@ public class BitsSet{
     }
 
     /**
+     * Function that returns true this BitsSet is greater than the other BitsSet, comparison signed.
+     * @param other Second BitsSet for comparison.
+     * @return True if this BitsSet is greater than the other BitsSet.
+     */
+    public boolean greaterSigned(BitsSet other){
+        int thisVal = this.toInt();
+        int otherVal = other.toInt();
+        return thisVal > otherVal;
+    }
+
+    /**
      * Function that returns true this BitsSet is greater than the other BitsSet, comparison unsigned.
      * @param other Second BitsSet for comparison.
      * @return True if this BitsSet is greater than the other BitsSet.
      */
-    public boolean greater(BitsSet other){
+    public boolean greaterUnsigned(BitsSet other){
         int thisSize = this.length();
         int otherSize = other.length();
         if ( thisSize != otherSize) {

@@ -16,7 +16,7 @@ public class ALU {
      * @return Value of the result of the ALU.
      */
     public BitsSet getResult() {
-        return this.result;
+        return this.result.get(0,32);
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.simulacion;
 
 import com.simulacion.eventos.ALUExecutedInstruction;
+import com.simulacion.eventos.SyscallRun;
 
 /**
  * Class to emulate the ALU.
@@ -162,8 +163,9 @@ public class ALU {
                 this.operationJleu();
                 break;
             default:
-                //TODO: revisar excepcion
-                //throw new Exception("No se reconoce la insruccion");
+                //Sent to run syscall halt, the instruction is unknown
+                System.out.println("The instruction " + operation + " is unknown.");
+                this.eventHandler.addEvent(new SyscallRun(1, new Object[]{BitsSet.valueOf(5)}));
                 break;
         }
         this.eventHandler.addEvent(new ALUExecutedInstruction(cycles,null));

@@ -5,6 +5,7 @@ package com.simulacion;
 // Imports
 import com.simulacion.eventos.CacheDataReturn;
 import com.simulacion.eventos.CacheWroteData;
+import com.simulacion.eventos.BusSendsSignal;
 
 import rx.Subscription;
 //-----------------------------------------------------------------------------
@@ -25,9 +26,14 @@ public class Cache {
     private RxBus rxSubscriber = RxBus.getInstance();
     //-------------------------------------------------------------------------
     // Constants
-    private int BLOCK_SIZE = 32;
-    private final int INFO_DATA_INDEX = 0;
-    private final int INFO_LEVEL_INDEX = 1;
+    private final int BLOCK_SIZE                = 32;
+    private final int INFO_DATA_INDEX           = 0;
+    private final int INFO_LEVEL_INDEX          = 1;
+    //-------------------------------------------------------------------------
+    // Bus codes
+    private final int CONTROL_LINES_SIZE        = 4;
+    private final int MEM_READ_QUERY_CODE       = 1;
+    private final int MEM_READING_DONE_CODE     = 2;
     //-------------------------------------------------------------------------
     // Events
     private Subscription cacheReadsCache;
@@ -144,9 +150,44 @@ public class Cache {
             } else {
                 //-------------------------------------------------------------
                 // getting the data from memory
-                
-                // TODO: fetch the data from memory and create the event...
-                // TODO: and wait for another one
+                this.cacheReadsMemory = this.rxSubscriber.register(
+                    BusSendsSignal.class, 
+                    event ->{
+                        //-----------------------------------------------------
+                        // Checking if the reading has already finished.
+                        if (
+                            this.MEM_READING_DONE_CODE == 
+                            this.memoryBus.getControlLines().toInt()
+                        ) {
+                            //-------------------------------------------------
+                            // creating the event so the level above can has 
+                            // read address. 
+                            this.createDataReturnedEvent(
+                                memoryBus.getDataLines()
+                            );
+                            //-------------------------------------------------
+                        }
+                        //-----------------------------------------------------
+                    }
+                );
+                //-------------------------------------------------------------
+                // Trying to set the control lines
+                try {
+                    //---------------------------------------------------------
+                    // Setting the control lines with the correct code
+                    this.memoryBus.setControl(
+                        new BitsSet(
+                            this.CONTROL_LINES_SIZE,
+                            this.MEM_READ_QUERY_CODE
+                        )
+                    );
+                    //---------------------------------------------------------
+                    // Setting the address lines
+                    this.memoryBus.setAddress(address);
+                    //---------------------------------------------------------
+                } catch (Exception e) {
+                    // nothing but find the real control lines size
+                }
                 //-------------------------------------------------------------
             }
         } else {
@@ -295,16 +336,8 @@ public class Cache {
      */
     private int calculateSetIndex (BitsSet address) {
         //---------------------------------------------------------------------
-        // Auxiliary Vars.
-        int addressInt = 0;
-        //---------------------------------------------------------------------
         // Casting bitset to an integer
-        // TODO: use the created one
-        for (int index = address.length(); index >= 0 ; index--) {
-            if (address.get(index)) {
-                addressInt += Math.pow(2, index);
-            }
-        }
+        int addressInt = address.toInt();
         //---------------------------------------------------------------------
         // computing the block number and the set index
         return (

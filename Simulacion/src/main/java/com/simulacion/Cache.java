@@ -7,6 +7,7 @@ import com.simulacion.eventos.CacheDataReturn;
 import com.simulacion.eventos.CacheWroteData;
 import com.simulacion.eventos.BusSendsSignal;
 
+import rx.SingleSubscriber;
 import rx.Subscription;
 //-----------------------------------------------------------------------------
 /**
@@ -34,11 +35,14 @@ public class Cache {
     private final int CONTROL_LINES_SIZE        = 4;
     private final int MEM_READ_QUERY_CODE       = 1;
     private final int MEM_READING_DONE_CODE     = 2;
+    private final int MEM_WRITE_QUERY_CODE      = 3;
+    private final int MEM_WRITING_DONE_CODE     = 4;
     //-------------------------------------------------------------------------
     // Events
     private Subscription cacheReadsCache;
     private Subscription cacheReadsMemory;
     private Subscription cacheWritesCache;
+    private Subscription cacheWriteMemory;
     //-------------------------------------------------------------------------
     // Constructors
     /**
@@ -152,7 +156,7 @@ public class Cache {
                 // getting the data from memory
                 this.cacheReadsMemory = this.rxSubscriber.register(
                     BusSendsSignal.class, 
-                    event ->{
+                    event -> {
                         //-----------------------------------------------------
                         // Checking if the reading has already finished.
                         if (
@@ -186,28 +190,14 @@ public class Cache {
                     this.memoryBus.setAddress(address);
                     //---------------------------------------------------------
                 } catch (Exception e) {
-                    // nothing but find the real control lines size
+                    // nothing but find the real control or address lines size
                 }
                 //-------------------------------------------------------------
             }
         } else {
             //-----------------------------------------------------------------
             // reduce the size of the reading. 
-            int bitsSetCutIndex = -1;
-            switch (amount) {
-                case Word:
-                    bitsSetCutIndex = 32;
-                    break;
-                case HalfWord:
-                bitsSetCutIndex = 16;
-                    break;
-                case Byte:
-                bitsSetCutIndex = 8;
-                    break;
-            }
-            result = result.get(
-                result.length()-bitsSetCutIndex, result.length()
-            );
+            result = this .trimToOperandSize(result,amount);
             //-----------------------------------------------------------------
             // Setting the result in the info array
             this.createDataReturnedEvent(result);
@@ -274,19 +264,51 @@ public class Cache {
                     //---------------------------------------------------------
                 }
             );
-            //-----------------------------------------------------------------
-            // write the changes in the next level.
-            this.nextCache.writeBits(address, amount, data);
-            //-----------------------------------------------------------------
         } else {
-            //-----------------------------------------------------------------
-            // write the changes in memory
-
-            // TODO: write the changes in memory
-            //-----------------------------------------------------------------
+            //-------------------------------------------------------------
+            // writting the data to memory
+            this.cacheWriteMemory = this.rxSubscriber.register(
+                BusSendsSignal.class, 
+                event -> {
+                    //-----------------------------------------------------
+                    // Checking if the writting has already finished.
+                    if (
+                        this.MEM_WRITING_DONE_CODE == 
+                        this.memoryBus.getControlLines().toInt()
+                    ) {
+                        //-------------------------------------------------
+                        // creating the event so the level above knows the 
+                        // write has finished
+                        this.createWriteEvent();
+                        //-------------------------------------------------
+                    }
+                    //-----------------------------------------------------
+                }
+            );
+            //-------------------------------------------------------------
+            // Trying to set the control lines
+            try {
+                //---------------------------------------------------------
+                // Setting the control lines with the correct code
+                this.memoryBus.setControl(
+                    new BitsSet(
+                        this.CONTROL_LINES_SIZE,
+                        this.MEM_WRITE_QUERY_CODE
+                    )
+                );
+                //---------------------------------------------------------
+                // Setting the address lines
+                this.memoryBus.setAddress(address);
+                //---------------------------------------------------------
+                // Setting the data lines
+                // TODO: what are we gonna do with the amount?
+                this.memoryBus.setData(data);
+                //---------------------------------------------------------
+            } catch (Exception e) {
+                // nothing but find the real control or address lines size
+            }
+            //-------------------------------------------------------------
         }
-        //---------------------------------------------------------------------
-        
         //---------------------------------------------------------------------
     }
     /**
@@ -343,6 +365,41 @@ public class Cache {
         return (
             (int) Math.floor(addressInt/this.BLOCK_SIZE) % this.sets.length
         );
+        //---------------------------------------------------------------------
+    }
+    //-------------------------------------------------------------------------
+    /**
+     * 
+     * Trims the given value to the given size
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param value the value to trim
+     * @param size the desired size
+     * @return the value in the least significant bits of the desired size
+     */
+    private BitsSet trimToOperandSize(BitsSet value, OperandSize size) {
+        //---------------------------------------------------------------------
+        // reduce the size of the reading. 
+        int bitsSetCutIndex = -1;
+        BitsSet result = null;
+        //---------------------------------------------------------------------
+        switch (size) {
+            case Word:
+                bitsSetCutIndex = 32;
+                break;
+            case HalfWord:
+                bitsSetCutIndex = 16;
+                break;
+            case Byte:
+                bitsSetCutIndex = 8;
+                break;
+        }
+        result = value.get(
+            value.length()-bitsSetCutIndex, value.length()
+        );
+        //---------------------------------------------------------------------
+        return result;
         //---------------------------------------------------------------------
     }
     //-------------------------------------------------------------------------

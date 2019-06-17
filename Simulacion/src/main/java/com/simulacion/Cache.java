@@ -324,6 +324,8 @@ public class Cache {
         info[this.INFO_LEVEL_INDEX-1] = this.level - 1;
         //---------------------------------------------------------------------
         // creating the event to the data to be read
+        // TODO: by know, the event to say that this level has finished the 
+        // TODO: writing is equal to the hit time
         CacheWroteData event = new CacheWroteData(this.hitTime, info);
         this.eventHandler.addEvent(event);
         //---------------------------------------------------------------------
@@ -347,7 +349,6 @@ public class Cache {
         this.sets[setNumber].writeBits(address, amount, data);
         //---------------------------------------------------------------------
     }
-
     /**
      * Calculate the set index form the given address
      * 

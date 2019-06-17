@@ -1,7 +1,6 @@
 package com.simulacion;
 
 import com.simulacion.eventos.*;
-import oracle.jrockit.jfr.events.Bits;
 import rx.Subscription;
 
 /**

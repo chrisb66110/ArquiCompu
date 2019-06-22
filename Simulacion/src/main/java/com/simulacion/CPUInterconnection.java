@@ -61,7 +61,6 @@ public class CPUInterconnection {
      * @param aluOperand ALU Operand to load the immediate.
      */
     public void loadImmediateToALU(BitsSet immediate, ALUOperands aluOperand){
-        //TODO: Ver si hay que revisar que el BitSet es de 32
         if (aluOperand == ALUOperands.OperandA){
             this.alu.setOperandA(immediate);
         }else{
@@ -82,8 +81,6 @@ public class CPUInterconnection {
      * @param register Register number to save the result of the ALU.
      */
     public void saveALUResultToRegister(int register){
-        //TODO: Ver si hay que revisar que el BitSet no hace overflow
-        //TODO: Ver si hago un this.alu.getResult().get(0,32);
         this.registers[register] = this.alu.getResult();
     }
 
@@ -92,8 +89,6 @@ public class CPUInterconnection {
      * @return Result of the ALU.
      */
     public BitsSet getALUResult(){
-        //TODO: Ver si hay que revisar que el BitSet no hace overflow
-        //TODO: Ver si hago un this.alu.getResult().get(0,32);
         return this.alu.getResult();
     }
 

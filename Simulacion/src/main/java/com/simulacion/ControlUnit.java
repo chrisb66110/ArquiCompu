@@ -14,6 +14,7 @@ public class ControlUnit {
     private final int INITIAL_STACK_POINTER = 127; //Initial stack pointer.
     private final BitsSet PUSH = BitsSet.valueOf(-4); //Number to mov the stack pointer in a push.
     private final BitsSet POP = BitsSet.valueOf(4); //Number to mov the stack pointer in a pop.
+    private final BitsSet INCREASE_PC = BitsSet.valueOf(4); //Number to increase PC to next instruction.
 
     //Registers
     private BitsSet stackPointer = BitsSet.valueOf(this.INITIAL_STACK_POINTER); //Pointer to the last address non used
@@ -68,6 +69,7 @@ public class ControlUnit {
             if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
                 //Save the returned cache instruction
                 instructionRegister = (BitsSet) event.info[this.INFO_INDEX_DATA];
+                this.programCounter.add(this.INCREASE_PC);
                 //Command to decode and execute the instruction
                 this.decodeInstruction();
                 this.cacheDataReturn.unsubscribe();
@@ -251,8 +253,10 @@ public class ControlUnit {
                 this.operationPopRegisterToStack(ALUOperations.Pop, this.instructionRegister);
                 break;
             default:
-                //TODO: revisar excepcion
-                //throw new Exception("No se reconoce la insruccion");
+                //Sent to run syscall halt, the instruction is unknown
+                System.out.println("The instruction " + aluOperationsNumber + " is unknown.");
+                this.eventHandler.addEvent(new SyscallRun(1, new Object[]{BitsSet.valueOf(5)}));
+                break;
         }
     }
 

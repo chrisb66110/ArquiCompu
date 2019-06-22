@@ -5,9 +5,6 @@ package com.simulacion;
 // imports
 import rx.Subscription;
 import com.simulacion.eventos.BusSendsSignal;
-
-import java.util.BitSet;
-
 import com.simulacion.Consts;
 //-----------------------------------------------------------------------------
 /**
@@ -37,14 +34,25 @@ public class Memory {
      * @param bus
      */
     public Memory(int size, Bus bus) {
+        //---------------------------------------------------------------------
+        // Creating the memory
+        // TODO: Memory as an array of bits or as a bank of them?
         this.memory = new BitsSet(size);
+        //---------------------------------------------------------------------
+        // Setting the bus
         this.bus = bus;
+        //---------------------------------------------------------------------
+        // creating the subscription to always read the bus signals 
         this.busSendingData = this.rxSubscriber.register(
             BusSendsSignal.class, 
             event ->{
+                //-------------------------------------------------------------
+                // Decoding the signals sent through the bus
                 this.decodeBusSignals();
+                //-------------------------------------------------------------
             }
         );
+        //---------------------------------------------------------------------
     }
     //--------------------------------------------------------------------------
     // Methods

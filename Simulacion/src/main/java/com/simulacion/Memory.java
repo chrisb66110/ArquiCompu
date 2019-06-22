@@ -66,25 +66,46 @@ public class Memory {
      */
     private void decodeBusSignals () {
         //---------------------------------------------------------------------
-        switch(this.bus.getControlLines().toInt()){
+        // Auxiliry variables
+        int amount = -1;
+        boolean writing = true;
+        //---------------------------------------------------------------------
+        switch(this.bus.getControlLines().toInt()) {
             case Consts.MEM_READ_QUERY_CODE:
                 //-------------------------------------------------------------
                 this.getBits(
-                    this.bus.getAddressLines().toInt(),
-                    OperandSize.Word
+                    this.bus.getAddressLines().toInt()
                 );
+                //-------------------------------------------------------------
+                writing = false;
                 //-------------------------------------------------------------
                 break;
-            case Consts.MEM_WRITE_QUERY_CODE:
+            case Consts.MEM_WRITE_BT_QUERY_CODE:
                 //-------------------------------------------------------------
-                this.writeBits(
-                    this.bus.getAddressLines().toInt(),
-                    OperandSize.Word,
-                    this.bus.getDataLines()
-                );
+                amount = Consts.BYTE_SIZE;
+                break;
+                //-------------------------------------------------------------
+            case Consts.MEM_WRITE_HW_QUERY_CODE:
+                //-------------------------------------------------------------
+                amount = Consts.HALFWORD_SIZE;
+                break;
+                //-------------------------------------------------------------
+            case Consts.MEM_WRITE_WD_QUERY_CODE:
+                //-------------------------------------------------------------
+                amount = Consts.WORD_SIZE;
                 break;
                 //-------------------------------------------------------------
         }
+        //---------------------------------------------------------------------
+        if (writing) {
+        //---------------------------------------------------------------------
+            this.writeBits(
+                this.bus.getAddressLines().toInt(),
+                amount,
+                this.bus.getDataLines()
+            );   
+        //---------------------------------------------------------------------
+        }        
         //---------------------------------------------------------------------
     }
     /**
@@ -96,14 +117,13 @@ public class Memory {
      * @param address address to read
      * @param amount the amount to be fetched
      */
-    public void getBits(int address, OperandSize amount){
+    public void getBits(int address){
         //---------------------------------------------------------------------
         this.createEvent(
             Consts.MEM_READING_DONE_CODE,
             //-----------------------------------------------------------------
             // Reading the data from memory
-            // TODO: get the amount as a referring number insted of 32
-            this.memory.get(address, address + 32) 
+            this.memory.get(address, address + Consts.BLOCK_SIZE) 
             //-----------------------------------------------------------------
         );
         //---------------------------------------------------------------------
@@ -118,12 +138,15 @@ public class Memory {
      * @param amount the amount of bit to write
      * @param data the info to be written to memory 
      */
-    public void writeBits(int address, OperandSize amount, BitsSet data){
+    public void writeBits(int address, int amount, BitsSet data){
         //---------------------------------------------------------------------
-        // Writting the whole data into memory
-        // TODO: use amount to save the changes 
-        for (int index = address; index < 32;index ++) {
-            this.memory.set(index, data.get(index-address));
+        // Writting the data into memory
+        int initDataIndex = data.size() - amount;
+        for (int index = address; index < amount; index ++) {
+            this.memory.set(
+                index, 
+                data.get(initDataIndex + (index - address))
+            );
         }
         //---------------------------------------------------------------------
         // Creating the event to unlock the level above

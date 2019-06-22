@@ -62,10 +62,14 @@ public class Cache {
         //---------------------------------------------------------------------
         // Setting the creation of the caché sets
         // this.size = this.BLOCK_SIZE * sets * this.asociativity;
-        int sets = (int) Math.ceil(size/(Consts.BLOCK_SIZE * this.asociativity));
+        int sets = 
+            (int) Math.ceil(size/(Consts.BLOCK_SIZE * this.asociativity));
         this.sets = new CacheSet[sets];
         for (int index = 0; index < sets; index++) {
-            this.sets[index] = new CacheSet(this.asociativity, Consts.BLOCK_SIZE);
+            this.sets[index] = new CacheSet(
+                this.asociativity,
+                Consts.BLOCK_SIZE
+            );
         }
         //---------------------------------------------------------------------
         // Setting the level
@@ -115,7 +119,10 @@ public class Cache {
                     event -> {
                         //-----------------------------------------------------
                         // Check if the event has my information
-                        if (this.level == (int) event.info[Consts.INFO_LEVEL_INDEX]) {                
+                        if (
+                            this.level == 
+                            (int) event.info[Consts.INFO_LEVEL_INDEX]
+                        ) {                
                             //-------------------------------------------------
                             // saving it in this level (because principle of
                             // locality)
@@ -252,49 +259,66 @@ public class Cache {
                 }
             );
         } else {
-            //-------------------------------------------------------------
+            //-----------------------------------------------------------------
             // writting the data to memory
             this.cacheWriteMemory = this.rxSubscriber.register(
                 BusSendsSignal.class, 
                 event -> {
-                    //-----------------------------------------------------
+                    //---------------------------------------------------------
                     // Checking if the writting has already finished.
                     if (
                         Consts.MEM_WRITING_DONE_CODE == 
                         this.memoryBus.getControlLines().toInt()
                     ) {
-                        //-------------------------------------------------
+                        //-----------------------------------------------------
                         // creating the event so the level above knows the 
                         // write has finished
                         this.createWriteEvent();
-                        //-------------------------------------------------
+                        //-----------------------------------------------------
                     }
-                    //-----------------------------------------------------
+                    //---------------------------------------------------------
                 }
             );
-            //-------------------------------------------------------------
+            //-----------------------------------------------------------------
             // Trying to set the control lines
             try {
-                //---------------------------------------------------------
+                //-------------------------------------------------------------
                 // Setting the control lines with the correct code
+                int code = -1;
+                switch (amount) {
+                    case Byte:
+                        //-----------------------------------------------------
+                        code = Consts.BYTE_SIZE;
+                        break;
+                        //-----------------------------------------------------
+                    case HalfWord:
+                        //-----------------------------------------------------
+                        code = Consts.HALFWORD_SIZE;
+                        break;
+                        //-----------------------------------------------------
+                    case Word:
+                        //-----------------------------------------------------
+                        code = Consts.WORD_SIZE;
+                        break;
+                        //-----------------------------------------------------
+                }
                 this.memoryBus.setControl(
                     new BitsSet(
                         Consts.CONTROL_LINES_SIZE,
-                        Consts.MEM_WRITE_QUERY_CODE
+                        code
                     )
                 );
-                //---------------------------------------------------------
+                //-------------------------------------------------------------
                 // Setting the address lines
                 this.memoryBus.setAddress(address);
-                //---------------------------------------------------------
+                //-------------------------------------------------------------
                 // Setting the data lines
-                // TODO: what are we gonna do with the amount?
                 this.memoryBus.setData(data);
-                //---------------------------------------------------------
+                //-------------------------------------------------------------
             } catch (Exception e) {
                 // nothing but find the real control or address lines size
             }
-            //-------------------------------------------------------------
+            //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
     }
@@ -310,9 +334,7 @@ public class Cache {
         Object[] info = new Object[1];
         info[Consts.INFO_LEVEL_INDEX-1] = this.level - 1;
         //---------------------------------------------------------------------
-        // creating the event to the data to be read
-        // TODO: by know, the event to say that this level has finished the 
-        // TODO: writing is equal to the hit time
+        // Creating the event to the data to be read
         CacheWroteData event = new CacheWroteData(this.hitTime, info);
         this.eventHandler.addEvent(event);
         //---------------------------------------------------------------------

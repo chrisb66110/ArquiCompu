@@ -25,10 +25,12 @@ public class Consts {
     //-------------------------------------------------------------------------
     // Bus codes
     public static final int CONTROL_LINES_SIZE        = 4;
-    public static final int MEM_READ_QUERY_CODE       = 1;
-    public static final int MEM_READING_DONE_CODE     = 2;
-    public static final int MEM_WRITE_QUERY_CODE      = 3;
-    public static final int MEM_WRITING_DONE_CODE     = 4;
+    public static final int MEM_READING_DONE_CODE     = 1;
+    public static final int MEM_READ_QUERY_CODE       = 2;
+    public static final int MEM_WRITING_DONE_CODE     = 3;
+    public static final int MEM_WRITE_WD_QUERY_CODE   = 4;
+    public static final int MEM_WRITE_HW_QUERY_CODE   = 5;
+    public static final int MEM_WRITE_BT_QUERY_CODE   = 6;
     //-------------------------------------------------------------------------
     // Memory constants
     public static final int MAT                       = 1024;

@@ -508,7 +508,18 @@ public class BitsSet{
         //False because they are the same
         return true;
     }
-
+    //-------------------------------------------------------------------------
+    /**
+     * Returns the size of the BitsSet
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @return size of the Bitsset
+     */
+    public int size() {
+        return this.bitSet.size();
+    }
+    //-------------------------------------------------------------------------
 }
 
 

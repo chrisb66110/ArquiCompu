@@ -2,6 +2,14 @@
 // Package
 package com.simulacion;
 //-----------------------------------------------------------------------------
+// imports
+import rx.Subscription;
+import com.simulacion.eventos.BusSendsSignal;
+
+import java.util.BitSet;
+
+import com.simulacion.Consts;
+//-----------------------------------------------------------------------------
 /**
  *  Class that emulates the behavoir of a RAM chip.
  * 
@@ -9,10 +17,14 @@ package com.simulacion;
  */
 public class Memory {
     //-------------------------------------------------------------------------
+    // Global variables
     private BitsSet memory;
     private EventHandler eventHandler = EventHandler.getInstance();
-    RxBus rxSubscriber = RxBus.getInstance();
+    private RxBus rxSubscriber = RxBus.getInstance();
     private Bus bus;
+    //--------------------------------------------------------------------------
+    // Subscriptions
+    private Subscription busSendingData;
     //--------------------------------------------------------------------------
     // Constructor
     /**
@@ -27,22 +39,56 @@ public class Memory {
     public Memory(int size, Bus bus) {
         this.memory = new BitsSet(size);
         this.bus = bus;
-         
+        this.busSendingData = this.rxSubscriber.register(
+            BusSendsSignal.class, 
+            event ->{
+                this.decodeBusSignals();
+            }
+        );
     }
     //--------------------------------------------------------------------------
     // Methods
-
-
+    /**
+     * 
+     * Handles the decode process when other component sends a signal through 
+     * the bus
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     */
+    private void decodeBusSignals () {
+        //---------------------------------------------------------------------
+        switch(this.bus.getControlLines().toInt()){
+            case Consts.MEM_READ_QUERY_CODE:
+                //-------------------------------------------------------------
+                this.getBits(
+                    this.bus.getAddressLines().toInt(),
+                    OperandSize.Word
+                );
+                //-------------------------------------------------------------
+                break;
+            case Consts.MEM_WRITE_QUERY_CODE:
+                //-------------------------------------------------------------
+                this.writeBits(
+                    this.bus.getAddressLines().toInt(),
+                    OperandSize.Word,
+                    this.bus.getDataLines()
+                );
+                break;
+                //-------------------------------------------------------------
+        }
+        //---------------------------------------------------------------------
+    }
     /**
      * 
      * Reads the data in the given address.
      * 
      * @author Joseph Rementería (b55824)
      * 
-     * @param dir address to read
-     * @param amount 
+     * @param address address to read
+     * @param amount the amount to be fetched
      */
-    public void getBits(int dir, OperandSize ammount){
+    public void getBits(int address, OperandSize amount){
         
     }
     /**

@@ -374,13 +374,13 @@ public class Cache {
         //---------------------------------------------------------------------
         switch (size) {
             case Word:
-                bitsSetCutIndex = 32;
+                bitsSetCutIndex = Consts.WORD_SIZE;
                 break;
             case HalfWord:
-                bitsSetCutIndex = 16;
+                bitsSetCutIndex = Consts.HALFWORD_SIZE;
                 break;
             case Byte:
-                bitsSetCutIndex = 8;
+                bitsSetCutIndex = Consts.BYTE_SIZE;
                 break;
         }
         result = value.get(

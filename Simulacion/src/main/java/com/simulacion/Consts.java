@@ -18,7 +18,7 @@ public class Consts {
 
     
     //-------------------------------------------------------------------------
-    // Constants
+    // Cache constants
     public static final int BLOCK_SIZE                = 32;
     public static final int INFO_DATA_INDEX           = 0;
     public static final int INFO_LEVEL_INDEX          = 1;
@@ -29,6 +29,9 @@ public class Consts {
     public static final int MEM_READING_DONE_CODE     = 2;
     public static final int MEM_WRITE_QUERY_CODE      = 3;
     public static final int MEM_WRITING_DONE_CODE     = 4;
+    //-------------------------------------------------------------------------
+    // Memory constants
+    public static final int MAT                       = 1024;
     //-------------------------------------------------------------------------
 
 }

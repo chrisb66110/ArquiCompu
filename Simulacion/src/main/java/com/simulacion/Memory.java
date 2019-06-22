@@ -98,9 +98,14 @@ public class Memory {
      */
     public void getBits(int address, OperandSize amount){
         //---------------------------------------------------------------------
-        // Reading the data from memory
-        // TODO: get the amount as a referring number insted of 32
-        this.memory.get(address, address + 32);
+        this.createEvent(
+            Consts.MEM_READING_DONE_CODE,
+            //-----------------------------------------------------------------
+            // Reading the data from memory
+            // TODO: get the amount as a referring number insted of 32
+            this.memory.get(address, address + 32) 
+            //-----------------------------------------------------------------
+        );
         //---------------------------------------------------------------------
     }
     /**
@@ -119,6 +124,42 @@ public class Memory {
         // TODO: use amount to save the changes 
         for (int index = address; index < 32;index ++) {
             this.memory.set(index, data.get(index-address));
+        }
+        //---------------------------------------------------------------------
+        // Creating the event to unlock the level above
+        this.createEvent(Consts.MEM_WRITING_DONE_CODE, null);
+        //---------------------------------------------------------------------
+    }
+    /**
+     * 
+     * Creates the evet to unlock the level above.
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param code the code to be send
+     * @param data the data read, null if it was a writting
+     */
+    private void createEvent(int code, BitsSet data) {
+        //---------------------------------------------------------------------
+        try {
+            //-----------------------------------------------------------------
+            // Telling the higher level that the data was saved
+            this.bus.setControl(
+                new BitsSet(
+                    Consts.CONTROL_LINES_SIZE,
+                    code
+                )
+            );
+            //-----------------------------------------------------------------
+            // Setting the data lines, null if it is a writting
+            this.bus.setData(data);
+            //-----------------------------------------------------------------
+            // Creating the BusSendingSignal event.
+            // There is no use for the var info
+            this.eventHandler.addEvent(new BusSendsSignal(Consts.MAT,null));
+            //-----------------------------------------------------------------
+        } catch (Exception e) {
+
         }
         //---------------------------------------------------------------------
     }

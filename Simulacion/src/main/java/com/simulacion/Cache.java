@@ -6,8 +6,7 @@ package com.simulacion;
 import com.simulacion.eventos.CacheDataReturn;
 import com.simulacion.eventos.CacheWroteData;
 import com.simulacion.eventos.BusSendsSignal;
-
-import rx.SingleSubscriber;
+import com.simulacion.Consts;
 import rx.Subscription;
 //-----------------------------------------------------------------------------
 /**
@@ -25,18 +24,6 @@ public class Cache {
     private Bus memoryBus;
     private EventHandler eventHandler = EventHandler.getInstance();
     private RxBus rxSubscriber = RxBus.getInstance();
-    //-------------------------------------------------------------------------
-    // Constants
-    private final int BLOCK_SIZE                = 32;
-    private final int INFO_DATA_INDEX           = 0;
-    private final int INFO_LEVEL_INDEX          = 1;
-    //-------------------------------------------------------------------------
-    // Bus codes
-    private final int CONTROL_LINES_SIZE        = 4;
-    private final int MEM_READ_QUERY_CODE       = 1;
-    private final int MEM_READING_DONE_CODE     = 2;
-    private final int MEM_WRITE_QUERY_CODE      = 3;
-    private final int MEM_WRITING_DONE_CODE     = 4;
     //-------------------------------------------------------------------------
     // Events
     private Subscription cacheReadsCache;
@@ -75,10 +62,10 @@ public class Cache {
         //---------------------------------------------------------------------
         // Setting the creation of the caché sets
         // this.size = this.BLOCK_SIZE * sets * this.asociativity;
-        int sets = (int) Math.ceil(size/(BLOCK_SIZE * this.asociativity));
+        int sets = (int) Math.ceil(size/(Consts.BLOCK_SIZE * this.asociativity));
         this.sets = new CacheSet[sets];
         for (int index = 0; index < sets; index++) {
-            this.sets[index] = new CacheSet(this.asociativity, BLOCK_SIZE);
+            this.sets[index] = new CacheSet(this.asociativity, Consts.BLOCK_SIZE);
         }
         //---------------------------------------------------------------------
         // Setting the level
@@ -128,19 +115,19 @@ public class Cache {
                     event -> {
                         //-----------------------------------------------------
                         // Check if the event has my information
-                        if (this.level == (int) event.info[INFO_LEVEL_INDEX]) {                
+                        if (this.level == (int) event.info[Consts.INFO_LEVEL_INDEX]) {                
                             //-------------------------------------------------
                             // saving it in this level (because principle of
                             // locality)
                             this.writeLocal(
                                 address,
                                 amount, 
-                                (BitsSet) event.info[this.INFO_DATA_INDEX]
+                                (BitsSet) event.info[Consts.INFO_DATA_INDEX]
                             );
                             //-------------------------------------------------
                             // Creating the event to send the data
                             this.createDataReturnedEvent(
-                                (BitsSet)event.info[this.INFO_DATA_INDEX]
+                                (BitsSet)event.info[Consts.INFO_DATA_INDEX]
                             );
                             //-------------------------------------------------
                         }
@@ -160,7 +147,7 @@ public class Cache {
                         //-----------------------------------------------------
                         // Checking if the reading has already finished.
                         if (
-                            this.MEM_READING_DONE_CODE == 
+                            Consts.MEM_READING_DONE_CODE == 
                             this.memoryBus.getControlLines().toInt()
                         ) {
                             //-------------------------------------------------
@@ -181,8 +168,8 @@ public class Cache {
                     // Setting the control lines with the correct code
                     this.memoryBus.setControl(
                         new BitsSet(
-                            this.CONTROL_LINES_SIZE,
-                            this.MEM_READ_QUERY_CODE
+                            Consts.CONTROL_LINES_SIZE,
+                            Consts.MEM_READ_QUERY_CODE
                         )
                     );
                     //---------------------------------------------------------
@@ -219,8 +206,8 @@ public class Cache {
         //---------------------------------------------------------------------
         // Setting the result in the info array
         Object[] info = new Object[2];
-        info[this.INFO_DATA_INDEX] = reading;
-        info[this.INFO_LEVEL_INDEX] = this.level - 1;
+        info[Consts.INFO_DATA_INDEX] = reading;
+        info[Consts.INFO_LEVEL_INDEX] = this.level - 1;
         //---------------------------------------------------------------------
         // creating the event to the data to be read
         CacheDataReturn event = new CacheDataReturn(this.hitTime, info);
@@ -254,7 +241,7 @@ public class Cache {
                     // Cheching whether the event is ours or not 
                     if (
                         this.level == 
-                        (int) event.info[this.INFO_LEVEL_INDEX-1]
+                        (int) event.info[Consts.INFO_LEVEL_INDEX-1]
                     ) {
                         //-----------------------------------------------------
                         // Creates the event to unlock the previous level
@@ -273,7 +260,7 @@ public class Cache {
                     //-----------------------------------------------------
                     // Checking if the writting has already finished.
                     if (
-                        this.MEM_WRITING_DONE_CODE == 
+                        Consts.MEM_WRITING_DONE_CODE == 
                         this.memoryBus.getControlLines().toInt()
                     ) {
                         //-------------------------------------------------
@@ -292,8 +279,8 @@ public class Cache {
                 // Setting the control lines with the correct code
                 this.memoryBus.setControl(
                     new BitsSet(
-                        this.CONTROL_LINES_SIZE,
-                        this.MEM_WRITE_QUERY_CODE
+                        Consts.CONTROL_LINES_SIZE,
+                        Consts.MEM_WRITE_QUERY_CODE
                     )
                 );
                 //---------------------------------------------------------
@@ -321,7 +308,7 @@ public class Cache {
         //---------------------------------------------------------------------
         // Setting the result in the info array
         Object[] info = new Object[1];
-        info[this.INFO_LEVEL_INDEX-1] = this.level - 1;
+        info[Consts.INFO_LEVEL_INDEX-1] = this.level - 1;
         //---------------------------------------------------------------------
         // creating the event to the data to be read
         // TODO: by know, the event to say that this level has finished the 
@@ -364,7 +351,7 @@ public class Cache {
         //---------------------------------------------------------------------
         // computing the block number and the set index
         return (
-            (int) Math.floor(addressInt/this.BLOCK_SIZE) % this.sets.length
+            (int) Math.floor(addressInt/Consts.BLOCK_SIZE) % this.sets.length
         );
         //---------------------------------------------------------------------
     }

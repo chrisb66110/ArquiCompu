@@ -97,7 +97,11 @@ public class Memory {
      * @param amount the amount to be fetched
      */
     public void getBits(int address, OperandSize amount){
-        
+        //---------------------------------------------------------------------
+        // Reading the data from memory
+        // TODO: get the amount as a referring number insted of 32
+        this.memory.get(address, address + 32);
+        //---------------------------------------------------------------------
     }
     /**
      * 
@@ -110,7 +114,13 @@ public class Memory {
      * @param data the info to be written to memory 
      */
     public void writeBits(int address, OperandSize amount, BitsSet data){
-
+        //---------------------------------------------------------------------
+        // Writting the whole data into memory
+        // TODO: use amount to save the changes 
+        for (int index = address; index < 32;index ++) {
+            this.memory.set(index, data.get(index-address));
+        }
+        //---------------------------------------------------------------------
     }
     //--------------------------------------------------------------------------
 }

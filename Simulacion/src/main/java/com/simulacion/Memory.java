@@ -115,9 +115,8 @@ public class Memory {
      * @author Joseph Rementería (b55824)
      * 
      * @param address address to read
-     * @param amount the amount to be fetched
      */
-    public void getBits(int address){
+    private void getBits(int address){
         //---------------------------------------------------------------------
         address *= 8;
         //---------------------------------------------------------------------
@@ -183,7 +182,7 @@ public class Memory {
      * @param amount the amount of bit to write
      * @param data the info to be written to memory 
      */
-    public void writeBits(int address, int amount, BitsSet data){
+    private void writeBits(int address, int amount, BitsSet data){
         //---------------------------------------------------------------------
         address *= 8;
         //---------------------------------------------------------------------

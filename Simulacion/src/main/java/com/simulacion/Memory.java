@@ -132,6 +132,49 @@ public class Memory {
     }
     /**
      * 
+     * Reads the data in the given address.
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param address address to read
+     * @param size the amount to be fetched
+     */
+    public BitsSet getBits(int address, OperandSize size) {
+        //---------------------------------------------------------------------
+        address *= 8;
+        BitsSet result = new BitsSet(size.size);
+        //---------------------------------------------------------------------
+        result = this.memory.get(address,address + size.size);
+        //---------------------------------------------------------------------
+        return result;
+        //---------------------------------------------------------------------
+    }
+    /**
+     * 
+     * Write the given data into the given address.
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @param address where to place the data
+     * @param amount the amount of bit to write
+     * @param data the info to be written to memory 
+     */
+    public void writeBits(int address, OperandSize amount, BitsSet data){
+        //---------------------------------------------------------------------
+        address *= 8;
+        //---------------------------------------------------------------------
+        // Writting the data into memory
+        int initDataIndex = data.size() - amount.size;
+        for (int index = address; index < address + amount.size; index ++) {
+            this.memory.set(
+                index, 
+                data.get(initDataIndex + (index - address))
+            );
+        }
+        //---------------------------------------------------------------------
+    }
+    /**
+     * 
      * Write the given data into the given address.
      * 
      * @author Joseph Rementería (b55824)
@@ -146,7 +189,7 @@ public class Memory {
         //---------------------------------------------------------------------
         // Writting the data into memory
         int initDataIndex = data.size() - amount;
-        for (int index = address; index < amount; index ++) {
+        for (int index = address; index < address + amount; index ++) {
             this.memory.set(
                 index, 
                 data.get(initDataIndex + (index - address))

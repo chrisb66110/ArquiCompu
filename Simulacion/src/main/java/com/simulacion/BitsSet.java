@@ -46,6 +46,32 @@ public class BitsSet{
         return newBits;
     }
 
+    //-------------------------------------------------------------------------
+    /**
+     * Class constructor that creates the inner BitSet using the given size 
+     * and asigns to it the given value.
+     * THIS CODE WAS TAKE FROM :
+     * https://stackoverflow.com/questions/2473597/bitset-to-and-from-integer
+     * -long
+     * 
+     * @author Joseph REmentería (b55824)
+     * 
+     * @param size the size of the the value
+     * @param value the value to be set
+     */
+    public BitsSet(int size, int value) {
+        this.bitSet = new BitSet(size);
+        int index = 0;
+        while (value != 0L) {
+          if (value % 2L != 0) {
+            this.bitSet.set(index);
+          }
+          ++index;
+          value = value >>> 1;
+        }
+      }
+      //-------------------------------------------------------------------------
+
     /**
      * Function that returns the value of the bitIndex position in the structure.
      * @param bitIndex Bit position.
@@ -482,7 +508,18 @@ public class BitsSet{
         //False because they are the same
         return true;
     }
-
+    //-------------------------------------------------------------------------
+    /**
+     * Returns the size of the BitsSet
+     * 
+     * @author Joseph Rementería (b55824)
+     * 
+     * @return size of the Bitsset
+     */
+    public int size() {
+        return this.bitSet.size();
+    }
+    //-------------------------------------------------------------------------
 }
 
 

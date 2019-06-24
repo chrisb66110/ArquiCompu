@@ -1,6 +1,9 @@
 package com.simulacion;
 
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class for handling bits.
@@ -523,11 +526,58 @@ public class BitsSet{
         return this.bitSet.size();
     }
 
+    /**
+     * Returns the original size the BitsSet was created with
+     * @return the original size
+     */
     public int getRealSize() {
         return realSize;
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Takes an array of bytes and creates one BitsSet with the result of joining them
+     * @param bytes the array of bytes
+     * @return The resulting BitsSet
+     */
+    public static BitsSet joinBytes(BitsSet[] bytes) {
+        BitsSet result = new BitsSet(bytes.length * 8);
+        for (int i = bytes.length - 1; i >= 0; i--) {
+            for(int j = 7; j >= 0; j--){
+                result.set((i*8) + j, bytes[i].get(j));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Takes a BitsSet that represents a Word or HalfWord and creates a List of BitsSet where each entry represents a byte.
+     * IMPORTANT: The index 0 has the most significant byte and the last index has the least significant one.
+     * @param data the word or half word to be split
+     * @return the resulting bytes in a list
+     */
+    public static List<BitsSet> SplitInBytes(BitsSet data) {
+        List<BitsSet> result = new LinkedList<BitsSet>();
+        for(int i = data.realSize / 8 - 1; i >= 0; i--){
+            BitsSet b = new BitsSet(8);
+            for(int j = 7; j >=0 ; j--){
+                b.set(j,  data.get((i*8) + j));
+            }
+            result.add(b);
+        }
+
+        return result;
+    }
+
+    /**
+     * Flips the bits in the this BitsSet
+     */
+    public void flip(){
+        for(int i = 0; i < this.realSize / 2; i++){
+            boolean tempBit = this.bitSet.get(i);
+            this.bitSet.set(i, this.bitSet.get(this.realSize - 1 - i));
+            this.bitSet.set(this.realSize - 1 - i, tempBit);
+        }
+    }
 }
 
 

@@ -4,6 +4,7 @@ package com.simulacion;
 //-----------------------------------------------------------------------------
 // Imports
 import com.simulacion.eventos.CacheDataReturn;
+import com.simulacion.eventos.CacheHitOrMiss;
 import com.simulacion.eventos.CacheWroteData;
 import com.simulacion.eventos.BusSendsSignal;
 import com.simulacion.Consts;
@@ -30,6 +31,7 @@ public class Cache {
     private Subscription cacheReadsMemory;
     private Subscription cacheWritesCache;
     private Subscription cacheWriteMemory;
+    private Subscription cacheHitOrMiss;
     //-------------------------------------------------------------------------
     // Constructors
     /**
@@ -97,16 +99,23 @@ public class Cache {
      * @return  the data as a bitset if the address is 
      *          the current level, null otherwise
      */
-    public void getBits(BitsSet address, OperandSize amount){
-        //---------------------------------------------------------------------
-        // Auxiliary Vars.
-        BitsSet result = null;
+    public void getBits(BitsSet address, OperandSize amount) {
         //---------------------------------------------------------------------
         // Calculate the set index to the given address
         int setIndex = this.calculateSetIndex(address);
+
+        this.cacheHitOrMiss = this.rxSubscriber.register(CacheHitOrMiss.class, event -> {
+            this.manageHitOrMiss(setIndex, address, amount);
+            this.cacheHitOrMiss.unsubscribe();
+        });
+
+        this.eventHandler.addEvent(new CacheHitOrMiss(this.hitTime, null));
+    }
+
+    private void manageHitOrMiss(int setIndex, BitsSet address, OperandSize amount) {
         //---------------------------------------------------------------------
         // try to fetch the data
-        result = this.sets[setIndex].find(address);
+        BitsSet result = this.sets[setIndex].find(address);
         //---------------------------------------------------------------------
         // if the data was not in this level then fetch it from the next level
         if (result == null){
@@ -137,6 +146,7 @@ public class Cache {
                                 (BitsSet)event.info[Consts.INFO_DATA_INDEX]
                             );
                             //-------------------------------------------------
+                            this.cacheReadsCache.unsubscribe();
                         }
                         //-----------------------------------------------------
                     }
@@ -164,6 +174,7 @@ public class Cache {
                                 memoryBus.getDataLines()
                             );
                             //-------------------------------------------------
+                            this.cacheReadsMemory.unsubscribe();
                         }
                         //-----------------------------------------------------
                     }
@@ -219,7 +230,7 @@ public class Cache {
         info[Consts.INFO_LEVEL_INDEX] = this.level - 1;
         //---------------------------------------------------------------------
         // creating the event to the data to be read
-        CacheDataReturn event = new CacheDataReturn(this.hitTime, info);
+        CacheDataReturn event = new CacheDataReturn(1, info);
         this.eventHandler.addEvent(event);
         //---------------------------------------------------------------------
     }
@@ -256,6 +267,7 @@ public class Cache {
                         // Creates the event to unlock the previous level
                         this.createWriteEvent();
                         //-----------------------------------------------------
+                        this.cacheWritesCache.unsubscribe();
                     }
                     //---------------------------------------------------------
                 }
@@ -274,6 +286,7 @@ public class Cache {
                         // write has finished
                         this.createWriteEvent();
                         //-----------------------------------------------------
+                        this.cacheWriteMemory.unsubscribe();
                     }
                     //---------------------------------------------------------
                 }

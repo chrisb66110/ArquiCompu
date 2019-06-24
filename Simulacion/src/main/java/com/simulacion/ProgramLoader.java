@@ -30,6 +30,7 @@ public class ProgramLoader {
                     }
                 }
                 memoryManager.writeBits(Consts.STACK_SIZE + wordCounter * 4, OperandSize.Word, word);
+                wordCounter++;
             }
         }
         catch (EOFException ignored){

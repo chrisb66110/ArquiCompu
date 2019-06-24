@@ -63,7 +63,7 @@ public class Cache {
         // Setting the creation of the caché sets
         // this.size = this.BLOCK_SIZE * sets * this.asociativity;
         int sets = 
-            (int) Math.ceil(size/(Consts.BLOCK_SIZE * this.asociativity));
+            (int) Math.ceil(size/(Consts.BLOCK_SIZE/8 * this.asociativity));
         this.sets = new CacheSet[sets];
         for (int index = 0; index < sets; index++) {
             this.sets[index] = new CacheSet(
@@ -182,9 +182,11 @@ public class Cache {
                     //---------------------------------------------------------
                     // Setting the address lines
                     this.memoryBus.setAddress(address);
+                    this.memoryBus.sendSignal();
                     //---------------------------------------------------------
                 } catch (Exception e) {
                     // nothing but find the real control or address lines size
+                    System.out.println(e);
                 }
                 //-------------------------------------------------------------
             }
@@ -266,10 +268,7 @@ public class Cache {
                 event -> {
                     //---------------------------------------------------------
                     // Checking if the writting has already finished.
-                    if (
-                        Consts.MEM_WRITING_DONE_CODE == 
-                        this.memoryBus.getControlLines().toInt()
-                    ) {
+                    if (Consts.MEM_WRITING_DONE_CODE == this.memoryBus.getControlLines().toInt()) {
                         //-----------------------------------------------------
                         // creating the event so the level above knows the 
                         // write has finished
@@ -314,6 +313,7 @@ public class Cache {
                 //-------------------------------------------------------------
                 // Setting the data lines
                 this.memoryBus.setData(data);
+                this.memoryBus.sendSignal();
                 //-------------------------------------------------------------
             } catch (Exception e) {
                 // nothing but find the real control or address lines size

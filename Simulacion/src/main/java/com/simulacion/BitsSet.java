@@ -8,6 +8,7 @@ import java.util.BitSet;
 public class BitsSet{
 
     private BitSet bitSet; //Class to handle bits.
+    private int realSize;
 
     /**
      * Constructor without parameters.
@@ -30,6 +31,7 @@ public class BitsSet{
      */
     public BitsSet(int nbits) {
         this.bitSet = new BitSet(nbits);
+        this.realSize = nbits;
     }
 
     /**
@@ -61,6 +63,7 @@ public class BitsSet{
      */
     public BitsSet(int size, int value) {
         this.bitSet = new BitSet(size);
+        this.realSize = size;
         int index = 0;
         while (value != 0L) {
           if (value % 2L != 0) {
@@ -519,6 +522,11 @@ public class BitsSet{
     public int size() {
         return this.bitSet.size();
     }
+
+    public int getRealSize() {
+        return realSize;
+    }
+
     //-------------------------------------------------------------------------
 }
 

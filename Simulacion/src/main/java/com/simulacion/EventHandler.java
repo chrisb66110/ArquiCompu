@@ -23,7 +23,9 @@ public class EventHandler {
 
     public void fireEvent(long clock){
         if(eventList.get(0).eventTime == clock){
-            bus.post(eventList.get(0).event);
+            Event nextEvent = eventList.get(0).event;
+            System.out.println(nextEvent.type);
+            bus.post(nextEvent);
             eventList.remove(0);
         }
     }

@@ -37,7 +37,7 @@ public class Memory {
         //---------------------------------------------------------------------
         // Creating the memory
         // TODO: Memory as an array of bits or as a bank of them?
-        this.memory = new BitsSet(size);
+        this.memory = new BitsSet(size*8);
         //---------------------------------------------------------------------
         // Setting the bus
         this.bus = bus;
@@ -119,6 +119,8 @@ public class Memory {
      */
     public void getBits(int address){
         //---------------------------------------------------------------------
+        address *= 8;
+        //---------------------------------------------------------------------
         this.createEvent(
             Consts.MEM_READING_DONE_CODE,
             //-----------------------------------------------------------------
@@ -139,6 +141,8 @@ public class Memory {
      * @param data the info to be written to memory 
      */
     public void writeBits(int address, int amount, BitsSet data){
+        //---------------------------------------------------------------------
+        address *= 8;
         //---------------------------------------------------------------------
         // Writting the data into memory
         int initDataIndex = data.size() - amount;

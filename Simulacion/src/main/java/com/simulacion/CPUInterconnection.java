@@ -49,9 +49,9 @@ public class CPUInterconnection {
      */
     public void loadRegisterToALU(int register, ALUOperands aluOperand){
         if (aluOperand == ALUOperands.OperandA){
-            this.alu.setOperandA(this.registers[register]);
+            this.alu.setOperandA(this.registers[register].get(0,32));
         }else{
-            this.alu.setOperandB(this.registers[register]);
+            this.alu.setOperandB(this.registers[register].get(0,32));
         }
     }
 
@@ -149,7 +149,7 @@ public class CPUInterconnection {
         BitsSet address = (BitsSet)offset.clone();
         address.add(registers[registerIndex]);
         //Write data in to cache
-        this.dataCache.writeBits(address, ammount, this.registers[registerResult]);
+        this.dataCache.writeBits(address, ammount, this.registers[registerResult].get(0,32));
     }
 
     /**
@@ -193,7 +193,7 @@ public class CPUInterconnection {
             this.cacheWroteData.unsubscribe();
         });
         //Write register in to stack
-        this.dataCache.writeBits(address, OperandSize.Word, this.registers[register]);
+        this.dataCache.writeBits(address, OperandSize.Word, this.registers[register].get(0,32));
     }
 
     /**
@@ -222,6 +222,6 @@ public class CPUInterconnection {
      * @return the data inside the register
      */
     public BitsSet getRegisterData(int index){
-        return registers[index];
+        return registers[index].get(0,32);
     }
 }

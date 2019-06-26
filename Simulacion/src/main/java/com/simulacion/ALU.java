@@ -240,7 +240,7 @@ public class ALU {
      */
     private void operationNot(){
         this.result = this.OperandA;
-        this.result.flip(0, this.OperandA.length());
+        this.result.flip(0, this.OperandA.getRealSize());
     }
 
     /**

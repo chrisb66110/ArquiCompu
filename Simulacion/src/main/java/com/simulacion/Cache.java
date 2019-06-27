@@ -419,7 +419,7 @@ public class Cache {
                 break;
         }
         result = value.get(
-            value.length()-bitsSetCutIndex, value.length()
+            value.getRealSize()-bitsSetCutIndex, value.getRealSize()
         );
         //---------------------------------------------------------------------
         return result;

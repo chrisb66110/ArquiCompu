@@ -14,18 +14,12 @@ public class BitsSet{
     private int realSize;
 
     /**
-     * Constructor without parameters.
-     */
-    public BitsSet(){
-        this.bitSet = new BitSet();
-    }
-
-    /**
      * Constructor from a BitSet.
      * @param bitSet BitSet to build the BitsSet.
      */
-    public BitsSet(BitSet bitSet){
+    public BitsSet(BitSet bitSet, int size){
         this.bitSet = bitSet;
+        this.realSize = size;
     }
 
     /**
@@ -95,7 +89,7 @@ public class BitsSet{
      * @return Returns BitsSet with the indicated bits from fromIndex to toIndex.
      */
     public BitsSet get(int fromIndex, int toIndex) {
-        return new BitsSet(this.bitSet.get(fromIndex, toIndex));
+        return new BitsSet(this.bitSet.get(fromIndex, toIndex), toIndex - fromIndex);
     }
 
     /**
@@ -121,7 +115,7 @@ public class BitsSet{
      * Function to know the amount of bits used.
      * @return Cantidad de bits utilizados.
      */
-    public int length() {
+    private int length() {
         return this.bitSet.length();
     }
 

@@ -134,8 +134,8 @@ public class CacheSet {
             }
             //-----------------------------------------------------------------
             // saving the block in the assigned index
-            this.blocks[savingBlockIndex].data = data;
-            this.blocks[savingBlockIndex].tag = address;
+            this.blocks[savingBlockIndex].data = BitsSet.valueOf(data.toInt());
+            this.blocks[savingBlockIndex].tag = BitsSet.valueOf(address.toInt());
             this.blocks[savingBlockIndex].valid = true;
             //-----------------------------------------------------------------
         }

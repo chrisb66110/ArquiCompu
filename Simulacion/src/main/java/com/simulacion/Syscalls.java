@@ -3,7 +3,7 @@ package com.simulacion;
 public enum Syscalls {
     Print,
     ReadChar,
-    Halt,
     PrintNumber,
-    ReadNumber
+    ReadNumber,
+    Halt
 }

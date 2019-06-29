@@ -23,9 +23,9 @@ public class ProgramLoader {
             int wordCounter = 0;
             while(true){
                 BitsSet word = new BitsSet(Consts.WORD_SIZE);
-                for(int i=0; i<4; i++){
+                for(int i=3; i>=0; i--){
                     byte tempByte = is.readByte();
-                    for (int j=0; j<8; j++){
+                    for (int j=7; j>=0; j--){
                         word.set((i*8) + j, ((tempByte >> j) & 1) == 1);
                     }
                 }

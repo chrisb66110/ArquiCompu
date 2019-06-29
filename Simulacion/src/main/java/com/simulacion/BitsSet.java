@@ -535,9 +535,9 @@ public class BitsSet{
      */
     public static BitsSet joinBytes(BitsSet[] bytes) {
         BitsSet result = new BitsSet(bytes.length * 8);
-        for (int i = bytes.length - 1; i >= 0; i--) {
+        for (int i = 0; i < bytes.length; i++) {
             for(int j = 7; j >= 0; j--){
-                result.set((i*8) + j, bytes[i].get(j));
+                result.set((i*8) + j, bytes[bytes.length - 1 - i].get(j));
             }
         }
         return result;

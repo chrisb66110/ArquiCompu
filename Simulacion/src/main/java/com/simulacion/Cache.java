@@ -272,6 +272,8 @@ public class Cache {
                     //---------------------------------------------------------
                 }
             );
+            //Write to the next level
+            this.nextCache.writeBits(address, amount, data);
         } else {
             //-----------------------------------------------------------------
             // writting the data to memory

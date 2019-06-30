@@ -31,7 +31,7 @@ public class OperatingSystem {
     public void menu(){
         boolean run = true;
         while (run){
-            System.out.print("Bienvenido a la simulación. Digite el número de la opción que desea:\n" +
+            System.out.print("\nBienvenido a la simulación. Digite el número de la opción que desea:\n" +
                     "\t1: Cargar un programa\n" +
                     "\t2: Salir\n\n");
             Scanner reader = new Scanner(System.in);

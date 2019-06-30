@@ -7,7 +7,6 @@ import com.simulacion.eventos.CacheDataReturn;
 import com.simulacion.eventos.CacheHitOrMiss;
 import com.simulacion.eventos.CacheWroteData;
 import com.simulacion.eventos.BusSendsSignal;
-import com.simulacion.Consts;
 import rx.Subscription;
 //-----------------------------------------------------------------------------
 /**
@@ -29,7 +28,7 @@ public class Cache {
     // Events
     private Subscription cacheReadsCache;
     private Subscription cacheReadsMemory;
-    private Subscription cacheWritesCache;
+    private Subscription cacheWroteData;
     private Subscription cacheWriteMemory;
     private Subscription cacheHitOrMiss;
     //-------------------------------------------------------------------------
@@ -254,7 +253,7 @@ public class Cache {
         if (this.nextCache != null) {
             //-----------------------------------------------------------------
             // Creating the event to write in the cache levels from bellow
-            this.cacheWritesCache = this.rxSubscriber.register(
+            this.cacheWroteData = this.rxSubscriber.register(
                 CacheWroteData.class,
                 event -> {
                     //---------------------------------------------------------
@@ -267,7 +266,7 @@ public class Cache {
                         // Creates the event to unlock the previous level
                         this.createWriteEvent();
                         //-----------------------------------------------------
-                        this.cacheWritesCache.unsubscribe();
+                        this.cacheWroteData.unsubscribe();
                     }
                     //---------------------------------------------------------
                 }

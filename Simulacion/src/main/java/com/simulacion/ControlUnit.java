@@ -380,6 +380,8 @@ public class ControlUnit {
         //Sum the offset to the PC
         BitsSet offset = instrucction.get(10,26);
         offset.set(16,32,offset.get(15));
+        //Add -4 to revert the increase the PC
+        offset.add(BitsSet.valueOf(-4));
         this.programCounter.add(offset);
         //Event to execute next instruction
         this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
@@ -397,6 +399,8 @@ public class ControlUnit {
         int registerB = instruction.get(16,21).toInt();
         BitsSet offset = instruction.get(0,16);
         offset.set(16,32,offset.get(15));
+        //Add -4 to revert the increase the PC
+        offset.add(BitsSet.valueOf(-4));
         //Values are loaded into the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
@@ -427,6 +431,8 @@ public class ControlUnit {
     private void operationCall(ALUOperations operation, BitsSet instruction){
         BitsSet offset = instruction.get(10,26);
         offset.set(16,32,offset.get(15));
+        //Add -4 to revert the increase the PC
+        offset.add(BitsSet.valueOf(-4));
         //The push of the complete pc
         this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
             //Sum the offset to the PC

@@ -1,6 +1,7 @@
 package com.simulacion;
 
 import com.simulacion.eventos.BusSendsSignal;
+import oracle.jrockit.jfr.events.Bits;
 
 public class Bus {
     private BitsSet controlLines;
@@ -33,10 +34,14 @@ public class Bus {
     }
 
     public void setData(BitsSet data) throws Exception {
-        if(this.dataLines.getRealSize() == data.getRealSize())
-            this.dataLines = data;
-        else
-            throw new Exception("La cantidad de bits del control code no concuerda con la cantidad de líneas del bus");
+        if (data == null) {
+            this.dataLines = BitsSet.valueOf(0);
+        } else {
+            if (this.dataLines.getRealSize() == data.getRealSize())
+                this.dataLines = data;
+            else
+                throw new Exception("La cantidad de bits del control code no concuerda con la cantidad de líneas del bus");
+        }
     }
 
     public BitsSet getControlLines() {

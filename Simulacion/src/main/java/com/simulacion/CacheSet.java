@@ -118,7 +118,7 @@ public class CacheSet {
             //-----------------------------------------------------------------
             // checking if there is free spaces in the set
             int savingBlockIndex = -1;
-            if (invalidBlockIndex != 1) {
+            if (invalidBlockIndex != -1) {
                 //-------------------------------------------------------------
                 // since there is free space, the saving space is the last 
                 // free space

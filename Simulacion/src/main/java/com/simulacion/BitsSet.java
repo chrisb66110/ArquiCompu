@@ -120,14 +120,6 @@ public class BitsSet{
     }
 
     /**
-     * Function that returns a copy of the object.
-     * @return Return copy of the object.
-     */
-    public Object clone() {
-        return this.bitSet.clone();
-    }
-
-    /**
      * Function that returns a string with bit bits, 32 bits.
      * @return Returns 32 character string.
      */

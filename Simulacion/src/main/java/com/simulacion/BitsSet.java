@@ -113,7 +113,7 @@ public class BitsSet{
 
     /**
      * Function to know the amount of bits used.
-     * @return Cantidad de bits utilizados.
+     * @return Number of bits used
      */
     private int length() {
         return this.bitSet.length();
@@ -374,7 +374,7 @@ public class BitsSet{
             return thisSize > otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -412,7 +412,7 @@ public class BitsSet{
             return thisSize > otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -450,7 +450,7 @@ public class BitsSet{
             return thisSize < otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -488,7 +488,7 @@ public class BitsSet{
             return thisSize < otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -499,17 +499,6 @@ public class BitsSet{
         }
         //False because they are the same
         return true;
-    }
-    //-------------------------------------------------------------------------
-    /**
-     * Returns the size of the BitsSet
-     * 
-     * @author Joseph Rementería (b55824)
-     * 
-     * @return size of the Bitsset
-     */
-    public int size() {
-        return this.bitSet.size();
     }
 
     /**

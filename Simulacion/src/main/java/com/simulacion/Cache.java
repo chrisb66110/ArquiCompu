@@ -331,6 +331,7 @@ public class Cache {
                 //-------------------------------------------------------------
             } catch (Exception e) {
                 // nothing but find the real control or address lines size
+                System.out.println(e);
             }
             //-----------------------------------------------------------------
         }

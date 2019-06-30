@@ -126,7 +126,7 @@ public class CPUInterconnection {
             }
         });
         //Add offset and index from register
-        BitsSet address = (BitsSet)offset.clone();
+        BitsSet address = BitsSet.valueOf(offset.toInt());
         address.add(registers[registerIndex]);
         //It is sent to bring data to the cache
         this.dataCache.getBits(address,ammount);
@@ -146,7 +146,7 @@ public class CPUInterconnection {
             this.cacheWroteData.unsubscribe();
         });
         //Add offset and index from register
-        BitsSet address = (BitsSet)offset.clone();
+        BitsSet address = BitsSet.valueOf(offset.toInt());
         address.add(registers[registerIndex]);
         //Write data in to cache
         this.dataCache.writeBits(address, ammount, this.registers[registerResult].get(0,32));

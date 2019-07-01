@@ -14,12 +14,14 @@ public class Output {
     public void printString(BitsSet address) {
         boolean eofFound = false;
         String string = "";
+        int initialAddress = address.toInt();
         while(!eofFound) {
-            char character = (char) memoryManager.getBits(address.toInt(), OperandSize.Byte).toInt();
+            char character = (char) memoryManager.getBits(initialAddress, OperandSize.Byte).toInt();
             if (character != '\0')
                 string = string + character;
             else
                 eofFound = true;
+            initialAddress ++;
         }
         System.out.print(string);
     }

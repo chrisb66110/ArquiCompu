@@ -14,18 +14,12 @@ public class BitsSet{
     private int realSize;
 
     /**
-     * Constructor without parameters.
-     */
-    public BitsSet(){
-        this.bitSet = new BitSet();
-    }
-
-    /**
      * Constructor from a BitSet.
      * @param bitSet BitSet to build the BitsSet.
      */
-    public BitsSet(BitSet bitSet){
+    public BitsSet(BitSet bitSet, int size){
         this.bitSet = bitSet;
+        this.realSize = size;
     }
 
     /**
@@ -95,7 +89,7 @@ public class BitsSet{
      * @return Returns BitsSet with the indicated bits from fromIndex to toIndex.
      */
     public BitsSet get(int fromIndex, int toIndex) {
-        return new BitsSet(this.bitSet.get(fromIndex, toIndex));
+        return new BitsSet(this.bitSet.get(fromIndex, toIndex), toIndex - fromIndex);
     }
 
     /**
@@ -119,18 +113,10 @@ public class BitsSet{
 
     /**
      * Function to know the amount of bits used.
-     * @return Cantidad de bits utilizados.
+     * @return Number of bits used
      */
-    public int length() {
+    private int length() {
         return this.bitSet.length();
-    }
-
-    /**
-     * Function that returns a copy of the object.
-     * @return Return copy of the object.
-     */
-    public Object clone() {
-        return this.bitSet.clone();
     }
 
     /**
@@ -388,7 +374,7 @@ public class BitsSet{
             return thisSize > otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -426,7 +412,7 @@ public class BitsSet{
             return thisSize > otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -464,7 +450,7 @@ public class BitsSet{
             return thisSize < otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -502,7 +488,7 @@ public class BitsSet{
             return thisSize < otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -513,17 +499,6 @@ public class BitsSet{
         }
         //False because they are the same
         return true;
-    }
-    //-------------------------------------------------------------------------
-    /**
-     * Returns the size of the BitsSet
-     * 
-     * @author Joseph Rementería (b55824)
-     * 
-     * @return size of the Bitsset
-     */
-    public int size() {
-        return this.bitSet.size();
     }
 
     /**
@@ -541,9 +516,9 @@ public class BitsSet{
      */
     public static BitsSet joinBytes(BitsSet[] bytes) {
         BitsSet result = new BitsSet(bytes.length * 8);
-        for (int i = bytes.length - 1; i >= 0; i--) {
+        for (int i = 0; i < bytes.length; i++) {
             for(int j = 7; j >= 0; j--){
-                result.set((i*8) + j, bytes[i].get(j));
+                result.set((i*8) + j, bytes[bytes.length - 1 - i].get(j));
             }
         }
         return result;

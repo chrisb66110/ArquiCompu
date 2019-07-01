@@ -9,7 +9,7 @@ import rx.Subscription;
 public class ControlUnit {
     //Const
     private final int INFO_INDEX_LEVEL = 1; //Index of the level number in the info in event.
-    private final int LEVEL = -1; //Number to represent that the cache return data to the CPU.
+    private final int LEVEL = 0; //Number to represent that the cache return data to the CPU.
     private final int INFO_INDEX_DATA = 0; //Index of data in the info in event.
     private final int INITIAL_STACK_POINTER = 127; //Initial stack pointer.
     private final BitsSet PUSH = BitsSet.valueOf(-4); //Number to mov the stack pointer in a push.
@@ -379,6 +379,9 @@ public class ControlUnit {
     private void operationJump(ALUOperations operation, BitsSet instrucction){
         //Sum the offset to the PC
         BitsSet offset = instrucction.get(10,26);
+        offset.set(16,32,offset.get(15));
+        //Add -4 to revert the increase the PC
+        offset.add(BitsSet.valueOf(-4));
         this.programCounter.add(offset);
         //Event to execute next instruction
         this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
@@ -395,6 +398,9 @@ public class ControlUnit {
         int registerA = instruction.get(21,26).toInt();
         int registerB = instruction.get(16,21).toInt();
         BitsSet offset = instruction.get(0,16);
+        offset.set(16,32,offset.get(15));
+        //Add -4 to revert the increase the PC
+        offset.add(BitsSet.valueOf(-4));
         //Values are loaded into the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadRegisterToALU(registerB, ALUOperands.OperandB);
@@ -424,6 +430,9 @@ public class ControlUnit {
      */
     private void operationCall(ALUOperations operation, BitsSet instruction){
         BitsSet offset = instruction.get(10,26);
+        offset.set(16,32,offset.get(15));
+        //Add -4 to revert the increase the PC
+        offset.add(BitsSet.valueOf(-4));
         //The push of the complete pc
         this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
             //Sum the offset to the PC

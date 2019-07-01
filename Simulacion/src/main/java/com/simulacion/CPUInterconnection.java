@@ -8,7 +8,7 @@ import rx.Subscription;
  */
 public class CPUInterconnection {
     //Const
-    private final int LEVEL = -1; //Number to represent that the cache return data to the CPU.
+    private final int LEVEL = 0; //Number to represent that the cache return data to the CPU.
     private final int INFO_INDEX_LEVEL = 1; //Index of the level number in the info in event.
     private final int INFO_INDEX_DATA = 0; //Index of data in the info in event.
 
@@ -49,9 +49,9 @@ public class CPUInterconnection {
      */
     public void loadRegisterToALU(int register, ALUOperands aluOperand){
         if (aluOperand == ALUOperands.OperandA){
-            this.alu.setOperandA(this.registers[register]);
+            this.alu.setOperandA(this.registers[register].get(0,32));
         }else{
-            this.alu.setOperandB(this.registers[register]);
+            this.alu.setOperandB(this.registers[register].get(0,32));
         }
     }
 
@@ -126,7 +126,7 @@ public class CPUInterconnection {
             }
         });
         //Add offset and index from register
-        BitsSet address = (BitsSet)offset.clone();
+        BitsSet address = BitsSet.valueOf(offset.toInt());
         address.add(registers[registerIndex]);
         //It is sent to bring data to the cache
         this.dataCache.getBits(address,ammount);
@@ -140,16 +140,18 @@ public class CPUInterconnection {
      */
     public void storeRegisterToMemory(ALUOperations operation, int registerResult, int registerIndex, BitsSet offset, OperandSize ammount){
         //This subscribe is waiting for a CacheWroteData event, so you know when the operation finished
-        this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
+        this.cacheWroteData = rXBus.register(CacheWroteData.class, event -> {
             //Event to execute next instruction
-            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
-            this.cacheWroteData.unsubscribe();
+            if(this.LEVEL == (int) event.info[Consts.INFO_LEVEL_INDEX-1]){
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
+                this.cacheWroteData.unsubscribe();
+            }
         });
         //Add offset and index from register
-        BitsSet address = (BitsSet)offset.clone();
+        BitsSet address = BitsSet.valueOf(offset.toInt());
         address.add(registers[registerIndex]);
         //Write data in to cache
-        this.dataCache.writeBits(address, ammount, this.registers[registerResult]);
+        this.dataCache.writeBits(address, ammount, this.registers[registerResult].get(0,32));
     }
 
     /**
@@ -193,7 +195,7 @@ public class CPUInterconnection {
             this.cacheWroteData.unsubscribe();
         });
         //Write register in to stack
-        this.dataCache.writeBits(address, OperandSize.Word, this.registers[register]);
+        this.dataCache.writeBits(address, OperandSize.Word, this.registers[register].get(0,32));
     }
 
     /**
@@ -222,6 +224,6 @@ public class CPUInterconnection {
      * @return the data inside the register
      */
     public BitsSet getRegisterData(int index){
-        return registers[index];
+        return registers[index].get(0,32);
     }
 }

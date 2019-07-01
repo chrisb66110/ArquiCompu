@@ -25,7 +25,7 @@ public class ALU {
      * @param operandA New value of the first operand.
      */
     public void setOperandA(BitsSet operandA) {
-        this.OperandA = operandA;
+        this.OperandA = operandA.get(0,32);
     }
 
     /**
@@ -33,7 +33,7 @@ public class ALU {
      * @param operandB New value of the first second.
      */
     public void setOperandB(BitsSet operandB) {
-        this.OperandB = operandB;
+        this.OperandB = operandB.get(0,32);
     }
 
     /**
@@ -240,7 +240,7 @@ public class ALU {
      */
     private void operationNot(){
         this.result = this.OperandA;
-        this.result.flip(0, this.OperandA.length());
+        this.result.flip(0, this.OperandA.getRealSize());
     }
 
     /**

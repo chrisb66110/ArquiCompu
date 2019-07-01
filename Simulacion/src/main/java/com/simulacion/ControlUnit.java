@@ -476,11 +476,12 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      */
     private void operationSysCall(ALUOperations operation, BitsSet instruction){
-        this.syscallExecuted = rXBus.register(SyscallExecuted.class, evento -> {
-            //Event to execute next instruction
-            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
-            this.syscallExecuted.unsubscribe();
-        });
+        if(Syscalls.values()[internalBus.getRegisterData(1).toInt() - 1] != Syscalls.Halt)
+            this.syscallExecuted = rXBus.register(SyscallExecuted.class, evento -> {
+                //Event to execute next instruction
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
+                this.syscallExecuted.unsubscribe();
+            });
         //Sent to run syscall
         this.eventHandler.addEvent(new SyscallRun(1,new Object[]{internalBus.getRegisterData(1), new BitsSet[]{internalBus.getRegisterData(3)}}));
     }

@@ -446,10 +446,10 @@ public class ControlUnit {
                 this.cacheWroteData.unsubscribe();
             }
         });
-        //Save programCounter in the stack
-        this.internalBus.pushPCToStack(this.stackPointer, this.programCounter);
-        //Sum 4 to the stackPointer, for decrease the stack pointer
+        //Sum -4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
+        //Save programCounter in the stack
+        this.internalBus.pushPCToStack(this.stackPointer, BitsSet.valueOf(this.programCounter.toInt()));
     }
 
     /**
@@ -458,8 +458,7 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      */
     private void operationRet(ALUOperations operation, BitsSet instruction){
-        //Subtract 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
-        this.stackPointer.add(this.POP);
+        // Address to compare in event
         BitsSet address = BitsSet.valueOf(this.stackPointer.toInt());
         // The pop is to PC complete
         this.cacheDataReturnOperationRet = rXBus.register(CacheDataReturn.class, event -> {
@@ -475,6 +474,8 @@ public class ControlUnit {
         });
         //Extract programCounter to the stack
         this.internalBus.popStackToPC(this.stackPointer);
+        //Sum 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
+        this.stackPointer.add(this.POP);
     }
 
     /**
@@ -501,10 +502,10 @@ public class ControlUnit {
     private void operationPushRegisterToStack(ALUOperations operation, BitsSet instruction){
         //Register to save in stack
         int register = instruction.get(21,26).toInt();
-        //Save register in the stack
-        this.internalBus.pushRegisterToStack(operation, this.stackPointer, register);
         //Sub 4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
+        //Save register in the stack
+        this.internalBus.pushRegisterToStack(operation, this.stackPointer, register);
     }
 
     /**

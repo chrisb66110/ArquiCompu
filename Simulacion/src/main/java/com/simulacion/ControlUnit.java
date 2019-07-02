@@ -435,11 +435,13 @@ public class ControlUnit {
         offset.add(BitsSet.valueOf(-4));
         //The push of the complete pc
         this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
-            //Sum the offset to the PC
-            this.programCounter.add(offset);
-            //Event to execute next instruction
-            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
-            this.cacheWroteData.unsubscribe();
+            if((int)evento.info[0] == this.LEVEL) {
+                //Sum the offset to the PC
+                this.programCounter.add(offset);
+                //Event to execute next instruction
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
+                this.cacheWroteData.unsubscribe();
+            }
         });
         //Save programCounter in the stack
         this.internalBus.pushPCToStack(this.stackPointer, this.programCounter);
@@ -465,7 +467,7 @@ public class ControlUnit {
             }
         });
         //Subtract 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
-        this.stackPointer.sub(this.POP);
+        this.stackPointer.add(this.POP);
         //Extract programCounter to the stack
         this.internalBus.popStackToPC(this.stackPointer);
     }

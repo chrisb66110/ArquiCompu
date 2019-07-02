@@ -27,7 +27,8 @@ public class ControlUnit {
 
     //Events used in the class
     private Subscription startCUCycle; //Subscription to the StartCUCycle event.
-    private Subscription cacheDataReturn; //Subscription to the event CacheBringsMemory event.
+    private Subscription cacheDataReturnFetch; //Subscription to the event CacheBringsMemory event.
+    private Subscription cacheDataReturnOperationRet; //Subscription to the event CacheBringsMemory event.
     private Subscription cacheWroteData; //Subscription to the event CacheWroteData
     private Subscription aluExecutedInstruction; //Subscription to the ALUExecutedInstruction event.
     private Subscription syscallExecuted; //Subscription to the SyscallRun event.
@@ -64,15 +65,17 @@ public class ControlUnit {
      * Method to do the fetch of the instruction and send to decode.
      */
     public void fetchNextInstruction(){
+        BitsSet address = BitsSet.valueOf(this.programCounter.toInt());
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
-        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, event -> {
-            if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
+        this.cacheDataReturnFetch = rXBus.register(CacheDataReturn.class, event -> {
+            if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL &&
+                    ((BitsSet)event.info[Consts.INFO_ADDRESS]).equals(address)) {
                 //Save the returned cache instruction
                 instructionRegister = (BitsSet) event.info[this.INFO_INDEX_DATA];
                 this.programCounter.add(this.INCREASE_PC);
                 //Command to decode and execute the instruction
                 this.decodeInstruction();
-                this.cacheDataReturn.unsubscribe();
+                this.cacheDataReturnFetch.unsubscribe();
             }
         });
         //It is sent to look for the data
@@ -455,19 +458,21 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      */
     private void operationRet(ALUOperations operation, BitsSet instruction){
-        // The pop is to PC complete
-        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, evento -> {
-            if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
-                //Assigns the pointer to the PC
-                //info: programCounter in the stack
-                this.programCounter = (BitsSet) evento.info[this.INFO_INDEX_DATA];
-                //Event to execute next instruction
-                this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
-                this.cacheDataReturn.unsubscribe();
-            }
-        });
         //Subtract 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
         this.stackPointer.add(this.POP);
+        BitsSet address = BitsSet.valueOf(this.stackPointer.toInt());
+        // The pop is to PC complete
+        this.cacheDataReturnOperationRet = rXBus.register(CacheDataReturn.class, event -> {
+            if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL &&
+                    ((BitsSet)event.info[Consts.INFO_ADDRESS]).equals(address)) {
+                //Assigns the pointer to the PC
+                //info: programCounter in the stack
+                this.programCounter = (BitsSet) event.info[this.INFO_INDEX_DATA];
+                //Event to execute next instruction
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
+                this.cacheDataReturnOperationRet.unsubscribe();
+            }
+        });
         //Extract programCounter to the stack
         this.internalBus.popStackToPC(this.stackPointer);
     }

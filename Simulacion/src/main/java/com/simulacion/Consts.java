@@ -22,6 +22,7 @@ public class Consts {
     public static final int BLOCK_SIZE                = 32;
     public static final int INFO_DATA_INDEX           = 0;
     public static final int INFO_LEVEL_INDEX          = 1;
+    public static final int INFO_ADDRESS              = 2;
     //-------------------------------------------------------------------------
     // Bus codes
     public static final int CONTROL_LINES_SIZE        = 4;

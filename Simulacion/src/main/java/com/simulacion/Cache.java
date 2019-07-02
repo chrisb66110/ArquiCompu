@@ -26,7 +26,7 @@ public class Cache {
     private RxBus rxSubscriber = RxBus.getInstance();
     //-------------------------------------------------------------------------
     // Events
-    private Subscription cacheReadsCache;
+    private Subscription cacheDataReturn;
     private Subscription cacheReadsMemory;
     private Subscription cacheWroteData;
     private Subscription cacheWriteMemory;
@@ -122,14 +122,15 @@ public class Cache {
             // check if this is the last level caché
             if (this.nextCache != null) {
                 //-------------------------------------------------------------
-                this.cacheReadsCache = this.rxSubscriber.register(
+                this.cacheDataReturn = this.rxSubscriber.register(
                     CacheDataReturn.class, 
                     event -> {
                         //-----------------------------------------------------
                         // Check if the event has my information
                         if (
                             this.level == 
-                            (int) event.info[Consts.INFO_LEVEL_INDEX]
+                            (int) event.info[Consts.INFO_LEVEL_INDEX] &&
+                                    ((BitsSet)event.info[Consts.INFO_ADDRESS]).equals(address)
                         ) {                
                             //-------------------------------------------------
                             // saving it in this level (because principle of
@@ -142,10 +143,11 @@ public class Cache {
                             //-------------------------------------------------
                             // Creating the event to send the data
                             this.createDataReturnedEvent(
-                                (BitsSet)event.info[Consts.INFO_DATA_INDEX]
+                                (BitsSet)event.info[Consts.INFO_DATA_INDEX],
+                                    BitsSet.valueOf(address.toInt())
                             );
                             //-------------------------------------------------
-                            this.cacheReadsCache.unsubscribe();
+                            this.cacheDataReturn.unsubscribe();
                         }
                         //-----------------------------------------------------
                     }
@@ -170,7 +172,8 @@ public class Cache {
                             // creating the event so the level above can has 
                             // read address. 
                             this.createDataReturnedEvent(
-                                memoryBus.getDataLines()
+                                memoryBus.getDataLines(),
+                                    BitsSet.valueOf(address.toInt())
                             );
                             //-------------------------------------------------
                             this.cacheReadsMemory.unsubscribe();
@@ -206,7 +209,7 @@ public class Cache {
             result = this .trimToOperandSize(result,amount);
             //-----------------------------------------------------------------
             // Setting the result in the info array
-            this.createDataReturnedEvent(result);
+            this.createDataReturnedEvent(result, BitsSet.valueOf(address.toInt()));
             //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
@@ -221,12 +224,13 @@ public class Cache {
      * 
      * @param reading the BitsSet read from this level
      */
-    private void createDataReturnedEvent(BitsSet reading) {
+    private void createDataReturnedEvent(BitsSet reading, BitsSet address) {
         //---------------------------------------------------------------------
         // Setting the result in the info array
-        Object[] info = new Object[2];
+        Object[] info = new Object[3];
         info[Consts.INFO_DATA_INDEX] = reading;
         info[Consts.INFO_LEVEL_INDEX] = this.level - 1;
+        info[Consts.INFO_ADDRESS] = address;
         //---------------------------------------------------------------------
         // creating the event to the data to be read
         CacheDataReturn event = new CacheDataReturn(1, info);

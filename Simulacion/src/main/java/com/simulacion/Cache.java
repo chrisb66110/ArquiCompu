@@ -144,7 +144,7 @@ public class Cache {
                             // Creating the event to send the data
                             this.createDataReturnedEvent(
                                 (BitsSet)event.info[Consts.INFO_DATA_INDEX],
-                                    BitsSet.valueOf(address.toInt())
+                                    (BitsSet)event.info[Consts.INFO_ADDRESS]
                             );
                             //-------------------------------------------------
                             this.cacheDataReturn.unsubscribe();
@@ -173,7 +173,7 @@ public class Cache {
                             // read address. 
                             this.createDataReturnedEvent(
                                 memoryBus.getDataLines(),
-                                    BitsSet.valueOf(address.toInt())
+                                    memoryBus.getAddressLines()
                             );
                             //-------------------------------------------------
                             this.cacheReadsMemory.unsubscribe();

@@ -449,7 +449,7 @@ public class ControlUnit {
         //Sum -4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
         //Save programCounter in the stack
-        this.internalBus.pushPCToStack(this.stackPointer, BitsSet.valueOf(this.programCounter.toInt()));
+        this.internalBus.pushPCToStack(BitsSet.valueOf(this.stackPointer.toInt()), BitsSet.valueOf(this.programCounter.toInt()));
     }
 
     /**
@@ -473,7 +473,7 @@ public class ControlUnit {
             }
         });
         //Extract programCounter to the stack
-        this.internalBus.popStackToPC(this.stackPointer);
+        this.internalBus.popStackToPC(BitsSet.valueOf(this.stackPointer.toInt()));
         //Sum 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
         this.stackPointer.add(this.POP);
     }
@@ -505,7 +505,7 @@ public class ControlUnit {
         //Sub 4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
         //Save register in the stack
-        this.internalBus.pushRegisterToStack(operation, this.stackPointer, register);
+        this.internalBus.pushRegisterToStack(operation, BitsSet.valueOf(this.stackPointer.toInt()), register);
     }
 
     /**
@@ -517,7 +517,7 @@ public class ControlUnit {
         //Register to save in stack
         int register = instruction.get(21,26).toInt();
         //Save register in the stack
-        this.internalBus.popStackToRegister(operation, this.stackPointer, register);
+        this.internalBus.popStackToRegister(operation, BitsSet.valueOf(this.stackPointer.toInt()), register);
         //Sum 4 to the stackPointer, for increase the stack pointer
         this.stackPointer.add(this.POP);
     }

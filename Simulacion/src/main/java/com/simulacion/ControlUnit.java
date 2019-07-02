@@ -11,7 +11,7 @@ public class ControlUnit {
     private final int INFO_INDEX_LEVEL = 1; //Index of the level number in the info in event.
     private final int LEVEL = 0; //Number to represent that the cache return data to the CPU.
     private final int INFO_INDEX_DATA = 0; //Index of data in the info in event.
-    private final int INITIAL_STACK_POINTER = 127; //Initial stack pointer.
+    private final int INITIAL_STACK_POINTER = 128; //Initial stack pointer.
     private final BitsSet PUSH = BitsSet.valueOf(-4); //Number to mov the stack pointer in a push.
     private final BitsSet POP = BitsSet.valueOf(4); //Number to mov the stack pointer in a pop.
     private final BitsSet INCREASE_PC = BitsSet.valueOf(4); //Number to increase PC to next instruction.

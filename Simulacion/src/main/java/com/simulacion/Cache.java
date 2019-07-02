@@ -305,17 +305,17 @@ public class Cache {
                 switch (amount) {
                     case Byte:
                         //-----------------------------------------------------
-                        code = Consts.BYTE_SIZE;
+                        code = Consts.MEM_WRITE_BT_QUERY_CODE;
                         break;
                         //-----------------------------------------------------
                     case HalfWord:
                         //-----------------------------------------------------
-                        code = Consts.HALFWORD_SIZE;
+                        code = Consts.MEM_WRITE_HW_QUERY_CODE;
                         break;
                         //-----------------------------------------------------
                     case Word:
                         //-----------------------------------------------------
-                        code = Consts.WORD_SIZE;
+                        code = Consts.MEM_WRITE_WD_QUERY_CODE;
                         break;
                         //-----------------------------------------------------
                 }

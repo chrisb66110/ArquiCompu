@@ -190,7 +190,8 @@ public class Memory {
             List<BitsSet> bytes = BitsSet.SplitInBytes(data);
 
             int i =0;
-            for (int index = address; index < address + amount; index ++) {
+            int endWrite = address + (amount / 8);
+            for (int index = address; index < endWrite; index ++) {
                 this.memory[index] = bytes.get(i);
                 i++;
             }

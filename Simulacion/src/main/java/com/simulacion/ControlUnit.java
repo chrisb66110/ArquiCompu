@@ -11,7 +11,7 @@ public class ControlUnit {
     private final int INFO_INDEX_LEVEL = 1; //Index of the level number in the info in event.
     private final int LEVEL = 0; //Number to represent that the cache return data to the CPU.
     private final int INFO_INDEX_DATA = 0; //Index of data in the info in event.
-    private final int INITIAL_STACK_POINTER = 127; //Initial stack pointer.
+    private final int INITIAL_STACK_POINTER = 128; //Initial stack pointer.
     private final BitsSet PUSH = BitsSet.valueOf(-4); //Number to mov the stack pointer in a push.
     private final BitsSet POP = BitsSet.valueOf(4); //Number to mov the stack pointer in a pop.
     private final BitsSet INCREASE_PC = BitsSet.valueOf(4); //Number to increase PC to next instruction.
@@ -27,7 +27,8 @@ public class ControlUnit {
 
     //Events used in the class
     private Subscription startCUCycle; //Subscription to the StartCUCycle event.
-    private Subscription cacheDataReturn; //Subscription to the event CacheBringsMemory event.
+    private Subscription cacheDataReturnFetch; //Subscription to the event CacheBringsMemory event.
+    private Subscription cacheDataReturnOperationRet; //Subscription to the event CacheBringsMemory event.
     private Subscription cacheWroteData; //Subscription to the event CacheWroteData
     private Subscription aluExecutedInstruction; //Subscription to the ALUExecutedInstruction event.
     private Subscription syscallExecuted; //Subscription to the SyscallRun event.
@@ -64,15 +65,17 @@ public class ControlUnit {
      * Method to do the fetch of the instruction and send to decode.
      */
     public void fetchNextInstruction(){
+        BitsSet address = BitsSet.valueOf(this.programCounter.toInt());
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
-        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, event -> {
-            if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
+        this.cacheDataReturnFetch = rXBus.register(CacheDataReturn.class, event -> {
+            if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL &&
+                    ((BitsSet)event.info[Consts.INFO_ADDRESS]).equals(address)) {
                 //Save the returned cache instruction
                 instructionRegister = (BitsSet) event.info[this.INFO_INDEX_DATA];
                 this.programCounter.add(this.INCREASE_PC);
                 //Command to decode and execute the instruction
                 this.decodeInstruction();
-                this.cacheDataReturn.unsubscribe();
+                this.cacheDataReturnFetch.unsubscribe();
             }
         });
         //It is sent to look for the data
@@ -435,16 +438,18 @@ public class ControlUnit {
         offset.add(BitsSet.valueOf(-4));
         //The push of the complete pc
         this.cacheWroteData = rXBus.register(CacheWroteData.class, evento -> {
-            //Sum the offset to the PC
-            this.programCounter.add(offset);
-            //Event to execute next instruction
-            this.eventHandler.addEvent(new StartCUCycle(operation.cycles,null));
-            this.cacheWroteData.unsubscribe();
+            if((int)evento.info[0] == this.LEVEL) {
+                //Sum the offset to the PC
+                this.programCounter.add(offset);
+                //Event to execute next instruction
+                this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
+                this.cacheWroteData.unsubscribe();
+            }
         });
-        //Save programCounter in the stack
-        this.internalBus.pushPCToStack(this.stackPointer, this.programCounter);
-        //Sum 4 to the stackPointer, for decrease the stack pointer
+        //Sum -4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
+        //Save programCounter in the stack
+        this.internalBus.pushPCToStack(BitsSet.valueOf(this.stackPointer.toInt()), BitsSet.valueOf(this.programCounter.toInt()));
     }
 
     /**
@@ -453,21 +458,24 @@ public class ControlUnit {
      * @param instruction Instruction bits.
      */
     private void operationRet(ALUOperations operation, BitsSet instruction){
+        // Address to compare in event
+        BitsSet address = BitsSet.valueOf(this.stackPointer.toInt());
         // The pop is to PC complete
-        this.cacheDataReturn = rXBus.register(CacheDataReturn.class, evento -> {
-            if((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL) {
+        this.cacheDataReturnOperationRet = rXBus.register(CacheDataReturn.class, event -> {
+            if((int)event.info[this.INFO_INDEX_LEVEL] == this.LEVEL &&
+                    ((BitsSet)event.info[Consts.INFO_ADDRESS]).equals(address)) {
                 //Assigns the pointer to the PC
                 //info: programCounter in the stack
-                this.programCounter = (BitsSet) evento.info[this.INFO_INDEX_DATA];
+                this.programCounter = (BitsSet) event.info[this.INFO_INDEX_DATA];
                 //Event to execute next instruction
                 this.eventHandler.addEvent(new StartCUCycle(operation.cycles, null));
-                this.cacheDataReturn.unsubscribe();
+                this.cacheDataReturnOperationRet.unsubscribe();
             }
         });
-        //Subtract 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
-        this.stackPointer.sub(this.POP);
         //Extract programCounter to the stack
-        this.internalBus.popStackToPC(this.stackPointer);
+        this.internalBus.popStackToPC(BitsSet.valueOf(this.stackPointer.toInt()));
+        //Sum 4 to the stackPointer, after because pointer the last used, for decrease the stack pointer
+        this.stackPointer.add(this.POP);
     }
 
     /**
@@ -494,10 +502,10 @@ public class ControlUnit {
     private void operationPushRegisterToStack(ALUOperations operation, BitsSet instruction){
         //Register to save in stack
         int register = instruction.get(21,26).toInt();
-        //Save register in the stack
-        this.internalBus.pushRegisterToStack(operation, this.stackPointer, register);
         //Sub 4 to the stackPointer, for decrease the stack pointer
         this.stackPointer.add(this.PUSH);
+        //Save register in the stack
+        this.internalBus.pushRegisterToStack(operation, BitsSet.valueOf(this.stackPointer.toInt()), register);
     }
 
     /**
@@ -509,7 +517,7 @@ public class ControlUnit {
         //Register to save in stack
         int register = instruction.get(21,26).toInt();
         //Save register in the stack
-        this.internalBus.popStackToRegister(operation, this.stackPointer, register);
+        this.internalBus.popStackToRegister(operation, BitsSet.valueOf(this.stackPointer.toInt()), register);
         //Sum 4 to the stackPointer, for increase the stack pointer
         this.stackPointer.add(this.POP);
     }

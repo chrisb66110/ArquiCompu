@@ -59,7 +59,7 @@ public class CacheSet {
             // This if checks whether the address is in the current caché 
             // block or not and verifies if the data is valid
             if (
-                (currentCacheBlock.tag == address) && 
+                (currentCacheBlock.tag.equals(address)) &&
                 (currentCacheBlock.valid)
             ) {
                 result = currentCacheBlock.data;
@@ -95,7 +95,7 @@ public class CacheSet {
             CacheBlock currentBlock = this.blocks[index];
             //-----------------------------------------------------------------
             // if the current block is a caché of the address
-            if (currentBlock.tag == address) {
+            if (currentBlock.tag.equals(address)) {
                 currentBlock.data = data;
                 updated = true;
             } else if (!currentBlock.valid) {

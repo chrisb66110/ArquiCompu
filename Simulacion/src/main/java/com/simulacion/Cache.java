@@ -204,6 +204,7 @@ public class Cache {
                 //-------------------------------------------------------------
             }
         } else {
+            System.out.println("Had it in cache " + this.level);
             //-----------------------------------------------------------------
             // reduce the size of the reading. 
             result = this .trimToOperandSize(result,amount);

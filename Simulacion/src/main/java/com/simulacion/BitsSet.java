@@ -561,10 +561,14 @@ public class BitsSet{
      * @param bits bits to be inserted
      */
     public void insertBits(int startIndex, BitsSet bits) {
-        for(int i = bits.length() - 1; i >= 0; i--) {
+        for(int i = bits.getRealSize() - 1; i >= 0; i--) {
             this.bitSet.set(startIndex, bits.get(i));
             --startIndex;
         }
+    }
+
+    public BitsSet clone(){
+        return new BitsSet((BitSet) this.bitSet.clone(), this.realSize);
     }
 }
 

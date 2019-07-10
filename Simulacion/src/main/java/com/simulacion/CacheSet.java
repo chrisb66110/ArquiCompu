@@ -100,7 +100,7 @@ public class CacheSet {
             //-----------------------------------------------------------------
             // if the current block is a caché of the address
             if (currentBlock.tag.equals(memoryBlockAddress)) {
-                currentBlock.data = BitsSet.valueOf(data.toInt());
+                currentBlock.data = data.clone();
                 updated = true;
             } else if (!currentBlock.valid) {
                 //-------------------------------------------------------------
@@ -137,8 +137,8 @@ public class CacheSet {
             }
             //-----------------------------------------------------------------
             // saving the block in the assigned index
-            this.blocks[savingBlockIndex].data = BitsSet.valueOf(data.toInt());
-            this.blocks[savingBlockIndex].tag = BitsSet.valueOf(memoryBlockAddress.toInt());
+            this.blocks[savingBlockIndex].data = data.clone();
+            this.blocks[savingBlockIndex].tag = memoryBlockAddress.clone();
             this.blocks[savingBlockIndex].valid = true;
             //-----------------------------------------------------------------
         }

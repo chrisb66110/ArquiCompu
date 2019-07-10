@@ -132,7 +132,7 @@ public class Cache {
                 this.getDataMemory(address);
             }
         } else {
-            System.out.println("Had it in cache " + this.level);
+            //System.out.println("Had it in cache " + this.level);
             //-----------------------------------------------------------------
             // reduce the size of the reading if I'm the first cache so the CPU gets only what it requested.
             result = this.level == 1 ?
@@ -199,6 +199,7 @@ public class Cache {
 
         // The division of address by block size is done to floor the result since they're ints
         BitsSet startAddress = BitsSet.valueOf((address.toInt()/(this.blockSize/8)) * (this.blockSize/8));
+        int startAddressInt = startAddress.toInt();
 
         this.cacheReadsMemory = this.rxSubscriber.register(
                 BusSendsSignal.class,
@@ -213,11 +214,11 @@ public class Cache {
                         --this.memoryHitsNecessary;
                         if(memoryHitsNecessary == 0) {
                             this.writeLocal(address, this.blockFromMemory);
-                            this.createDataReturnedEvent(address, this.extractUpperLevelBlock(address, this.blockFromMemory));
+                            this.createDataReturnedEvent(this.extractUpperLevelBlock(address, this.blockFromMemory), address);
                             this.cacheReadsMemory.unsubscribe();
                         }
                         else{
-                            BitsSet nextAddress = BitsSet.valueOf(startAddress.toInt() + (this.blockSize/8 - this.memoryHitsNecessary));
+                            BitsSet nextAddress = BitsSet.valueOf(startAddress.toInt() + (this.blockSize/8 - (this.memoryHitsNecessary*4)));
                             this.sendSignalRead(nextAddress);
                         }
                     }
@@ -240,7 +241,7 @@ public class Cache {
         return exactBlockPosition * 10 % 10 >= 5 ?
                 block.get(0, this.blockSize / 2)
                 :
-                block.get(this.blockSize / 2, this.blockSize - 1);
+                block.get(this.blockSize / 2, this.blockSize);
     }
 
     /**

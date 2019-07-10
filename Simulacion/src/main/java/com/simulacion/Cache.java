@@ -481,6 +481,19 @@ public class Cache {
             0, size.size
         );
     }
+
+    /**
+     * Asks the sets to set their blocks as invalid and the tells
+     * the lower level cache to do the same
+     */
+    public void setInvalid() {
+        for (CacheSet set : this.sets) {
+            set.setInvalid();
+        }
+
+        if(this.nextCache != null)
+            this.nextCache.setInvalid();
+    }
     //-------------------------------------------------------------------------
 }
 //-----------------------------------------------------------------------------

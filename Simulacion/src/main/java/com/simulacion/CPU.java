@@ -40,6 +40,10 @@ public class CPU {
         this.controlUnit.setProgramCounter(initialInstAddress);
         eventHandler.addEvent(new StartCUCycle(1, null));
 
+        // Reset caches for the new program
+        dataCache.setInvalid();
+        instCache.setInvalid();
+
         this.run = true;
         while(this.run){
             eventHandler.fireEvent(this.clock);

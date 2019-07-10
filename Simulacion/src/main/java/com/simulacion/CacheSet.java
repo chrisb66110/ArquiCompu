@@ -163,7 +163,7 @@ public class CacheSet {
             //-----------------------------------------------------------------
             if (this.blocks[index].tag.equals(memoryBlockAddress) && this.blocks[index].valid) {
                 // Calculate offset between address and the start of block address
-                int addressBlockOffset = address.toInt() - address.toInt()/(this.blockSize/8);
+                int addressBlockOffset = address.toInt() - memoryBlockAddress.toInt() * (this.blockSize/8);
                 // Extract the part of the data we need
                 BitsSet exactData = data.get(0, amount.size);
                 // Insert the data into the block part
@@ -174,6 +174,15 @@ public class CacheSet {
             // update the index
             index++;
             //-----------------------------------------------------------------
+        }
+    }
+
+    /**
+     * Sets the blocks of the set as invalid
+     */
+    public void setInvalid() {
+        for (CacheBlock block : this.blocks) {
+            block.valid = false;
         }
     }
     //-------------------------------------------------------------------------

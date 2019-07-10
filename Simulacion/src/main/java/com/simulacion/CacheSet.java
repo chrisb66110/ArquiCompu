@@ -37,7 +37,7 @@ public class CacheSet {
     //-------------------------------------------------------------------------
     // Methods
     /**
-     * Find the data stored on the given address
+     * Find the data stored on the given address. Returns the entire block
      * 
      * @author Joseph Rementería (b55824)
      * 
@@ -46,6 +46,7 @@ public class CacheSet {
      */
     public BitsSet find(BitsSet address) {
         //---------------------------------------------------------------------
+        BitsSet memoryBlock = BitsSet.valueOf(address.toInt()/Consts.BLOCK_SIZE);
         // Auxiliary Variables
         BitsSet result = null;
         int index = 0;
@@ -59,7 +60,7 @@ public class CacheSet {
             // This if checks whether the address is in the current caché 
             // block or not and verifies if the data is valid
             if (
-                (currentCacheBlock.tag == address) && 
+                (currentCacheBlock.tag.equals(memoryBlock)) &&
                 (currentCacheBlock.valid)
             ) {
                 result = currentCacheBlock.data;
@@ -73,16 +74,17 @@ public class CacheSet {
         return result;
         //---------------------------------------------------------------------
     }
+
+    // TODO: make this method write blocks
     /**
      * Method used for write the given data to the given address. 
      * 
      * @author Joseph Rementería (b55824)
      * 
      * @param address
-     * @param amount
      * @param data
      */
-    public void writeBits(BitsSet address, OperandSize amount, BitsSet data) {
+    public void writeBits(BitsSet address, BitsSet data) {
         //---------------------------------------------------------------------
         // Auxiliary variables.
         boolean updated = false;
@@ -95,7 +97,7 @@ public class CacheSet {
             CacheBlock currentBlock = this.blocks[index];
             //-----------------------------------------------------------------
             // if the current block is a caché of the address
-            if (currentBlock.tag == address) {
+            if (currentBlock.tag.equals(address)) {
                 currentBlock.data = data;
                 updated = true;
             } else if (!currentBlock.valid) {
@@ -118,7 +120,7 @@ public class CacheSet {
             //-----------------------------------------------------------------
             // checking if there is free spaces in the set
             int savingBlockIndex = -1;
-            if (invalidBlockIndex != 1) {
+            if (invalidBlockIndex != -1) {
                 //-------------------------------------------------------------
                 // since there is free space, the saving space is the last 
                 // free space
@@ -134,13 +136,17 @@ public class CacheSet {
             }
             //-----------------------------------------------------------------
             // saving the block in the assigned index
-            this.blocks[savingBlockIndex].data = data;
-            this.blocks[savingBlockIndex].tag = address;
+            this.blocks[savingBlockIndex].data = BitsSet.valueOf(data.toInt());
+            this.blocks[savingBlockIndex].tag = BitsSet.valueOf(address.toInt());
             this.blocks[savingBlockIndex].valid = true;
             //-----------------------------------------------------------------
         }
         //---------------------------------------------------------------------
 	}
+
+	// TODO: implement
+    public void updateBlock(BitsSet address, OperandSize amount, BitsSet data) {
+    }
     //-------------------------------------------------------------------------
 }
 //-----------------------------------------------------------------------------

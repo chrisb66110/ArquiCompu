@@ -12,6 +12,7 @@ public class CacheSet {
     //-------------------------------------------------------------------------
     // Global Variables
     private CacheBlock[] blocks;
+    private int blockSize;
     //-------------------------------------------------------------------------
     // Constructors
     /**
@@ -26,6 +27,7 @@ public class CacheSet {
         //---------------------------------------------------------------------
         // Creation of the array.
         this.blocks = new CacheBlock[blocks];
+        this.blockSize = blockSize;
         //---------------------------------------------------------------------
         // Creation of each block
         for (int index = 0; index < blocks; index++) {
@@ -46,7 +48,7 @@ public class CacheSet {
      */
     public BitsSet find(BitsSet address) {
         //---------------------------------------------------------------------
-        BitsSet memoryBlock = BitsSet.valueOf(address.toInt()/Consts.BLOCK_SIZE);
+        BitsSet memoryBlock = BitsSet.valueOf(address.toInt()/this.blockSize);
         // Auxiliary Variables
         BitsSet result = null;
         int index = 0;

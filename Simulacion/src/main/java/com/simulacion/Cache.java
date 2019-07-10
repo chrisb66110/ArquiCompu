@@ -20,6 +20,7 @@ public class Cache {
     private CacheSet[] sets;
     private int level;
     private int hitTime;
+    private int blockSize;
     private Cache nextCache;
     private Bus memoryBus;
     private EventHandler eventHandler = EventHandler.getInstance();
@@ -46,12 +47,12 @@ public class Cache {
      * @param nextCache
      * @param memoryBus
      */
-    // TODO: Make the block size a parameter
     public Cache(
         long size,
         int associativity,
         int level,
         int hitTime,
+        int blockSize,
         Cache nextCache, 
         Bus memoryBus
     ) {
@@ -63,14 +64,13 @@ public class Cache {
         this.size = size;
         //---------------------------------------------------------------------
         // Setting the creation of the caché sets
-        // this.size = this.BLOCK_SIZE * sets * this.asociativity;
-        int sets = 
-            (int) Math.ceil(size/(Consts.BLOCK_SIZE/8 * this.asociativity));
+        this.blockSize = blockSize;
+        int sets = (int) Math.ceil(size/(this.blockSize/8 * this.asociativity));
         this.sets = new CacheSet[sets];
         for (int index = 0; index < sets; index++) {
             this.sets[index] = new CacheSet(
                 this.asociativity,
-                Consts.BLOCK_SIZE
+                this.blockSize
             );
         }
         //---------------------------------------------------------------------
@@ -410,7 +410,7 @@ public class Cache {
         //---------------------------------------------------------------------
         // computing the block number and the set index
         return (
-            (int) Math.floor(addressInt/Consts.BLOCK_SIZE) % this.sets.length
+            (int) addressInt/this.blockSize % this.sets.length
         );
         //---------------------------------------------------------------------
     }

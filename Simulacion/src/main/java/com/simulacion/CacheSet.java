@@ -145,8 +145,36 @@ public class CacheSet {
         //---------------------------------------------------------------------
 	}
 
-	// TODO: implement
+    /**
+     * Updates the cache with the new data. If the block for this write is not present, it does nothing.
+     * (Write Non-Allocate)
+     *
+     * @param address the memory address where the new data is being updated.
+     * @param amount the ammount to be updated
+     * @param data the data being updated
+     */
     public void updateBlock(BitsSet address, OperandSize amount, BitsSet data) {
+        BitsSet memoryBlockAddress = BitsSet.valueOf(address.toInt()/(this.blockSize/8));
+        // Auxiliary Variables
+        int index = 0;
+        //---------------------------------------------------------------------
+        // Searching for the address in the array
+        while (index < this.blocks.length) {
+            //-----------------------------------------------------------------
+            if (this.blocks[index].tag.equals(memoryBlockAddress) && this.blocks[index].valid) {
+                // Calculate offset between address and the start of block address
+                int addressBlockOffset = address.toInt() - address.toInt()/(this.blockSize/8);
+                // Extract the part of the data we need
+                BitsSet exactData = data.get(0, amount.size);
+                // Insert the data into the block part
+                this.blocks[index].data.insertBits(this.blockSize - (addressBlockOffset * 8) - 1, exactData);
+                break;
+            }
+            //-----------------------------------------------------------------
+            // update the index
+            index++;
+            //-----------------------------------------------------------------
+        }
     }
     //-------------------------------------------------------------------------
 }

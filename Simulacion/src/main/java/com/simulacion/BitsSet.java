@@ -566,23 +566,6 @@ public class BitsSet{
             --startIndex;
         }
     }
-
-    /**
-     * Extracts a new BitsSet made from the bits between the start and end indices (both included). The start number must be bigger than the end
-     *
-     * @param startIndex  the start index of the extraction
-     * @param endIndex the end index of the extraction
-     * @return returns a new BitsSet that contains the extraction
-     */
-    public BitsSet extractBits(int startIndex, int endIndex) {
-        BitsSet extraction = new BitsSet(startIndex - endIndex + 1);
-        int extractionIndex = extraction.getRealSize() - 1;
-        for(int i = startIndex; i >= endIndex; i--){
-            extraction.set(extractionIndex, this.bitSet.get(i));
-            --extractionIndex;
-        }
-        return extraction;
-    }
 }
 
 

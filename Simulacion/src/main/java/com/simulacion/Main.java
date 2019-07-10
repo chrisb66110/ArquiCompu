@@ -25,6 +25,8 @@ public class Main {
             bus.post(new Event(0, "Hola",null));
             System.out.println("Finitio");
         }*/
+        BitsSet test = BitsSet.valueOf(117);
+        BitsSet cut = test.get(0, 4);
 
         OperatingSystem os = new OperatingSystem();
 

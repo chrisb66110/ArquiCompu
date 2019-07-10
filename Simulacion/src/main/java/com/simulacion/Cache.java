@@ -238,9 +238,9 @@ public class Cache {
     private BitsSet extractUpperLevelBlock(BitsSet address, BitsSet block) {
         double exactBlockPosition = address.toInt() / (this.blockSize/8.0);
         return exactBlockPosition * 10 % 10 >= 5 ?
-                block.extractBits(this.blockSize / 2 - 1, 0)
+                block.get(0, this.blockSize / 2)
                 :
-                block.extractBits(this.blockSize - 1, this.blockSize / 2);
+                block.get(this.blockSize / 2, this.blockSize - 1);
     }
 
     /**
@@ -304,23 +304,27 @@ public class Cache {
      */
     public void writeBits(BitsSet address, OperandSize amount, BitsSet data) {
         //---------------------------------------------------------------------
-        if(this.sets[this.calculateSetIndex(address)].find(address) != null)
-            this.updateLocal(address, amount, data);
-        else
-            // TODO: mark block as non valid. Non-allocate write
+        this.updateLocal(address, amount, data);
         //---------------------------------------------------------------------
         // check if this is the last level caché
         if (this.nextCache != null) {
-            //-----------------------------------------------------------------
-            // Creating the event to write in the cache levels from bellow
-            this.cacheWroteData = this.rxSubscriber.register(
+            this.writeCacheNextLevel(address, amount, data);
+        } else {
+            this.writeMemory(address, amount, data);
+        }
+    }
+
+    private void writeCacheNextLevel(BitsSet address, OperandSize amount, BitsSet data){
+        //-----------------------------------------------------------------
+        // Creating the event to write in the cache levels from bellow
+        this.cacheWroteData = this.rxSubscriber.register(
                 CacheWroteData.class,
                 event -> {
                     //---------------------------------------------------------
-                    // Cheching whether the event is ours or not 
+                    // Cheching whether the event is ours or not
                     if (
-                        this.level == 
-                        (int) event.info[Consts.INFO_LEVEL_INDEX-1]
+                            this.level ==
+                                    (int) event.info[Consts.INFO_LEVEL_INDEX-1]
                     ) {
                         //-----------------------------------------------------
                         // Creates the event to unlock the previous level
@@ -330,20 +334,22 @@ public class Cache {
                     }
                     //---------------------------------------------------------
                 }
-            );
-            //Write to the next level
-            this.nextCache.writeBits(address, amount, data);
-        } else {
-            //-----------------------------------------------------------------
-            // writting the data to memory
-            this.cacheWriteMemory = this.rxSubscriber.register(
-                BusSendsSignal.class, 
+        );
+        //Write to the next level
+        this.nextCache.writeBits(address, amount, data);
+    }
+
+    private void writeMemory(BitsSet address, OperandSize amount, BitsSet data){
+        //-----------------------------------------------------------------
+        // writting the data to memory
+        this.cacheWriteMemory = this.rxSubscriber.register(
+                BusSendsSignal.class,
                 event -> {
                     //---------------------------------------------------------
                     // Checking if the writting has already finished.
                     if (Consts.MEM_WRITING_DONE_CODE == this.memoryBus.getControlLines().toInt()) {
                         //-----------------------------------------------------
-                        // creating the event so the level above knows the 
+                        // creating the event so the level above knows the
                         // write has finished
                         this.createWriteEvent();
                         //-----------------------------------------------------
@@ -351,51 +357,49 @@ public class Cache {
                     }
                     //---------------------------------------------------------
                 }
-            );
-            //-----------------------------------------------------------------
-            // Trying to set the control lines
-            try {
-                //-------------------------------------------------------------
-                // Setting the control lines with the correct code
-                int code = -1;
-                switch (amount) {
-                    case Byte:
-                        //-----------------------------------------------------
-                        code = Consts.MEM_WRITE_BT_QUERY_CODE;
-                        break;
-                        //-----------------------------------------------------
-                    case HalfWord:
-                        //-----------------------------------------------------
-                        code = Consts.MEM_WRITE_HW_QUERY_CODE;
-                        break;
-                        //-----------------------------------------------------
-                    case Word:
-                        //-----------------------------------------------------
-                        code = Consts.MEM_WRITE_WD_QUERY_CODE;
-                        break;
-                        //-----------------------------------------------------
-                }
-                this.memoryBus.setControl(
-                    new BitsSet(
-                        Consts.CONTROL_LINES_SIZE,
-                        code
-                    )
-                );
-                //-------------------------------------------------------------
-                // Setting the address lines
-                this.memoryBus.setAddress(address);
-                //-------------------------------------------------------------
-                // Setting the data lines
-                this.memoryBus.setData(data);
-                this.memoryBus.sendSignal();
-                //-------------------------------------------------------------
-            } catch (Exception e) {
-                // nothing but find the real control or address lines size
-                System.out.println(e);
+        );
+        //-----------------------------------------------------------------
+        // Trying to set the control lines
+        try {
+            //-------------------------------------------------------------
+            // Setting the control lines with the correct code
+            int code = -1;
+            switch (amount) {
+                case Byte:
+                    //-----------------------------------------------------
+                    code = Consts.MEM_WRITE_BT_QUERY_CODE;
+                    break;
+                //-----------------------------------------------------
+                case HalfWord:
+                    //-----------------------------------------------------
+                    code = Consts.MEM_WRITE_HW_QUERY_CODE;
+                    break;
+                //-----------------------------------------------------
+                case Word:
+                    //-----------------------------------------------------
+                    code = Consts.MEM_WRITE_WD_QUERY_CODE;
+                    break;
+                //-----------------------------------------------------
             }
-            //-----------------------------------------------------------------
+            this.memoryBus.setControl(
+                    new BitsSet(
+                            Consts.CONTROL_LINES_SIZE,
+                            code
+                    )
+            );
+            //-------------------------------------------------------------
+            // Setting the address lines
+            this.memoryBus.setAddress(address);
+            //-------------------------------------------------------------
+            // Setting the data lines
+            this.memoryBus.setData(data);
+            this.memoryBus.sendSignal();
+            //-------------------------------------------------------------
+        } catch (Exception e) {
+            // nothing but find the real control or address lines size
+            System.out.println(e);
         }
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------
     }
 
     /**
@@ -432,12 +436,11 @@ public class Cache {
     }
 
     /**
-     * Method that updates the respective part of the block. This method assumes the cache already
-     * checked that the block for this address is present
+     * Method that updates the respective part of the block.
      *
-     * @param address The address of memory being written
+     * @param address the address of memory being written
      * @param amount the amount of bits to be written
-     * @param data th data to be written
+     * @param data the data to be written
      */
     private void updateLocal(BitsSet address, OperandSize amount, BitsSet data) {
         this.sets[this.calculateSetIndex(address)].updateBlock(address, amount,data);
@@ -473,27 +476,9 @@ public class Cache {
      */
     private BitsSet trimToOperandSize(BitsSet value, OperandSize size) {
         //---------------------------------------------------------------------
-        // reduce the size of the reading. 
-        int bitsSetCutIndex = -1;
-        BitsSet result = null;
-        //---------------------------------------------------------------------
-        switch (size) {
-            case Word:
-                bitsSetCutIndex = Consts.WORD_SIZE;
-                break;
-            case HalfWord:
-                bitsSetCutIndex = Consts.HALFWORD_SIZE;
-                break;
-            case Byte:
-                bitsSetCutIndex = Consts.BYTE_SIZE;
-                break;
-        }
-        result = value.get(
-            value.getRealSize()-bitsSetCutIndex, value.getRealSize()
+        return value.get(
+            0, size.size
         );
-        //---------------------------------------------------------------------
-        return result;
-        //---------------------------------------------------------------------
     }
     //-------------------------------------------------------------------------
 }

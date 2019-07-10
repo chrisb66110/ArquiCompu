@@ -48,7 +48,7 @@ public class CacheSet {
      */
     public BitsSet find(BitsSet address) {
         //---------------------------------------------------------------------
-        BitsSet memoryBlock = BitsSet.valueOf(address.toInt()/this.blockSize);
+        BitsSet memoryBlockAddress = BitsSet.valueOf(address.toInt()/(this.blockSize/8));
         // Auxiliary Variables
         BitsSet result = null;
         int index = 0;
@@ -62,7 +62,7 @@ public class CacheSet {
             // This if checks whether the address is in the current caché 
             // block or not and verifies if the data is valid
             if (
-                (currentCacheBlock.tag.equals(memoryBlock)) &&
+                (currentCacheBlock.tag.equals(memoryBlockAddress)) &&
                 (currentCacheBlock.valid)
             ) {
                 result = currentCacheBlock.data;
@@ -77,7 +77,6 @@ public class CacheSet {
         //---------------------------------------------------------------------
     }
 
-    // TODO: make this method write blocks
     /**
      * Method used for write the given data to the given address. 
      * 
@@ -87,6 +86,7 @@ public class CacheSet {
      * @param data
      */
     public void writeBits(BitsSet address, BitsSet data) {
+        BitsSet memoryBlockAddress = BitsSet.valueOf(address.toInt()/(this.blockSize/8));
         //---------------------------------------------------------------------
         // Auxiliary variables.
         boolean updated = false;
@@ -99,8 +99,8 @@ public class CacheSet {
             CacheBlock currentBlock = this.blocks[index];
             //-----------------------------------------------------------------
             // if the current block is a caché of the address
-            if (currentBlock.tag.equals(address)) {
-                currentBlock.data = data;
+            if (currentBlock.tag.equals(memoryBlockAddress)) {
+                currentBlock.data = BitsSet.valueOf(data.toInt());
                 updated = true;
             } else if (!currentBlock.valid) {
                 //-------------------------------------------------------------
@@ -131,7 +131,6 @@ public class CacheSet {
             } else {
                 //-------------------------------------------------------------
                 // otherwise, find a index victim
-                // TODO: we are using a random algorithm by now
                 Random rand = new Random();
                 savingBlockIndex = rand.nextInt(this.blocks.length);
                 //-------------------------------------------------------------
@@ -139,7 +138,7 @@ public class CacheSet {
             //-----------------------------------------------------------------
             // saving the block in the assigned index
             this.blocks[savingBlockIndex].data = BitsSet.valueOf(data.toInt());
-            this.blocks[savingBlockIndex].tag = BitsSet.valueOf(address.toInt());
+            this.blocks[savingBlockIndex].tag = BitsSet.valueOf(memoryBlockAddress.toInt());
             this.blocks[savingBlockIndex].valid = true;
             //-----------------------------------------------------------------
         }

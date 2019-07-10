@@ -21,6 +21,10 @@ public class Cache {
     private int level;
     private int hitTime;
     private int blockSize;
+
+    private int memoryHitsNecessary;
+    private BitsSet blockFromMemory;
+
     private Cache nextCache;
     private Bus memoryBus;
     private EventHandler eventHandler = EventHandler.getInstance();
@@ -122,103 +126,150 @@ public class Cache {
             //-----------------------------------------------------------------
             // check if this is the last level caché
             if (this.nextCache != null) {
-                //-------------------------------------------------------------
-                this.cacheDataReturn = this.rxSubscriber.register(
-                    CacheDataReturn.class, 
-                    event -> {
-                        //-----------------------------------------------------
-                        // Check if the event has my information
-                        if (
-                            this.level == 
-                            (int) event.info[Consts.INFO_LEVEL_INDEX] &&
-                                    ((BitsSet)event.info[Consts.INFO_ADDRESS]).equals(address)
-                        ) {                
-                            //-------------------------------------------------
-                            // saving the block from lower level
-                            this.writeLocal(
-                                address,
-                                (BitsSet) event.info[Consts.INFO_DATA_INDEX]
-                            );
-                            //-------------------------------------------------
-                            // Creating the event to send the data
-                            this.createDataReturnedEvent(
-                                (BitsSet)event.info[Consts.INFO_DATA_INDEX],
-                                    (BitsSet)event.info[Consts.INFO_ADDRESS]
-                            );
-                            //-------------------------------------------------
-                            this.cacheDataReturn.unsubscribe();
-                        }
-                        //-----------------------------------------------------
-                    }
-                );
-                //-------------------------------------------------------------
-                // getting the data from the next caché level
-                this.nextCache.getBits(address, amount);
-                //-------------------------------------------------------------
-            } else {
-                //-------------------------------------------------------------
-                // getting the data from memory
-                this.cacheReadsMemory = this.rxSubscriber.register(
-                    BusSendsSignal.class, 
-                    event -> {
-                        // TODO: go various times to memory if the block size requires it
-                        //-----------------------------------------------------
-                        // Checking if the reading has already finished.
-                        if (
-                            Consts.MEM_READING_DONE_CODE == 
-                            this.memoryBus.getControlLines().toInt()
-                        ) {
-                            // TODO: write local what memory gave me
-                            //-------------------------------------------------
-                            // creating the event so the level above can has 
-                            // read address. 
-                            this.createDataReturnedEvent(
-                                memoryBus.getDataLines(),
-                                    memoryBus.getAddressLines()
-                            );
-                            //-------------------------------------------------
-                            this.cacheReadsMemory.unsubscribe();
-                        }
-                        //-----------------------------------------------------
-                    }
-                );
-                //-------------------------------------------------------------
-                // Trying to set the control lines
-                try {
-                    //---------------------------------------------------------
-                    // Setting the control lines with the correct code
-                    this.memoryBus.setControl(
-                        new BitsSet(
-                            Consts.CONTROL_LINES_SIZE,
-                            Consts.MEM_READ_QUERY_CODE
-                        )
-                    );
-                    //---------------------------------------------------------
-                    // Setting the address lines
-                    this.memoryBus.setAddress(address);
-                    this.memoryBus.sendSignal();
-                    //---------------------------------------------------------
-                } catch (Exception e) {
-                    // nothing but find the real control or address lines size
-                    System.out.println(e);
-                }
-                //-------------------------------------------------------------
+                this.getDataLowerCache(address, amount);
+            }
+            else {
+                this.getDataMemory(address);
             }
         } else {
-            // TODO: always return the entire block except for level 1 cache who has to trim
             System.out.println("Had it in cache " + this.level);
             //-----------------------------------------------------------------
-            // reduce the size of the reading. 
-            result = this.trimToOperandSize(result,amount);
+            // reduce the size of the reading if I'm the first cache so the CPU gets only what it requested.
+            result = this.level == 1 ?
+                    this.trimToOperandSize(result,amount)
+                    :
+                    this.extractUpperLevelBlock(address,result);
             //-----------------------------------------------------------------
             // Setting the result in the info array
             this.createDataReturnedEvent(result, BitsSet.valueOf(address.toInt()));
             //-----------------------------------------------------------------
         }
-        //---------------------------------------------------------------------
-        // return result;
-        //---------------------------------------------------------------------
     }
+
+    /**
+     * Asks the cache below me to give the block for the address being requested
+     *
+     * @param address the address of memory being requested
+     * @param amount the amount of bits being requested
+     */
+    private void getDataLowerCache(BitsSet address, OperandSize amount){
+        //-------------------------------------------------------------
+        this.cacheDataReturn = this.rxSubscriber.register(
+                CacheDataReturn.class,
+                event -> {
+                    // Check if the event has my information
+                    if (
+                            this.level ==
+                                    (int) event.info[Consts.INFO_LEVEL_INDEX] &&
+                                    ((BitsSet)event.info[Consts.INFO_ADDRESS]).equals(address)
+                    ) {
+                        // saving the block from lower level
+                        this.writeLocal(
+                                address,
+                                (BitsSet) event.info[Consts.INFO_DATA_INDEX]
+                        );
+                        // If this is the first level, trim so the CPU gets what it requested
+                        BitsSet result = this.level == 1 ?
+                                this.trimToOperandSize((BitsSet)event.info[Consts.INFO_DATA_INDEX],amount)
+                                :
+                                this.extractUpperLevelBlock(address, (BitsSet)event.info[Consts.INFO_DATA_INDEX]);
+
+                        // Creating the event to send the data
+                        this.createDataReturnedEvent(
+                                result,
+                                address
+                        );
+                        this.cacheDataReturn.unsubscribe();
+                    }
+                }
+        );
+        // getting the data from the next caché level
+        this.nextCache.getBits(address, amount);
+    }
+
+    /**
+     * Requests the block of memory where the address being requested is located
+     *
+     * @param address the address of memory being requested
+     */
+    private void getDataMemory(BitsSet address){
+        //-------------------------------------------------------------
+        this.memoryHitsNecessary = this.blockSize / Consts.WORD_SIZE;
+        this.blockFromMemory = new BitsSet(this.blockSize);
+
+        // The division of address by block size is done to floor the result since they're ints
+        BitsSet startAddress = BitsSet.valueOf((address.toInt()/(this.blockSize/8)) * (this.blockSize/8));
+
+        this.cacheReadsMemory = this.rxSubscriber.register(
+                BusSendsSignal.class,
+                event -> {
+                    //-----------------------------------------------------
+                    // Checking if the reading has already finished.
+                    if (
+                            Consts.MEM_READING_DONE_CODE ==
+                                    this.memoryBus.getControlLines().toInt()
+                    ) {
+                        this.blockFromMemory.insertBits(memoryHitsNecessary * Consts.WORD_SIZE - 1, memoryBus.getDataLines());
+                        --this.memoryHitsNecessary;
+                        if(memoryHitsNecessary == 0) {
+                            this.writeLocal(address, this.blockFromMemory);
+                            this.createDataReturnedEvent(address, this.extractUpperLevelBlock(address, this.blockFromMemory));
+                            this.cacheReadsMemory.unsubscribe();
+                        }
+                        else{
+                            BitsSet nextAddress = BitsSet.valueOf(startAddress.toInt() + (this.blockSize/8 - this.memoryHitsNecessary));
+                            this.sendSignalRead(nextAddress);
+                        }
+                    }
+                    //-----------------------------------------------------
+                });
+        //-------------------------------------------------------------
+        this.sendSignalRead(startAddress);
+        //-------------------------------------------------------------
+    }
+
+    /**
+     * Extracts the half block where the data is so that the upper level can handle it
+     *
+     * @param address the address of the memory requested
+     * @param block the block from this level where the address is located
+     * @return a BitsSet representing the upper level block
+     */
+    private BitsSet extractUpperLevelBlock(BitsSet address, BitsSet block) {
+        double exactBlockPosition = address.toInt() / (this.blockSize/8.0);
+        return exactBlockPosition * 10 % 10 >= 5 ?
+                block.extractBits(this.blockSize / 2 - 1, 0)
+                :
+                block.extractBits(this.blockSize - 1, this.blockSize / 2);
+    }
+
+    /**
+     * Sets the control signals on the bus for a word read and sends them
+     *
+     * @param address the address of memory to be read
+     */
+    private void sendSignalRead(BitsSet address) {
+        // Trying to set the control lines
+        try {
+            //---------------------------------------------------------
+            // Setting the control lines with the correct code
+            this.memoryBus.setControl(
+                    new BitsSet(
+                            Consts.CONTROL_LINES_SIZE,
+                            Consts.MEM_READ_QUERY_CODE
+                    )
+            );
+            //---------------------------------------------------------
+            // Setting the address lines
+            this.memoryBus.setAddress(address);
+            this.memoryBus.sendSignal();
+            //---------------------------------------------------------
+        } catch (Exception e) {
+            // nothing but find the real control or address lines size
+            System.out.println(e);
+        }
+    }
+
     /**
      * 
      * Creates the event to unlock the code from above
@@ -375,11 +426,8 @@ public class Cache {
      */
     private void writeLocal(BitsSet address, BitsSet data){
         //---------------------------------------------------------------------
-        // Find the set number assigned to the address
-        int setNumber = this.calculateSetIndex(address);
-        //---------------------------------------------------------------------
         // write the changes in the current caché level. 
-        this.sets[setNumber].writeBits(address, data);
+        this.sets[this.calculateSetIndex(address)].writeBits(address, data);
         //---------------------------------------------------------------------
     }
 
@@ -409,9 +457,7 @@ public class Cache {
         int addressInt = address.toInt();
         //---------------------------------------------------------------------
         // computing the block number and the set index
-        return (
-            (int) addressInt/this.blockSize % this.sets.length
-        );
+        return (addressInt/(this.blockSize/8) % this.sets.length);
         //---------------------------------------------------------------------
     }
     //-------------------------------------------------------------------------

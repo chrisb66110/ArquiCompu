@@ -1,6 +1,9 @@
 package com.simulacion;
 
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class for handling bits.
@@ -8,20 +11,15 @@ import java.util.BitSet;
 public class BitsSet{
 
     private BitSet bitSet; //Class to handle bits.
-
-    /**
-     * Constructor without parameters.
-     */
-    public BitsSet(){
-        this.bitSet = new BitSet();
-    }
+    private int realSize;
 
     /**
      * Constructor from a BitSet.
      * @param bitSet BitSet to build the BitsSet.
      */
-    public BitsSet(BitSet bitSet){
+    public BitsSet(BitSet bitSet, int size){
         this.bitSet = bitSet;
+        this.realSize = size;
     }
 
     /**
@@ -30,6 +28,7 @@ public class BitsSet{
      */
     public BitsSet(int nbits) {
         this.bitSet = new BitSet(nbits);
+        this.realSize = nbits;
     }
 
     /**
@@ -61,6 +60,7 @@ public class BitsSet{
      */
     public BitsSet(int size, int value) {
         this.bitSet = new BitSet(size);
+        this.realSize = size;
         int index = 0;
         while (value != 0L) {
           if (value % 2L != 0) {
@@ -89,7 +89,7 @@ public class BitsSet{
      * @return Returns BitsSet with the indicated bits from fromIndex to toIndex.
      */
     public BitsSet get(int fromIndex, int toIndex) {
-        return new BitsSet(this.bitSet.get(fromIndex, toIndex));
+        return new BitsSet(this.bitSet.get(fromIndex, toIndex), toIndex - fromIndex);
     }
 
     /**
@@ -113,18 +113,10 @@ public class BitsSet{
 
     /**
      * Function to know the amount of bits used.
-     * @return Cantidad de bits utilizados.
+     * @return Number of bits used
      */
-    public int length() {
+    private int length() {
         return this.bitSet.length();
-    }
-
-    /**
-     * Function that returns a copy of the object.
-     * @return Return copy of the object.
-     */
-    public Object clone() {
-        return this.bitSet.clone();
     }
 
     /**
@@ -382,7 +374,7 @@ public class BitsSet{
             return thisSize > otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -420,7 +412,7 @@ public class BitsSet{
             return thisSize > otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -458,7 +450,7 @@ public class BitsSet{
             return thisSize < otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -496,7 +488,7 @@ public class BitsSet{
             return thisSize < otherSize;
         }
         //Number of equal bits
-        for (int i = 0; i < thisSize; i++) {
+        for (int i = thisSize; i >= 0; i--) {
             boolean thisVal = this.get(i);
             boolean otherVal = other.get(i);
             if (thisVal != otherVal) {
@@ -508,18 +500,59 @@ public class BitsSet{
         //False because they are the same
         return true;
     }
-    //-------------------------------------------------------------------------
+
     /**
-     * Returns the size of the BitsSet
-     * 
-     * @author Joseph Rementería (b55824)
-     * 
-     * @return size of the Bitsset
+     * Returns the original size the BitsSet was created with
+     * @return the original size
      */
-    public int size() {
-        return this.bitSet.size();
+    public int getRealSize() {
+        return realSize;
     }
-    //-------------------------------------------------------------------------
+
+    /**
+     * Takes an array of bytes and creates one BitsSet with the result of joining them
+     * @param bytes the array of bytes
+     * @return The resulting BitsSet
+     */
+    public static BitsSet joinBytes(BitsSet[] bytes) {
+        BitsSet result = new BitsSet(bytes.length * 8);
+        for (int i = 0; i < bytes.length; i++) {
+            for(int j = 7; j >= 0; j--){
+                result.set((i*8) + j, bytes[bytes.length - 1 - i].get(j));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Takes a BitsSet that represents a Word or HalfWord and creates a List of BitsSet where each entry represents a byte.
+     * IMPORTANT: The index 0 has the most significant byte and the last index has the least significant one.
+     * @param data the word or half word to be split
+     * @return the resulting bytes in a list
+     */
+    public static List<BitsSet> SplitInBytes(BitsSet data) {
+        List<BitsSet> result = new LinkedList<BitsSet>();
+        for(int i = data.realSize / 8 - 1; i >= 0; i--){
+            BitsSet b = new BitsSet(8);
+            for(int j = 7; j >=0 ; j--){
+                b.set(j,  data.get((i*8) + j));
+            }
+            result.add(b);
+        }
+
+        return result;
+    }
+
+    /**
+     * Flips the bits in the this BitsSet
+     */
+    public void flip(){
+        for(int i = 0; i < this.realSize / 2; i++){
+            boolean tempBit = this.bitSet.get(i);
+            this.bitSet.set(i, this.bitSet.get(this.realSize - 1 - i));
+            this.bitSet.set(this.realSize - 1 - i, tempBit);
+        }
+    }
 }
 
 

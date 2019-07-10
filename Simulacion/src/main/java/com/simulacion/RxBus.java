@@ -25,7 +25,6 @@ public class RxBus {
     }
 
     public void post(Event event) {
-        System.out.println(event.type);
         mBusSubject.onNext(event);
     }
 }

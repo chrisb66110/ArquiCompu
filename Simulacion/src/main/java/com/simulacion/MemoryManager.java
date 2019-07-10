@@ -8,10 +8,10 @@ public class MemoryManager {
     }
 
     public BitsSet getBits(int dir, OperandSize ammount){
-        return null;
+        return this.memory.getBits(dir, ammount);
     }
 
     public void writeBits(int dir, OperandSize ammount, BitsSet bits){
-
+        this.memory.writeBits(dir, ammount, bits);
     }
 }

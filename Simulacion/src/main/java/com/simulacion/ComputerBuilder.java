@@ -6,12 +6,12 @@ public class ComputerBuilder {
      * @param os The operating system in order to set the references to the computer components
      */
     public static void buildComputer(OperatingSystem os) {
-        Bus bus = new Bus(4, 32, 32);
+        Bus bus = new Bus(Consts.CONTROL_LINES_SIZE, 32, 32);
         // TODO: definir el tamaño de la memoria
         Memory memory = new Memory(Consts.MEMORY_SIZE, bus);
         // TODO: definir las configuraciones de los caches
-        Cache L1DataCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{64, 8, 1}, new int[]{2, 4, 8},bus);
-        Cache L1InstCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{64, 8, 1}, new int[]{2, 4, 8},bus);
+        Cache L1DataCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{16, 8, 1}, new int[]{2, 4, 8},bus);
+        Cache L1InstCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{16, 8, 1}, new int[]{2, 4, 8},bus);
         CPU cpu = new CPU(L1DataCache, L1InstCache);
         EventHandler.getInstance().setCpu(cpu);
 

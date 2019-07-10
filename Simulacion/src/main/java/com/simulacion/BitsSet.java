@@ -567,6 +567,10 @@ public class BitsSet{
         }
     }
 
+    /**
+     * Creates a copy of this BitsSet
+     * @return the copy
+     */
     public BitsSet clone(){
         return new BitsSet((BitSet) this.bitSet.clone(), this.realSize);
     }

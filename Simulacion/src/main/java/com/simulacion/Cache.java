@@ -315,6 +315,13 @@ public class Cache {
         }
     }
 
+    /**
+     * Tells the cache below to write the data
+     *
+     * @param address address in memmory of the data
+     * @param amount the amount of data to be stored
+     * @param data the data to be stored
+     */
     private void writeCacheNextLevel(BitsSet address, OperandSize amount, BitsSet data){
         //-----------------------------------------------------------------
         // Creating the event to write in the cache levels from bellow
@@ -340,6 +347,13 @@ public class Cache {
         this.nextCache.writeBits(address, amount, data);
     }
 
+    /**
+     * Writes the data to memory
+     *
+     * @param address the address in memory of where to store the data
+     * @param amount the amount of data to be stored
+     * @param data the data to be stored
+     */
     private void writeMemory(BitsSet address, OperandSize amount, BitsSet data){
         //-----------------------------------------------------------------
         // writting the data to memory

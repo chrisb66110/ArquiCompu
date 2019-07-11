@@ -6,30 +6,7 @@ import com.simulacion.eventos.Halt;
 public class Main {
 
     public static void main(String[] args) {
-        /*RxBus bus = RxBus.getInstance();
-
-        bus.register(Event.class, event -> {
-            long num = 0;
-            for(int i=0; i < 1000; i++){
-                num = num + i % 10;
-            }
-            System.out.println("numero: " + num);
-            bus.post(new Halt(0, null));
-        });
-
-        bus.register(Halt.class, event -> {
-            System.out.println("test");
-        });
-
-        for(int i = 0; i< 10; i++) {
-            bus.post(new Event(0, "Hola",null));
-            System.out.println("Finitio");
-        }*/
-        BitsSet test = BitsSet.valueOf(117);
-        BitsSet cut = test.get(0, 4);
-
         OperatingSystem os = new OperatingSystem();
-
         os.menu();
     }
 }

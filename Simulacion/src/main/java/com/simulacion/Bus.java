@@ -1,7 +1,6 @@
 package com.simulacion;
 
 import com.simulacion.eventos.BusSendsSignal;
-import oracle.jrockit.jfr.events.Bits;
 
 public class Bus {
     private BitsSet controlLines;

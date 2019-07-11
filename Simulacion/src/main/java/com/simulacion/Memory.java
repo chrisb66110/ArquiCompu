@@ -6,13 +6,9 @@ package com.simulacion;
 import com.simulacion.eventos.MemoryWRDone;
 import rx.Subscription;
 import com.simulacion.eventos.BusSendsSignal;
-import com.simulacion.Consts;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 //-----------------------------------------------------------------------------
 /**
  *  Class that emulates the behavoir of a RAM chip.

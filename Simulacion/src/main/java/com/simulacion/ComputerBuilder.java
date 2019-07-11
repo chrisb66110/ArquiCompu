@@ -7,9 +7,8 @@ public class ComputerBuilder {
      */
     public static void buildComputer(OperatingSystem os) {
         Bus bus = new Bus(Consts.CONTROL_LINES_SIZE, 32, 32);
-        // TODO: definir el tamaño de la memoria
         Memory memory = new Memory(Consts.MEMORY_SIZE, bus);
-        // TODO: definir las configuraciones de los caches
+        // Definir las configuraciones de los caches
         Cache L1DataCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{16, 8, 1}, new int[]{2, 4, 8}, new int[]{32, 64, 128},bus);
         Cache L1InstCache = createCacheHierarchy(3, new long[]{64, 128, 256}, new int[]{16, 8, 1}, new int[]{2, 4, 8}, new int[]{32, 64, 128},bus);
         CPU cpu = new CPU(L1DataCache, L1InstCache);

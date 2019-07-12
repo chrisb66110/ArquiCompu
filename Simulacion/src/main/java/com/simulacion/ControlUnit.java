@@ -310,9 +310,6 @@ public class ControlUnit {
         BitsSet inmmediate = instruction.get(0,16);
         boolean signed = inmmediate.get(Consts.HALFWORD_SIZE-1);
         inmmediate.set(Consts.HALFWORD_SIZE, Consts.REGISTER_SIZE, signed);
-        if(operation==ALUOperations.Sali){
-            System.out.println("aqui: " + registerA);
-        }
         //The values are loaded to the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandB);

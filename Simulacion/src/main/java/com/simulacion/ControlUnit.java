@@ -308,6 +308,11 @@ public class ControlUnit {
         int registerResult = instruction.get(21,26).toInt();
         int registerA = instruction.get(16,21).toInt();
         BitsSet inmmediate = instruction.get(0,16);
+        boolean signed = inmmediate.get(Consts.HALFWORD_SIZE-1);
+        inmmediate.set(Consts.HALFWORD_SIZE, Consts.REGISTER_SIZE, signed);
+        if(operation==ALUOperations.Sali){
+            System.out.println("aqui: " + registerA);
+        }
         //The values are loaded to the ALU
         this.internalBus.loadRegisterToALU(registerA, ALUOperands.OperandA);
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandB);
@@ -339,6 +344,8 @@ public class ControlUnit {
         //The operands of the instruction are extracted.
         int registerResult = instruction.get(21,26).toInt();
         BitsSet inmmediate = instruction.get(5,21);
+        boolean signed = inmmediate.get(Consts.HALFWORD_SIZE-1);
+        inmmediate.set(Consts.HALFWORD_SIZE, Consts.REGISTER_SIZE, signed);
         //The operand in the ALU is loaded
         this.internalBus.loadImmediateToALU(inmmediate, ALUOperands.OperandA);
         //It is sent to execute the instruction

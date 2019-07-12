@@ -102,6 +102,7 @@ public class ALU {
                 break;
             case Sali:
                 this.operationSal();
+                break;
             case Sar:
                 this.operationSar();
                 break;

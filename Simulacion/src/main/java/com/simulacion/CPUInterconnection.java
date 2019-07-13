@@ -107,10 +107,10 @@ public class CPUInterconnection {
         address.add(registers[registerIndex]);
         //This subscribe is waiting for a CacheDataReturn event, so you know when the available data is already available
         this.cacheDataReturnLoad = rXBus.register(CacheDataReturn.class, evento -> {
-            if ((int)evento.info[this.INFO_INDEX_LEVEL] != this.LEVEL &&
+            if ((int)evento.info[this.INFO_INDEX_LEVEL] == this.LEVEL &&
                     ((BitsSet)evento.info[Consts.INFO_ADDRESS]).equals(address)){
                 registers[registerResult] = (BitsSet) evento.info[this.INFO_INDEX_DATA];
-                if(!signed){
+                if(signed){
                     //Case where there are that copy the sign
                     if (ammount == OperandSize.Byte) {
                         //The sign is copied from bit 7, since 8 to 32
